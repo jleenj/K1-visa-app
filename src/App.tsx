@@ -5,7 +5,7 @@ const K1VisaQuestionnaire = () => {
   const [expandedSections, setExpandedSections] = useState({ 0: true });
   const [expandedSubsections, setExpandedSubsections] = useState({});
   const [currentData, setCurrentData] = useState({});
-
+//tested on main pc
   const phoneCountries = [
     { code: 'US', name: 'United States', flag: '🇺🇸', dialCode: '+1', format: '(XXX) XXX-XXXX' },
     { code: 'CA', name: 'Canada', flag: '🇨🇦', dialCode: '+1', format: '(XXX) XXX-XXXX' },
