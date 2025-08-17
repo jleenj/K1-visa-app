@@ -5,7 +5,9 @@ const K1VisaQuestionnaire = () => {
   const [expandedSections, setExpandedSections] = useState({ 0: true });
   const [expandedSubsections, setExpandedSubsections] = useState({});
   const [currentData, setCurrentData] = useState({});
-  //tested on pc #2
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
+  
   const phoneCountries = [
     { code: 'US', name: 'United States', flag: '🇺🇸', dialCode: '+1', format: '(XXX) XXX-XXXX' },
     { code: 'CA', name: 'Canada', flag: '🇨🇦', dialCode: '+1', format: '(XXX) XXX-XXXX' },
@@ -182,17 +184,12 @@ const K1VisaQuestionnaire = () => {
       title: '1.1 Personal Information',
       icon: User,
       description: 'Legal names, identification, and personal details',
-      questionCount: 20,
+      questionCount: 18,
       fields: [
         // Legal Name
         { id: 'sponsorLastName', label: 'Legal Last Name (Family Name)', type: 'text', required: true },
         { id: 'sponsorFirstName', label: 'Legal First Name (Given Name)', type: 'text', required: true },
         { id: 'sponsorMiddleName', label: 'Middle Name', type: 'text', required: false },
-        
-        // Name in Native Alphabet
-        { id: 'sponsorUsesNativeAlphabet', label: 'Do you use a non-Latin alphabet for your name?', type: 'select', options: ['No', 'Yes'], required: true },
-        { id: 'sponsorNativeScript', label: 'Full Name in Native Script', type: 'text', required: false, conditional: true },
-        { id: 'sponsorNativeLanguage', label: 'Native Language', type: 'text', required: false, conditional: true },
         
         // Other Names
         { id: 'sponsorOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false },
@@ -202,9 +199,6 @@ const K1VisaQuestionnaire = () => {
         { id: 'sponsorBirthLocation', label: 'Place of Birth', type: 'birth-location', required: true },
         { id: 'sponsorSex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
         { id: 'sponsorSSN', label: 'Social Security Number', type: 'ssn', required: true },
-        { id: 'sponsorTaxID', label: 'U.S. Taxpayer ID Number (if different from SSN)', type: 'text', required: false },
-        { id: 'sponsorTaxResidenceCountry', label: 'Country of Tax Residence', type: 'select', options: ['United States', 'Other'], required: true },
-        { id: 'sponsorANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
         
         // Physical Description
         { id: 'sponsorHeight', label: 'Height', type: 'height-converter', required: true },
@@ -218,66 +212,20 @@ const K1VisaQuestionnaire = () => {
           required: true 
         },
         
-        // Ethnicity & Race
-        { id: 'sponsorEthnicity', label: 'Ethnicity', type: 'select', 
-          options: ['Hispanic or Latino', 'Not Hispanic or Latino'], 
-          required: true 
-        },
-        { id: 'sponsorRace', label: 'Race (select all that apply)', type: 'multi-select', 
-          options: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White'], 
-          required: true 
-        }
-      ]
-    },
-    {
-      id: '1.2-citizenship',
-      title: '1.2 U.S. Citizenship & Identification',
-      icon: FileText,
-      description: 'Citizenship documentation and history',
-      questionCount: 15,
-      fields: [
-        { id: 'sponsorCitizenshipMethod', label: 'How did you obtain U.S. citizenship?', type: 'select', 
-          options: ['Birth in the United States', 'Naturalization', 'U.S. citizen parents'], 
-          required: true 
-        },
-        
-        // Adoption questions
-        { id: 'sponsorAdopted', label: 'Were you adopted?', type: 'select', options: ['No', 'Yes'], required: true },
-        { id: 'sponsorAdoptionAge', label: 'Were you adopted before or after age 16?', type: 'select', 
-          options: ['Before age 16', 'After age 16'], 
-          required: false, conditional: true 
-        },
-        
-        // Certificate information
+        // Account Numbers
+        { id: 'sponsorANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
+        { id: 'sponsorUSCISAccount', label: 'USCIS Online Account Number (if any)', type: 'text', required: false },
+
+        // Certificates
         { id: 'sponsorHasCertificate', label: 'Do you have a Certificate of Naturalization or Certificate of Citizenship?', type: 'cert-question', required: true },
-        { id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: false, conditional: true },
-        { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: false, conditional: true },
-        { id: 'sponsorCertIssuePlace', label: 'Place of Issuance (City, State)', type: 'text', required: false, conditional: true },
-        
-        // Passport information
-        { id: 'sponsorHasPassport', label: 'Do you have a U.S. Passport?', type: 'select', options: ['No', 'Yes'], required: false },
-        { id: 'sponsorPassportNumber', label: 'Passport Number', type: 'text', required: false, conditional: true },
-        { id: 'sponsorPassportIssueDate', label: 'Passport Issue Date', type: 'date', required: false, conditional: true },
-        { id: 'sponsorPassportExpDate', label: 'Passport Expiration Date', type: 'date', required: false, conditional: true },
-        
-        // Exchange Visitor History
-        { id: 'sponsorJ1J2', label: 'Have you ever been a J-1 or J-2 exchange visitor?', type: 'select', options: ['No', 'Yes'], required: true },
-        { id: 'sponsorJ1J2Requirement', label: 'Were you subject to the 2-year foreign residence requirement?', type: 'select', 
-          options: ['No', 'Yes'], 
-          required: false, conditional: true 
-        },
-        { id: 'sponsorJ1J2Waiver', label: 'Did you receive a waiver?', type: 'select', 
-          options: ['No', 'Yes'], 
-          required: false, conditional: true 
-        },
-        
-        // Online Account
-        { id: 'sponsorUSCISAccount', label: 'USCIS Online Account Number (if any)', type: 'text', required: false }
+{ id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: false, conditional: true },
+{ id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: false, conditional: true },
+{ id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'cert-place', required: false, conditional: true },
       ]
     },
     {
-      id: '1.3-contact',
-      title: '1.3 Contact Information',
+      id: '1.2-contact',
+      title: '1.2 Contact Information',
       icon: Phone,
       description: 'Phone numbers, email, and contact preferences',
       questionCount: 7,
@@ -300,8 +248,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorAddressSubsections = [
     {
-      id: '1.4-addresses',
-      title: '1.4 Complete Address History',
+      id: '1.3-addresses',
+      title: '1.3 Complete Address History',
       icon: Home,
       description: 'Current and previous addresses',
       questionCount: 10,
@@ -334,8 +282,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorMaritalSubsections = [
     {
-      id: '1.5-marital',
-      title: '1.5 Marital History',
+      id: '1.4-marital',
+      title: '1.4 Marital History',
       icon: Users,
       description: 'Current and previous marriages',
       questionCount: 4,
@@ -356,8 +304,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorFamilySubsections = [
     {
-      id: '1.6-family',
-      title: '1.6 Family Background',
+      id: '1.5-family',
+      title: '1.5 Family Background',
       icon: Users,
       description: 'Information about your parents',
       questionCount: 18,
@@ -389,8 +337,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorEmploymentSubsections = [
     {
-      id: '1.7-employment',
-      title: '1.7 Employment & Work History',
+      id: '1.6-employment',
+      title: '1.6 Employment & Work History',
       icon: FileText,
       description: 'Current and previous employment information',
       questionCount: 15,
@@ -426,8 +374,8 @@ const K1VisaQuestionnaire = () => {
   // Financial sections are large, so I'm breaking them into subsections
   const sponsorFinancialSubsections = [
     {
-      id: '1.8-financial-income',
-      title: '1.8 Financial Information - Income',
+      id: '1.7-financial-income',
+      title: '1.7 Financial Information - Income',
       icon: FileText,
       description: 'Current income and tax information',
       questionCount: 15,
@@ -443,8 +391,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorPetitionsSubsections = [
     {
-      id: '1.9-petitions',
-      title: '1.9 Previous Petitions & Affidavits',
+      id: '1.8-petitions',
+      title: '1.8 Previous Petitions & Affidavits',
       icon: FileText,
       description: 'Previous I-129F petitions and support affidavits',
       questionCount: 6,
@@ -458,8 +406,8 @@ const K1VisaQuestionnaire = () => {
 
   const sponsorLegalSubsections = [
     {
-      id: '1.10-legal',
-      title: '1.10 Legal History',
+      id: '1.9-legal',
+      title: '1.9 Legal History',
       icon: FileText,
       description: 'Criminal history and legal matters',
       questionCount: 20,
@@ -526,30 +474,48 @@ const sections = [
     }));
   };
 
-  const updateField = (field, value) => {
-    setCurrentData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
+const updateField = (field, value) => {
+  setCurrentData(prev => ({
+    ...prev,
+    [field]: value
+  }));
+};
+  
   const renderField = (field) => {
     const value = currentData[field.id] || '';
 
     switch (field.type) {
-      case 'select':
-        return (
-          <select
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={value}
-            onChange={(e) => updateField(field.id, e.target.value)}
-          >
-            <option value="">Select...</option>
-            {field.options.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        );
+case 'select':
+  const isSelectFieldTouched = touchedFields && touchedFields[field.id];
+  const showSelectError = isSelectFieldTouched && field.required && (!value || value === '');
+  
+  return (
+    <div>
+      <select
+        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
+          showSelectError ? 'border-red-500' : ''
+        }`}
+        value={value}
+        onFocus={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+        }}
+        onBlur={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+        }}
+        onChange={(e) => updateField(field.id, e.target.value)}
+      >
+        <option value="">Select...</option>
+        {field.options.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+      {showSelectError && (
+        <div className="mt-1 text-sm text-red-600">
+          ⚠️ Please select an option
+        </div>
+      )}
+    </div>
+  );
 
       case 'address-duration':
         return (
@@ -1192,11 +1158,15 @@ const sections = [
         const { city: birthLocationCity = '', state: birthLocationState = '', country: birthLocationCountry = '' } = birthLocationValue;
         const birthLocationCountryFormat = addressFormats[birthLocationCountry] || addressFormats['United States'];
 
-        return (
-          <div className="space-y-3">
+return (
+  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+    <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
+      📍 Place of Birth Information
+    </h4>
+    <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country of Birth <span className="text-red-500">*</span>
+                Country <span className="text-red-500">*</span>
               </label>
               <select
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -1218,14 +1188,14 @@ const sections = [
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City/Town/Village of Birth <span className="text-red-500">*</span>
+                    City/Town/Village <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                     value={birthLocationCity}
                     onChange={(e) => updateField(field.id, { ...birthLocationValue, city: e.target.value })}
-                    placeholder="Enter city/town of birth"
+                    placeholder="Enter city/town/village"
                   />
                 </div>
 
@@ -1258,7 +1228,8 @@ const sections = [
               </>
             )}
           </div>
-        );
+      </div>
+    );
 
       case 'other-names':
         const otherNamesValue = currentData[field.id] || [];
@@ -1454,15 +1425,33 @@ const sections = [
           </div>
         );
 
-      case 'date':
-        return (
-          <input
-            type="date"
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={value}
-            onChange={(e) => updateField(field.id, e.target.value)}
-          />
-        );
+case 'date':
+  const isDateFieldTouched = touchedFields && touchedFields[field.id];
+  const showDateError = isDateFieldTouched && field.required && (!value || value === '');
+  
+  return (
+    <div>
+      <input
+        type="date"
+        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
+          showDateError ? 'border-red-500' : ''
+        }`}
+        value={value}
+        onFocus={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+        }}
+        onBlur={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+        }}
+        onChange={(e) => updateField(field.id, e.target.value)}
+      />
+      {showDateError && (
+        <div className="mt-1 text-sm text-red-600">
+          ⚠️ Please select a date
+        </div>
+      )}
+    </div>
+  );
 
       case 'textarea':
         return (
@@ -1474,22 +1463,53 @@ const sections = [
           />
         );
 
-      case 'ssn':
-        return (
-          <input
-            type="text"
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={value}
-            onChange={(e) => {
-              let val = e.target.value.replace(/\D/g, '');
-              if (val.length >= 5) val = val.slice(0, 3) + '-' + val.slice(3, 5) + '-' + val.slice(5, 9);
-              else if (val.length >= 3) val = val.slice(0, 3) + '-' + val.slice(3);
-              updateField(field.id, val);
-            }}
-            placeholder="XXX-XX-XXXX"
-            maxLength="11"
-          />
-        );
+case 'ssn':
+  // Remove the test line if you added it
+  const ssnDigits = (value || '').replace(/\D/g, '');
+  const isSSNFieldTouched = touchedFields && touchedFields[field.id];
+  const showSSNError = isSSNFieldTouched && field.required && ssnDigits.length > 0 && ssnDigits.length < 9;
+  
+  return (
+    <div>
+      <input
+        type="text"
+        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
+          showSSNError ? 'border-red-500' : ''
+        }`}
+        value={value}
+        onFocus={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+        }}
+        onBlur={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+        }}
+        onChange={(e) => {
+          let digits = e.target.value.replace(/\D/g, '');
+          digits = digits.slice(0, 9);
+          
+          let formatted = '';
+          if (digits.length > 0) {
+            formatted = digits.slice(0, 3);
+            if (digits.length > 3) {
+              formatted += '-' + digits.slice(3, 5);
+            }
+            if (digits.length > 5) {
+              formatted += '-' + digits.slice(5, 9);
+            }
+          }
+          
+          updateField(field.id, formatted);
+        }}
+        placeholder="XXX-XX-XXXX"
+        maxLength="11"
+      />
+      {showSSNError && (
+        <div className="mt-1 text-sm text-red-600">
+          ⚠️ Please enter all 9 digits
+        </div>
+      )}
+    </div>
+  );
 
       case 'international-phone':
         const intlPhoneValue = currentData[field.id] || {};
@@ -2308,15 +2328,76 @@ case 'country':
           </div>
         );
 
-      default:
-        return (
+case 'cert-place':
+  const certPlaceValue = currentData[field.id] || {};
+  const { city: certCity = '', state: certState = '' } = certPlaceValue;
+  
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+      <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
+        📍 Place of Issuance
+      </h4>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
           <input
-            type={field.type}
+            type="text"
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={value}
-            onChange={(e) => updateField(field.id, e.target.value)}
+            value={certCity}
+            onChange={(e) => updateField(field.id, { ...certPlaceValue, city: e.target.value })}
+            placeholder="Enter city (e.g., Los Angeles, New York)"
           />
-        );
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            value={certState}
+            onChange={(e) => updateField(field.id, { ...certPlaceValue, state: e.target.value })}
+          >
+            <option value="">Select state...</option>
+            {addressFormats['United States'].states.map(stateOption => (
+              <option key={stateOption} value={stateOption}>{stateOption}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+
+default:
+  // This handles 'text', 'number', and any other basic input types
+const isDefaultTouched = touchedFields && touchedFields[field.id];
+const showError = isDefaultTouched && field.required && (!value || value === '');
+  
+  return (
+    <div>
+      <input
+        type={field.type}
+        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
+          showError ? 'border-red-500' : ''
+        }`}
+        value={value}
+        onFocus={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+        }}
+        onBlur={() => {
+          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+        }}
+        onChange={(e) => updateField(field.id, e.target.value)}
+      />
+      {showError && (
+        <div className="mt-1 text-sm text-red-600">
+          ⚠️ This field is required
+        </div>
+      )}
+    </div>
+  );
     }
   };
 
@@ -2410,7 +2491,7 @@ case 'country':
 
                                   {field.conditional ? (
                                     (() => {
-                                      const hasCert = currentData['sponsorNaturalizationCert'] || '';
+                                      const hasCert = currentData['sponsorHasCertificate'] || '';
                                       const physicalSameCheck = currentData['sponsorPhysicalSame'] || '';
                                       const employmentStatus = currentData['sponsorEmploymentStatus'] || '';
 
@@ -2443,48 +2524,9 @@ case 'country':
                                       }
 // Add these conditions to your existing conditional logic:
 
-// For adoption age
-if (field.id === 'sponsorAdoptionAge') {
-  if (currentData['sponsorAdopted'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
-
 // For certificate fields
-if (field.id.includes('sponsorCert') && !field.id.includes('Has')) {
+if (field.id === 'sponsorCertNumber' || field.id === 'sponsorCertIssueDate' || field.id === 'sponsorCertIssuePlace') {
   if (currentData['sponsorHasCertificate'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
-
-// For passport fields
-if (field.id.includes('sponsorPassport') && !field.id.includes('Has')) {
-  if (currentData['sponsorHasPassport'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
-
-// For J-1/J-2 waiver
-if (field.id === 'sponsorJ1J2Requirement') {
-  if (currentData['sponsorJ1J2'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
-
-if (field.id === 'sponsorJ1J2Waiver') {
-  if (currentData['sponsorJ1J2Requirement'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
-
-// For native script fields
-if (field.id === 'sponsorNativeScript' || field.id === 'sponsorNativeLanguage') {
-  if (currentData['sponsorUsesNativeAlphabet'] === 'Yes') {
     return renderField(field);
   }
   return null;

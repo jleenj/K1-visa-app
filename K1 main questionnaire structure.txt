@@ -41,11 +41,19 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   ├── First Name (Given Name) [Required]
 │   │   └── Middle Name [Optional]
 │   │
+│   ├── Name in Native Alphabet (if applicable)
+│   │   ├── Uses non-Latin alphabet? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Full Name in Native Script [Required]
+│   │       └── Native Language [Required]
+│   │
 │   ├── Other Names Used [Optional - but if yes, then required:]
 │   │   └── For EACH name:
 │   │       ├── Last Name [Required]
 │   │       ├── First Name [Required]
-│   │       └── Middle Name [Optional]
+│   │       ├── Middle Name [Optional]
+│   │       └── Reason for name [Required]
+│   │           └── Maiden / Previous marriage / Legal change / Other
 │   │
 │   ├── Date of Birth [Required]
 │   ├── Place of Birth
@@ -53,7 +61,10 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   ├── State/Province/Region [Required if applicable to country]
 │   │   └── Country [Required]
 │   ├── Sex [Required - Male/Female]
-│   ├── Social Security Number [Required - XXX-XX-XXXX format]
+│   ├── Social Security Number [Required for I-129F, Optional for I-134]
+│   ├── U.S. Taxpayer ID Number [Required if different from SSN]
+│   ├── Country of Tax Residence [Required - default USA]
+│   ├── USCIS File Number (A-Number) [Optional - even citizens may have one]
 │   │
 │   ├── Physical Description (for I-129F)
 │   │   ├── Height in Feet [Required - 3-8]
@@ -78,6 +89,10 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   ├── How did you obtain U.S. citizenship? [Required]
 │   │   └── Birth in U.S. / Naturalization / U.S. citizen parents
 │   │
+│   ├── Were you adopted? [Required - Yes/No]
+│   │   └── If Yes: Before or after age 16? [Required]
+│   │       └── Before 16 / After 16
+│   │
 │   ├── Do you have a Certificate of Naturalization or Certificate of Citizenship? [Required - Yes/No]
 │   │   └── If Yes:
 │   │       ├── Certificate Number [Required]
@@ -89,23 +104,45 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   ├── Issue Date [Optional]
 │   │   └── Expiration Date [Optional]
 │   │
+│   ├── Exchange Visitor History
+│   │   ├── Ever been a J-1 or J-2 exchange visitor? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Subject to 2-year foreign residence requirement? [Required - Yes/No]
+│   │       └── If Yes: Received a waiver? [Required - Yes/No]
+│   │
 │   ├── Alien Registration Number (A-Number) [Optional - "if any"]
 │   └── USCIS Online Account Number [Optional - 12 digits]
 │
 ├── 1.3 Contact Information
 │   ├── Email Address [Required]
+│   ├── Can we contact you by email about this case? [Required - Yes/No]
+│   ├── Can we contact you by text about this case? [Required - Yes/No]
 │   ├── Daytime Phone Number [Required]
+│   │   ├── Area Code [3 digits]
+│   │   ├── Exchange [3 digits]
+│   │   ├── Number [4 digits]
+│   │   └── Extension [Optional]
 │   ├── Mobile Phone Number [Optional]
-│   └── Work Phone Number [Optional]
+│   │   ├── Area Code [3 digits]
+│   │   ├── Exchange [3 digits]
+│   │   └── Number [4 digits]
+│   ├── Work Phone Number [Optional]
+│   │   ├── Area Code [3 digits]
+│   │   ├── Exchange [3 digits]
+│   │   ├── Number [4 digits]
+│   │   └── Extension [Optional]
+│   └── Is it safe to communicate about this case at these numbers? [Required - Yes/No]
 │
 ├── 1.4 Complete Address History
 │   ├── Current Physical Address [Required]
+│   │   ├── Date moved to this address (MM/DD/YYYY) [Required]
+│   │   ├── Is this a Safe Mailing Address/DV Shelter? [Required - Yes/No]
 │   │   ├── Is this a military address? [Required - Yes/No]
 │   │   │   └── If Yes: APO/FPO/DPO selection [Required]
 │   │   ├── Street Number and Name [Required]
 │   │   ├── Apt/Suite/Unit Number [Optional]
 │   │   ├── City or Town [Required unless military]
-│   │   ├── State/Province/Region [Required if applicable]
+│   │   ├── State/Province/Territory [Required if applicable]
 │   │   │   └── 2-letter state code for forms [Auto-generated]
 │   │   ├── ZIP/Postal Code [Required]
 │   │   └── Country [Required]
@@ -117,12 +154,9 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │       ├── Street Number and Name [Required]
 │   │       ├── Apt/Suite/Unit Number [Optional]
 │   │       ├── City or Town [Required unless military]
-│   │       ├── State/Province/Region [Required if applicable]
+│   │       ├── State/Province/Territory [Required if applicable]
 │   │       ├── ZIP/Postal Code [Required]
 │   │       └── Country [Required]
-│   │
-│   ├── How long at current address? [Required]
-│   │   └── Less than 1 year / 1-2 / 2-3 / 3-4 / 4-5 / 5+ years
 │   │
 │   ├── Address History Requirements:
 │   │   [System calculates based on age from DOB]
@@ -135,19 +169,26 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │       ├── Street Number and Name [Required]
 │   │       ├── Apt/Suite/Unit [Optional]
 │   │       ├── City [Required]
-│   │       ├── State/Province/Region [Required if applicable]
+│   │       ├── State/Province/Territory [Required if applicable]
 │   │       ├── ZIP/Postal Code [Required]
 │   │       ├── Country [Required]
-│   │       ├── Date From (MM/YYYY) [Required]
-│   │       └── Date To (MM/YYYY) [Required]
+│   │       ├── Date From (MM/DD/YYYY) [Required]
+│   │       └── Date To (MM/DD/YYYY) [Required]
 │   │
-│   └── Last Foreign Residence Over 1 Year (for G-325A)
-│       ├── Ever lived outside U.S. for over 1 year? [Required - Yes/No]
-│       └── If Yes:
-│           ├── Country [Required]
-│           ├── City [Required]
-│           ├── From Date [Required]
-│           └── To Date [Required]
+│   ├── Last Foreign Residence Over 1 Year (for G-325A)
+│   │   ├── Ever lived outside U.S. for over 1 year? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Country [Required]
+│   │       ├── City [Required]
+│   │       ├── From Date (MM/YYYY) [Required]
+│   │       └── To Date (MM/YYYY) [Required]
+│   │
+│   └── Last Address Outside U.S. of More Than 1 Year (G-325A specific)
+│       [If different from above foreign residence]
+│       ├── Street Address [Required]
+│       ├── City [Required]
+│       ├── Country [Required]
+│       └── Dates (MM/YYYY to MM/YYYY) [Required]
 │
 ├── 1.5 Marital History
 │   ├── Current Marital Status [Required]
@@ -163,6 +204,12 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │       ├── Former Spouse's Date of Birth [Required]
 │       ├── Former Spouse's Country of Birth [Required]
 │       ├── Former Spouse's Country of Citizenship [Required]
+│       ├── Was former spouse a U.S. citizen? [Required - Yes/No]
+│       │   └── If Yes:
+│       │       ├── Acquired through naturalization? [Required - Yes/No]
+│       │       └── If Yes:
+│       │           ├── Certificate Number [Required]
+│       │           └── Date of Naturalization [Required]
 │       ├── Date of Marriage (MM/DD/YYYY) [Required]
 │       ├── Place of Marriage (City, State/Country) [Required]
 │       ├── Date Marriage Ended (MM/DD/YYYY) [Required]
@@ -209,14 +256,18 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   │   ├── State [Required]
 │   │   │   ├── ZIP Code [Required]
 │   │   │   └── Country [Required - default US]
-│   │   ├── Employer Phone Number [Required - with smart extension field]
+│   │   ├── Employer Phone Number [Required]
+│   │   │   ├── Area Code [3 digits]
+│   │   │   ├── Exchange [3 digits]
+│   │   │   ├── Number [4 digits]
+│   │   │   └── Extension [Optional]
 │   │   ├── Supervisor Name [Required for employment verification]
 │   │   ├── Supervisor Title [Required]
 │   │   ├── Supervisor Phone [Required]
 │   │   ├── HR Department Phone [Optional]
 │   │   ├── Your Job Title/Occupation [Required]
 │   │   ├── Type of Business/Industry [Required]
-│   │   ├── Date Employment Began (MM/YYYY) [Required]
+│   │   ├── Date Employment Began (MM/DD/YYYY) [Required]
 │   │   ├── Annual Salary (USD) [Required]
 │   │   └── Is this full-time employment? [Required - Yes/No]
 │   │
@@ -232,15 +283,32 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │           │   ├── ZIP/Postal Code [Required]
 │           │   └── Country [Required]
 │           ├── Job Title [Required]
-│           ├── From Date (MM/YYYY) [Required]
-│           ├── To Date (MM/YYYY) [Required]
+│           ├── From Date (MM/DD/YYYY) [Required]
+│           ├── To Date (MM/DD/YYYY) [Required]
 │           └── Reason for Leaving [Optional]
 │
 ├── 1.8 Financial Information (for I-134 Affidavit of Support)
 │   ├── Current Annual Income
 │   │   ├── Are you currently employed? [Required - Yes/No]
+│   │   ├── Are you currently on active duty in U.S. Armed Forces? [Required - Yes/No]
 │   │   ├── Annual Salary/Wages (USD) [Required if employed]
-│   │   ├── Employer's Federal EIN/Tax ID [Required]
+│   │   ├── Employer's Federal EIN/Tax ID [Required if employed]
+│   │   │
+│   │   ├── Contributions from Others in Household
+│   │   │   ├── Does anyone else contribute to household income? [Required - Yes/No]
+│   │   │   └── If Yes, for EACH contributor:
+│   │   │       ├── Contributor Name [Required]
+│   │   │       ├── Relationship to You [Required]
+│   │   │       └── Annual Contribution (USD) [Required]
+│   │   │
+│   │   ├── Means-Tested Public Benefits
+│   │   │   ├── Currently receiving public benefits? [Required - Yes/No]
+│   │   │   └── If Yes, for EACH benefit:
+│   │   │       ├── Type of Benefit [Required]
+│   │   │       │   └── TANF / SNAP / Medicaid / SSI / Housing Assistance / Other
+│   │   │       ├── Monthly Amount [Required]
+│   │   │       └── Start Date [Required]
+│   │   │
 │   │   ├── Other Income Sources
 │   │   │   ├── Self-Employment Income [Enter 0 if none]
 │   │   │   ├── Interest/Dividends [Enter 0 if none]
@@ -248,15 +316,26 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   │   ├── Rental Income [Enter 0 if none]
 │   │   │   ├── Unemployment Benefits [Enter 0 if none]
 │   │   │   ├── Social Security Benefits [Enter 0 if none]
+│   │   │   ├── Disability Benefits [Enter 0 if none]
+│   │   │   ├── Alimony Received [Enter 0 if none]
 │   │   │   └── Other Income (specify source) [Enter 0 if none]
 │   │   └── Total Annual Income [Auto-calculated]
 │   │
-│   ├── Tax Filing Information
+│   ├── Tax Filing History
+│   │   ├── Filed Federal tax returns for past 3 years? 
+│   │   │   ├── [Year-1] Filed? [Required - Yes/No]
+│   │   │   │   └── If No: Were you required to file? [Required - Yes/No]
+│   │   │   │       └── If Yes: Why didn't you file? [Required - text]
+│   │   │   ├── [Year-2] Filed? [Required - Yes/No]
+│   │   │   │   └── If No: Were you required to file? [Required - Yes/No]
+│   │   │   │       └── If Yes: Why didn't you file? [Required - text]
+│   │   │   └── [Year-3] Filed? [Required - Yes/No]
+│   │   │       └── If No: Were you required to file? [Required - Yes/No]
+│   │   │           └── If Yes: Why didn't you file? [Required - text]
+│   │   │
 │   │   ├── Most Recent Tax Year Filed [Required - e.g., 2023]
 │   │   ├── Filing Status [Required]
 │   │   │   └── Single / Married Filing Jointly / Married Filing Separately / Head of Household / Qualifying Widow(er)
-│   │   ├── Did you file required federal tax return? [Required - Yes/No]
-│   │   │   └── If No: Explanation [Required]
 │   │   ├── Adjusted Gross Income - Last 3 Years
 │   │   │   ├── Most Recent Year AGI [Required]
 │   │   │   ├── Year 2 AGI [Required]
@@ -276,6 +355,22 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   │   │       ├── Account Number (last 4) [Required]
 │   │   │   │       └── Current Balance (USD) [Required]
 │   │   │   └── Total Cash in Banks [Auto-calculated]
+│   │   │
+│   │   ├── Foreign Bank Accounts
+│   │   │   ├── Have accounts in foreign banks? [Required - Yes/No]
+│   │   │   └── If Yes, for EACH account:
+│   │   │       ├── Country [Required]
+│   │   │       ├── Bank Name [Required]
+│   │   │       ├── Account Type [Required]
+│   │   │       └── Current Balance in USD [Required]
+│   │   │
+│   │   ├── Business Ownership
+│   │   │   ├── Do you own any businesses? [Required - Yes/No]
+│   │   │   └── If Yes, for EACH business:
+│   │   │       ├── Business Name [Required]
+│   │   │       ├── Business Type [Required]
+│   │   │       ├── Ownership Percentage [Required]
+│   │   │       └── Estimated Value (USD) [Required]
 │   │   │
 │   │   ├── Real Estate Owned [Optional]
 │   │   │   └── For EACH property:
@@ -328,10 +423,12 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │
 │   ├── Income Sufficiency Check [Auto-calculated]
 │   │   ├── Required Income (100% poverty line) [Display based on household size]
+│   │   │   └── If active military: Use different guidelines [Auto-adjust]
 │   │   ├── Your Total Income [Display]
 │   │   ├── Meets Requirement? [Auto-calculate Yes/No]
 │   │   └── If No:
 │   │       ├── Will you use assets? [Required - Yes/No]
+│   │       │   └── Assets must equal 5x the shortfall [Display calculation]
 │   │       ├── Will you have a joint sponsor? [Required - Yes/No]
 │   │       └── If Yes to joint sponsor:
 │   │           ├── Joint Sponsor Name [Required]
@@ -357,13 +454,19 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │   │   ├── Have you filed I-129F before? [Required - Yes/No]
 │   │   └── If Yes:
 │   │       ├── How many times? [Required]
-│   │       └── For EACH petition:
-│   │           ├── Beneficiary Name [Required]
-│   │           ├── Receipt Number [Required]
-│   │           ├── Filing Date [Required]
-│   │           ├── Result (Approved/Denied/Withdrawn) [Required]
-│   │           └── If Approved: Did marriage occur? [Required - Yes/No]
-│   │               └── If No: Why not? [Required]
+│   │       ├── For EACH petition:
+│   │       │   ├── Beneficiary Name [Required]
+│   │       │   ├── Receipt Number [Required]
+│   │       │   ├── Filing Date [Required]
+│   │       │   ├── Result (Approved/Denied/Withdrawn) [Required]
+│   │       │   ├── If Approved: 
+│   │       │   │   ├── Did beneficiary enter the U.S.? [Required - Yes/No]
+│   │       │   │   └── If Yes: Did marriage occur within 90 days? [Required - Yes/No]
+│   │       │   │       └── If No: Why not? [Required]
+│   │       │
+│   │       └── If 2 or more approved petitions:
+│   │           ├── Request waiver of filing limitations? [Required - Yes/No]
+│   │           └── If Yes: Waiver explanation [Required - text area]
 │   │
 │   └── Previous Affidavit Support
 │       ├── Have you filed I-134/I-864 before? [Required - Yes/No]
@@ -373,7 +476,7 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
 │           └── Are any still in effect? [Required - Yes/No]
 │
 └── 1.10 Legal History
-    ├── Criminal History
+    ├── Criminal History - General
     │   ├── Ever been arrested or convicted of any crime? [Required - Yes/No]
     │   │   └── If Yes, for EACH incident:
     │   │       ├── Date of Arrest/Conviction [Required]
@@ -383,12 +486,26 @@ SECTION 1: U.S. Citizen Sponsor - Complete Profile
     │   │       ├── Sentence (if any) [Required]
     │   │       └── Court Records Available? [Required - Yes/No]
     │   │
+    │   ├── Ever been cited for a traffic violation? [Required - Yes/No]
+    │   │   └── If Yes and involved drugs/alcohol: Details [Required]
+    │   │
     │   ├── Ever had protection/restraining order against you? [Required - Yes/No]
     │   │   └── If Yes: Details [Required]
     │   │
-    │   ├── Any pending criminal charges? [Required - Yes/No]
+    │   ├── Ever been subject to a protection order (as protected party)? [Required - Yes/No]
     │   │   └── If Yes: Details [Required]
     │   │
+    │   └── Any pending criminal charges? [Required - Yes/No]
+    │       └── If Yes: Details [Required]
+    │
+    ├── Criminal History - IMBRA Specific (for I-129F)
+    │   ├── Ever convicted of crime relating to controlled substance? [Required - Yes/No]
+    │   ├── Ever convicted of crime relating to alcohol? [Required - Yes/No]
+    │   ├── Ever convicted of domestic violence? [Required - Yes/No]
+    │   ├── Ever convicted of child abuse or neglect? [Required - Yes/No]
+    │   ├── Ever convicted of dating violence? [Required - Yes/No]
+    │   ├── Ever convicted of elder abuse? [Required - Yes/No]
+    │   ├── Ever convicted of stalking? [Required - Yes/No]
     │   └── Have you disclosed criminal history to beneficiary? [Required - Yes/No/N/A]
     │       └── If Yes: Date disclosed [Required]
     │
