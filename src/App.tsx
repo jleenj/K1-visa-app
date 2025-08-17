@@ -178,188 +178,338 @@ const K1VisaQuestionnaire = () => {
   // Define subsections for the sponsor section
   const sponsorSubsections = [
     {
-      id: 'basic-info',
-      title: 'Basic Information',
+      id: '1.1-personal-info',
+      title: '1.1 Personal Information',
       icon: User,
-      description: 'Legal names, SSN, and identification numbers',
-      questionCount: 6,
+      description: 'Legal names, identification, and personal details',
+      questionCount: 20,
       fields: [
-        { id: 'sponsorLastName', label: 'Legal Last Name', type: 'text', required: true },
-        { id: 'sponsorFirstName', label: 'Legal First Name', type: 'text', required: true },
+        // Legal Name
+        { id: 'sponsorLastName', label: 'Legal Last Name (Family Name)', type: 'text', required: true },
+        { id: 'sponsorFirstName', label: 'Legal First Name (Given Name)', type: 'text', required: true },
         { id: 'sponsorMiddleName', label: 'Middle Name', type: 'text', required: false },
+        
+        // Name in Native Alphabet
+        { id: 'sponsorUsesNativeAlphabet', label: 'Do you use a non-Latin alphabet for your name?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorNativeScript', label: 'Full Name in Native Script', type: 'text', required: false, conditional: true },
+        { id: 'sponsorNativeLanguage', label: 'Native Language', type: 'text', required: false, conditional: true },
+        
+        // Other Names
         { id: 'sponsorOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false },
+        
+        // Basic Information
+        { id: 'sponsorDOB', label: 'Date of Birth', type: 'date', required: true },
+        { id: 'sponsorBirthLocation', label: 'Place of Birth', type: 'birth-location', required: true },
+        { id: 'sponsorSex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
         { id: 'sponsorSSN', label: 'Social Security Number', type: 'ssn', required: true },
-        { id: 'sponsorMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed'], required: true }
+        { id: 'sponsorTaxID', label: 'U.S. Taxpayer ID Number (if different from SSN)', type: 'text', required: false },
+        { id: 'sponsorTaxResidenceCountry', label: 'Country of Tax Residence', type: 'select', options: ['United States', 'Other'], required: true },
+        { id: 'sponsorANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
+        
+        // Physical Description
+        { id: 'sponsorHeight', label: 'Height', type: 'height-converter', required: true },
+        { id: 'sponsorWeight', label: 'Weight', type: 'weight', required: true },
+        { id: 'sponsorEyeColor', label: 'Eye Color', type: 'select', 
+          options: ['Black', 'Blue', 'Brown', 'Gray', 'Green', 'Hazel', 'Maroon', 'Pink', 'Unknown/Other'], 
+          required: true 
+        },
+        { id: 'sponsorHairColor', label: 'Hair Color', type: 'select', 
+          options: ['Bald (No hair)', 'Black', 'Blonde', 'Brown', 'Gray', 'Red', 'Sandy', 'White', 'Unknown/Other'], 
+          required: true 
+        },
+        
+        // Ethnicity & Race
+        { id: 'sponsorEthnicity', label: 'Ethnicity', type: 'select', 
+          options: ['Hispanic or Latino', 'Not Hispanic or Latino'], 
+          required: true 
+        },
+        { id: 'sponsorRace', label: 'Race (select all that apply)', type: 'multi-select', 
+          options: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White'], 
+          required: true 
+        }
       ]
     },
     {
-      id: 'citizenship-docs',
-      title: 'Citizenship & Documentation',
+      id: '1.2-citizenship',
+      title: '1.2 U.S. Citizenship & Identification',
       icon: FileText,
-      description: 'How you obtained citizenship and documentation',
-      questionCount: 5,
+      description: 'Citizenship documentation and history',
+      questionCount: 15,
       fields: [
-        { id: 'sponsorCitizenshipMethod', label: 'You are a U.S. citizen through', type: 'select', options: ['Birth in the United States', 'Naturalization', 'U.S. citizen parents'], required: true },
-        { id: 'sponsorNaturalizationCert', label: 'Have you obtained a Certificate of Naturalization or a Certificate of Citizenship in your own name?', type: 'cert-question', required: true },
+        { id: 'sponsorCitizenshipMethod', label: 'How did you obtain U.S. citizenship?', type: 'select', 
+          options: ['Birth in the United States', 'Naturalization', 'U.S. citizen parents'], 
+          required: true 
+        },
+        
+        // Adoption questions
+        { id: 'sponsorAdopted', label: 'Were you adopted?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorAdoptionAge', label: 'Were you adopted before or after age 16?', type: 'select', 
+          options: ['Before age 16', 'After age 16'], 
+          required: false, conditional: true 
+        },
+        
+        // Certificate information
+        { id: 'sponsorHasCertificate', label: 'Do you have a Certificate of Naturalization or Certificate of Citizenship?', type: 'cert-question', required: true },
         { id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: false, conditional: true },
         { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: false, conditional: true },
-        { id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'text', required: false, conditional: true }
+        { id: 'sponsorCertIssuePlace', label: 'Place of Issuance (City, State)', type: 'text', required: false, conditional: true },
+        
+        // Passport information
+        { id: 'sponsorHasPassport', label: 'Do you have a U.S. Passport?', type: 'select', options: ['No', 'Yes'], required: false },
+        { id: 'sponsorPassportNumber', label: 'Passport Number', type: 'text', required: false, conditional: true },
+        { id: 'sponsorPassportIssueDate', label: 'Passport Issue Date', type: 'date', required: false, conditional: true },
+        { id: 'sponsorPassportExpDate', label: 'Passport Expiration Date', type: 'date', required: false, conditional: true },
+        
+        // Exchange Visitor History
+        { id: 'sponsorJ1J2', label: 'Have you ever been a J-1 or J-2 exchange visitor?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorJ1J2Requirement', label: 'Were you subject to the 2-year foreign residence requirement?', type: 'select', 
+          options: ['No', 'Yes'], 
+          required: false, conditional: true 
+        },
+        { id: 'sponsorJ1J2Waiver', label: 'Did you receive a waiver?', type: 'select', 
+          options: ['No', 'Yes'], 
+          required: false, conditional: true 
+        },
+        
+        // Online Account
+        { id: 'sponsorUSCISAccount', label: 'USCIS Online Account Number (if any)', type: 'text', required: false }
       ]
     },
     {
-      id: 'physical-characteristics',
-      title: 'Physical Characteristics',
-      icon: User,
-      description: 'Physical appearance and biographic information',
+      id: '1.3-contact',
+      title: '1.3 Contact Information',
+      icon: Phone,
+      description: 'Phone numbers, email, and contact preferences',
       questionCount: 7,
       fields: [
-        { id: 'sponsorDOB', label: 'Date of Birth', type: 'date', required: true },
-        { id: 'sponsorSex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
-        { id: 'sponsorBirthLocation', label: 'Birth Information', type: 'birth-location', required: true },
-        { id: 'sponsorHeight', label: 'Height', type: 'height-converter', required: true },
-        { id: 'sponsorWeight', label: 'Weight (In pounds)', type: 'weight', required: true },
-        { id: 'sponsorEyeColor', label: 'Eye Color (Select only one)', type: 'select', options: ['Black', 'Blue', 'Brown', 'Gray', 'Green', 'Hazel', 'Maroon', 'Pink', 'Unknown/Other'], required: true },
-        { id: 'sponsorHairColor', label: 'Hair Color (Select only one)', type: 'select', options: ['Bald (No hair)', 'Black', 'Blond', 'Brown', 'Gray', 'Red', 'Sandy', 'White', 'Unknown/Other'], required: true }
-      ]
-    },
-    {
-      id: 'ethnicity-race',
-      title: 'Ethnicity & Race',
-      icon: Users,
-      description: 'Ethnicity and racial background',
-      questionCount: 2,
-      fields: [
-        { id: 'sponsorEthnicity', label: 'Ethnicity', type: 'select', options: ['Hispanic or Latino', 'Not Hispanic or Latino'], required: true },
-        { id: 'sponsorRace', label: 'Race (select all that apply)', type: 'multi-select', options: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White'], required: true }
-      ]
-    },
-    {
-      id: 'contact-info',
-      title: 'Contact Information',
-      icon: Phone,
-      description: 'Phone numbers, email, and account numbers',
-      questionCount: 5,
-      fields: [
-        { id: 'sponsorPhone', label: 'Daytime Phone Number', type: 'international-phone', required: true },
-        { id: 'sponsorMobilePhone', label: 'Mobile Phone Number', type: 'international-phone', required: false },
         { id: 'sponsorEmail', label: 'Email Address', type: 'smart-email', required: true },
-        { id: 'sponsorANumber', label: 'Alien Registration Number (A-Number) if any', type: 'a-number', required: false },
-        { id: 'sponsorOnlineAccount', label: 'USCIS Online Account Number if any', type: 'text', required: false }
+        { id: 'sponsorEmailContact', label: 'Can we contact you by email about this case?', type: 'select', options: ['Yes', 'No'], required: true },
+        { id: 'sponsorTextContact', label: 'Can we contact you by text about this case?', type: 'select', options: ['Yes', 'No'], required: true },
+        
+        { id: 'sponsorDaytimePhone', label: 'Daytime Phone Number', type: 'international-phone', required: true },
+        { id: 'sponsorMobilePhone', label: 'Mobile Phone Number', type: 'international-phone', required: false },
+        { id: 'sponsorWorkPhone', label: 'Work Phone Number', type: 'international-phone', required: false },
+        
+        { id: 'sponsorSafeToContact', label: 'Is it safe to communicate about this case at these numbers?', type: 'select', 
+          options: ['Yes', 'No'], 
+          required: true 
+        }
       ]
     }
   ];
 
   const sponsorAddressSubsections = [
     {
-      id: 'current-addresses',
-      title: 'Current Addresses',
+      id: '1.4-addresses',
+      title: '1.4 Complete Address History',
       icon: Home,
-      description: 'Where you currently live and receive mail',
-      questionCount: 3,
+      description: 'Current and previous addresses',
+      questionCount: 10,
       fields: [
-        { id: 'sponsorMailingAddress', label: 'Current Mailing Address', type: 'address', required: true },
-        { id: 'sponsorPhysicalSame', label: 'Is your physical address the same as your mailing address?', type: 'select', options: ['Yes', 'No'], required: true },
-        { id: 'sponsorPhysicalAddress', label: 'Current Physical Address', type: 'conditional-address', required: false, conditional: true }
-      ]
-    },
-    {
-      id: 'address-history',
-      title: 'Address History',
-      icon: Home,
-      description: 'Previous addresses and duration information',
-      questionCount: 2,
-      fields: [
-        { id: 'sponsorAddressDuration', label: 'How long have you lived at this address?', type: 'address-duration', required: false, conditional: true },
-        { id: 'sponsorAddressHistory', label: 'Address History (Last 5 Years)', type: 'conditional-address-history', required: true }
-      ]
-    },
-    {
-      id: 'places-lived',
-      title: 'Places Lived Since Age 18',
-      icon: Home,
-      description: 'States and countries where you have resided',
-      questionCount: 1,
-      fields: [
+        // Current Physical Address
+        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address', required: true },
+        { id: 'sponsorMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
+        { id: 'sponsorSafeAddress', label: 'Is this a Safe Mailing Address/DV Shelter?', type: 'select', options: ['No', 'Yes'], required: true },
+        
+        // Mailing Address
+        { id: 'sponsorMailingDifferent', label: 'Is your mailing address different from your physical address?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorMailingAddress', label: 'Mailing Address', type: 'address', required: false, conditional: true },
+        { id: 'sponsorInCareOf', label: 'In Care Of Name (if applicable)', type: 'text', required: false, conditional: true },
+        
+        // Address Duration
+        { id: 'sponsorAddressDuration', label: 'How long have you lived at your current address?', type: 'address-duration', required: true },
+        
+        // Address History (calculated based on age)
+        { id: 'sponsorAddressHistory', label: 'Previous Addresses', type: 'conditional-address-history', required: true },
+        
+        // Foreign Residence
+        { id: 'sponsorLivedAbroad', label: 'Have you ever lived outside the U.S. for more than 1 year?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorForeignResidence', label: 'Last Foreign Residence Details', type: 'foreign-residence', required: false, conditional: true },
+        
+        // Places resided (this will use your existing places-resided field type)
         { id: 'sponsorPlacesResided', label: 'Places You Have Resided Since Age 18', type: 'places-resided', required: true }
       ]
     }
   ];
 
-  const sponsorWorkSubsections = [
+  const sponsorMaritalSubsections = [
     {
-      id: 'current-employment',
-      title: 'Current Employment',
-      icon: Phone,
-      description: 'Current job and employment status',
+      id: '1.5-marital',
+      title: '1.5 Marital History',
+      icon: Users,
+      description: 'Current and previous marriages',
       questionCount: 4,
       fields: [
-        { id: 'sponsorEmploymentStatus', label: 'Current Employment Status', type: 'select', options: ['Employed (full-time)', 'Employed (part-time)', 'Employed (seasonal)', 'Self-Employed', 'Unemployed or Not Employed', 'Retired', 'Other'], required: true },
-        { id: 'sponsorOccupation', label: 'Current Occupation/Job Title', type: 'text', required: false, conditional: true },
-        { id: 'sponsorEmployer', label: 'Name of Current Employer', type: 'text', required: false, conditional: true },
-        { id: 'sponsorEmployerAddress', label: 'Employer Address', type: 'address', required: false, conditional: true }
-      ]
-    },
-    {
-      id: 'employment-history',
-      title: 'Employment History',
-      icon: FileText,
-      description: 'Work history for the last 5 years',
-      questionCount: 2,
-      fields: [
-        { id: 'sponsorEmploymentDuration', label: 'Employment Duration Question', type: 'dynamic-employment-duration', required: false, conditional: true },
-        { id: 'sponsorEmploymentHistory', label: 'Employment History (Last 5 Years)', type: 'conditional-employment-history', required: true }
+        { id: 'sponsorMaritalStatus', label: 'Current Marital Status', type: 'select', 
+          options: ['Single, never married', 'Divorced', 'Widowed'], 
+          required: true 
+        },
+        { id: 'sponsorStatusDate', label: 'Date you became single/divorced/widowed', type: 'date', required: false, conditional: true },
+        { id: 'sponsorPreviousMarriages', label: 'How many times have you been previously married?', type: 'select', 
+          options: ['0', '1', '2', '3', '4', '5+'], 
+          required: true 
+        },
+        { id: 'sponsorMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, conditional: true }
       ]
     }
   ];
 
-  const sections = [
+  const sponsorFamilySubsections = [
     {
-      id: 'about-sponsor',
-      title: 'About Sponsor',
-      subtitle: 'Basic information, citizenship, and physical characteristics',
-      questionCount: 25,
-      role: 'sponsor',
-      hasSubsections: true,
-      subsections: sponsorSubsections
-    },
-    {
-      id: 'sponsor-addresses',
-      title: 'Sponsor Addresses & Location',
-      subtitle: 'Current and previous addresses',
-      questionCount: 6,
-      role: 'sponsor',
-      hasSubsections: true,
-      subsections: sponsorAddressSubsections
-    },
-    {
-      id: 'sponsor-work-money',
-      title: 'Sponsor Work & Money',
-      subtitle: 'Employment history and financial information',
-      questionCount: 6,
-      role: 'sponsor',
-      hasSubsections: true,
-      subsections: sponsorWorkSubsections
-    },
-    {
-      id: 'beneficiary-personal',
-      title: 'Beneficiary Identity & Demographics',
-      subtitle: 'Foreign fiancé(e) core identifying information',
-      questionCount: 10,
-      role: 'beneficiary',
+      id: '1.6-family',
+      title: '1.6 Family Background',
+      icon: Users,
+      description: 'Information about your parents',
+      questionCount: 18,
       fields: [
-        { id: 'beneficiaryLastName', label: 'Legal Last Name', type: 'text', required: true },
-        { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
-        { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
-        { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
-        { id: 'beneficiaryDOB', label: 'Date of Birth', type: 'date', required: true },
-        { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
-        { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
-        { id: 'beneficiaryBirthCountry', label: 'Country of Birth', type: 'text', required: true },
-        { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
-        { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
+        // Father's Information
+        { id: 'sponsorFatherLastName', label: "Father's Last Name at Birth", type: 'text', required: true },
+        { id: 'sponsorFatherFirstName', label: "Father's First Name", type: 'text', required: true },
+        { id: 'sponsorFatherMiddleName', label: "Father's Middle Name", type: 'text', required: false },
+        { id: 'sponsorFatherDOB', label: "Father's Date of Birth", type: 'date', required: true },
+        { id: 'sponsorFatherBirthCity', label: "Father's City of Birth", type: 'text', required: true },
+        { id: 'sponsorFatherBirthCountry', label: "Father's Country of Birth", type: 'country', required: true },
+        { id: 'sponsorFatherCurrentCity', label: "Father's Current City of Residence", type: 'text', required: true },
+        { id: 'sponsorFatherCurrentCountry', label: "Father's Current Country of Residence", type: 'country', required: true },
+        { id: 'sponsorFatherLiving', label: 'Is your father living?', type: 'select', options: ['Yes', 'No'], required: true },
+        
+        // Mother's Information
+        { id: 'sponsorMotherMaidenName', label: "Mother's Last Name at Birth (Maiden Name)", type: 'text', required: true },
+        { id: 'sponsorMotherFirstName', label: "Mother's First Name", type: 'text', required: true },
+        { id: 'sponsorMotherMiddleName', label: "Mother's Middle Name", type: 'text', required: false },
+        { id: 'sponsorMotherDOB', label: "Mother's Date of Birth", type: 'date', required: true },
+        { id: 'sponsorMotherBirthCity', label: "Mother's City of Birth", type: 'text', required: true },
+        { id: 'sponsorMotherBirthCountry', label: "Mother's Country of Birth", type: 'country', required: true },
+        { id: 'sponsorMotherCurrentCity', label: "Mother's Current City of Residence", type: 'text', required: true },
+        { id: 'sponsorMotherCurrentCountry', label: "Mother's Current Country of Residence", type: 'country', required: true },
+        { id: 'sponsorMotherLiving', label: 'Is your mother living?', type: 'select', options: ['Yes', 'No'], required: true }
       ]
     }
   ];
+
+  const sponsorEmploymentSubsections = [
+    {
+      id: '1.7-employment',
+      title: '1.7 Employment & Work History',
+      icon: FileText,
+      description: 'Current and previous employment information',
+      questionCount: 15,
+      fields: [
+        { id: 'sponsorEmploymentStatus', label: 'Current Employment Status', type: 'select', 
+          options: ['Employed', 'Self-Employed', 'Retired', 'Unemployed', 'Student', 'Other'], 
+          required: true 
+        },
+        
+        // If Employed or Self-Employed (conditional fields)
+        { id: 'sponsorEmployerName', label: 'Employer/Business Name', type: 'text', required: false, conditional: true },
+        { id: 'sponsorEmployerAddress', label: 'Employer/Business Address', type: 'address', required: false, conditional: true },
+        { id: 'sponsorEmployerPhone', label: 'Employer Phone Number', type: 'international-phone', required: false, conditional: true },
+        { id: 'sponsorSupervisorName', label: 'Supervisor Name', type: 'text', required: false, conditional: true },
+        { id: 'sponsorSupervisorTitle', label: 'Supervisor Title', type: 'text', required: false, conditional: true },
+        { id: 'sponsorSupervisorPhone', label: 'Supervisor Phone', type: 'international-phone', required: false, conditional: true },
+        { id: 'sponsorHRPhone', label: 'HR Department Phone', type: 'international-phone', required: false, conditional: true },
+        { id: 'sponsorJobTitle', label: 'Your Job Title/Occupation', type: 'text', required: false, conditional: true },
+        { id: 'sponsorBusinessType', label: 'Type of Business/Industry', type: 'text', required: false, conditional: true },
+        { id: 'sponsorEmploymentStartDate', label: 'Date Employment Began', type: 'date', required: false, conditional: true },
+        { id: 'sponsorAnnualSalary', label: 'Annual Salary (USD)', type: 'currency', required: false, conditional: true },
+        { id: 'sponsorFullTime', label: 'Is this full-time employment?', type: 'select', options: ['Yes', 'No'], required: false, conditional: true },
+        
+        // Employment Duration - uses your existing dynamic-employment-duration
+        { id: 'sponsorEmploymentDuration', label: 'Employment Duration', type: 'dynamic-employment-duration', required: false, conditional: true },
+        
+        // Employment History - uses your existing conditional-employment-history
+        { id: 'sponsorEmploymentHistory', label: 'Previous Employment (Last 5 Years)', type: 'conditional-employment-history', required: true }
+      ]
+    }
+  ];
+
+  // Financial sections are large, so I'm breaking them into subsections
+  const sponsorFinancialSubsections = [
+    {
+      id: '1.8-financial-income',
+      title: '1.8 Financial Information - Income',
+      icon: FileText,
+      description: 'Current income and tax information',
+      questionCount: 15,
+      fields: [
+        // This section would have income fields
+        { id: 'sponsorCurrentlyEmployed', label: 'Are you currently employed?', type: 'select', options: ['Yes', 'No'], required: true },
+        { id: 'sponsorActiveDuty', label: 'Are you currently on active duty in U.S. Armed Forces?', type: 'select', options: ['No', 'Yes'], required: true },
+        // Add more income fields here...
+      ]
+    }
+    // Add more financial subsections here...
+  ];
+
+  const sponsorPetitionsSubsections = [
+    {
+      id: '1.9-petitions',
+      title: '1.9 Previous Petitions & Affidavits',
+      icon: FileText,
+      description: 'Previous I-129F petitions and support affidavits',
+      questionCount: 6,
+      fields: [
+        { id: 'sponsorFiledI129FBefore', label: 'Have you filed Form I-129F before?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorI129FCount', label: 'How many times?', type: 'number', required: false, conditional: true },
+        // Add more fields...
+      ]
+    }
+  ];
+
+  const sponsorLegalSubsections = [
+    {
+      id: '1.10-legal',
+      title: '1.10 Legal History',
+      icon: FileText,
+      description: 'Criminal history and legal matters',
+      questionCount: 20,
+      fields: [
+        { id: 'sponsorEverArrested', label: 'Have you ever been arrested or convicted of any crime?', type: 'select', options: ['No', 'Yes'], required: true },
+        // Add more legal fields...
+      ]
+    }
+  ];
+
+const sections = [
+  {
+    id: 'sponsor-section-1',
+    title: 'Section 1: U.S. Citizen Sponsor - Complete Profile',
+    subtitle: 'All sponsor information required for K-1 visa',
+    questionCount: 150,
+    role: 'sponsor',
+    hasSubsections: true,
+    subsections: [
+      ...sponsorSubsections,
+      ...sponsorAddressSubsections,
+      ...sponsorMaritalSubsections,
+      ...sponsorFamilySubsections,
+      ...sponsorEmploymentSubsections,
+      ...sponsorFinancialSubsections,
+      ...sponsorPetitionsSubsections,
+      ...sponsorLegalSubsections
+    ]
+  },
+  {
+    id: 'beneficiary-personal',
+    title: 'Beneficiary Identity & Demographics',
+    subtitle: 'Foreign fiancé(e) core identifying information',
+    questionCount: 10,
+    role: 'beneficiary',
+    fields: [
+      { id: 'beneficiaryLastName', label: 'Legal Last Name', type: 'text', required: true },
+      { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
+      { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
+      { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
+      { id: 'beneficiaryDOB', label: 'Date of Birth', type: 'date', required: true },
+      { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
+      { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
+      { id: 'beneficiaryBirthCountry', label: 'Country of Birth', type: 'text', required: true },
+      { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
+      { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
+    ]
+  }
+  // Add your other sections here if you have them
+];
 
   const toggleSection = (index) => {
     setExpandedSections(prev => ({
@@ -1945,6 +2095,219 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
+case 'country':
+        return (
+          <select
+            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            value={value}
+            onChange={(e) => updateField(field.id, e.target.value)}
+          >
+            <option value="">Select country...</option>
+            {phoneCountries.map(country => (
+              <option key={country.code} value={country.name}>
+                {country.flag} {country.name}
+              </option>
+            ))}
+          </select>
+        );
+
+      case 'currency':
+        return (
+          <div className="relative">
+            <span className="absolute left-3 top-2 text-gray-500">$</span>
+            <input
+              type="number"
+              className="w-full pl-8 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={value}
+              onChange={(e) => updateField(field.id, e.target.value)}
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+        );
+
+      case 'foreign-residence':
+        const foreignResValue = currentData[field.id] || {};
+        const showForeignRes = currentData['sponsorLivedAbroad'] === 'Yes';
+        
+        if (!showForeignRes) return null;
+        
+        return (
+          <div className="space-y-3">
+            <input
+              type="text"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={foreignResValue.country || ''}
+              onChange={(e) => updateField(field.id, { ...foreignResValue, country: e.target.value })}
+              placeholder="Country"
+            />
+            <input
+              type="text"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={foreignResValue.city || ''}
+              onChange={(e) => updateField(field.id, { ...foreignResValue, city: e.target.value })}
+              placeholder="City"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={foreignResValue.fromDate || ''}
+                  onChange={(e) => updateField(field.id, { ...foreignResValue, fromDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={foreignResValue.toDate || ''}
+                  onChange={(e) => updateField(field.id, { ...foreignResValue, toDate: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'marriage-history':
+        const marriageCount = parseInt(currentData['sponsorPreviousMarriages']) || 0;
+        const marriageHistoryValue = currentData[field.id] || [];
+        
+        if (marriageCount === 0) return null;
+        
+        return (
+          <div className="space-y-4">
+            {[...Array(marriageCount)].map((_, index) => {
+              const marriage = marriageHistoryValue[index] || {};
+              return (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <h4 className="font-medium text-gray-800 mb-3">Marriage #{index + 1}</h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      <input
+                        type="text"
+                        className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={marriage.spouseLastName || ''}
+                        onChange={(e) => {
+                          const newHistory = [...marriageHistoryValue];
+                          newHistory[index] = { ...marriage, spouseLastName: e.target.value };
+                          updateField(field.id, newHistory);
+                        }}
+                        placeholder="Spouse Last Name"
+                      />
+                      <input
+                        type="text"
+                        className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={marriage.spouseFirstName || ''}
+                        onChange={(e) => {
+                          const newHistory = [...marriageHistoryValue];
+                          newHistory[index] = { ...marriage, spouseFirstName: e.target.value };
+                          updateField(field.id, newHistory);
+                        }}
+                        placeholder="Spouse First Name"
+                      />
+                      <input
+                        type="text"
+                        className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={marriage.spouseMiddleName || ''}
+                        onChange={(e) => {
+                          const newHistory = [...marriageHistoryValue];
+                          newHistory[index] = { ...marriage, spouseMiddleName: e.target.value };
+                          updateField(field.id, newHistory);
+                        }}
+                        placeholder="Middle Name"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input
+                          type="date"
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={marriage.spouseDOB || ''}
+                          onChange={(e) => {
+                            const newHistory = [...marriageHistoryValue];
+                            newHistory[index] = { ...marriage, spouseDOB: e.target.value };
+                            updateField(field.id, newHistory);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Country of Birth</label>
+                        <select
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={marriage.spouseBirthCountry || ''}
+                          onChange={(e) => {
+                            const newHistory = [...marriageHistoryValue];
+                            newHistory[index] = { ...marriage, spouseBirthCountry: e.target.value };
+                            updateField(field.id, newHistory);
+                          }}
+                        >
+                          <option value="">Select country...</option>
+                          {phoneCountries.map(c => (
+                            <option key={c.code} value={c.name}>
+                              {c.flag} {c.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Date of Marriage</label>
+                        <input
+                          type="date"
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={marriage.marriageDate || ''}
+                          onChange={(e) => {
+                            const newHistory = [...marriageHistoryValue];
+                            newHistory[index] = { ...marriage, marriageDate: e.target.value };
+                            updateField(field.id, newHistory);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Date Marriage Ended</label>
+                        <input
+                          type="date"
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={marriage.marriageEndDate || ''}
+                          onChange={(e) => {
+                            const newHistory = [...marriageHistoryValue];
+                            newHistory[index] = { ...marriage, marriageEndDate: e.target.value };
+                            updateField(field.id, newHistory);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <select
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={marriage.howEnded || ''}
+                      onChange={(e) => {
+                        const newHistory = [...marriageHistoryValue];
+                        newHistory[index] = { ...marriage, howEnded: e.target.value };
+                        updateField(field.id, newHistory);
+                      }}
+                    >
+                      <option value="">How did marriage end?</option>
+                      <option value="Divorce">Divorce</option>
+                      <option value="Death">Death</option>
+                      <option value="Annulment">Annulment</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+
       default:
         return (
           <input
@@ -2078,6 +2441,82 @@ const K1VisaQuestionnaire = () => {
                                         }
                                         return null;
                                       }
+// Add these conditions to your existing conditional logic:
+
+// For adoption age
+if (field.id === 'sponsorAdoptionAge') {
+  if (currentData['sponsorAdopted'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For certificate fields
+if (field.id.includes('sponsorCert') && !field.id.includes('Has')) {
+  if (currentData['sponsorHasCertificate'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For passport fields
+if (field.id.includes('sponsorPassport') && !field.id.includes('Has')) {
+  if (currentData['sponsorHasPassport'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For J-1/J-2 waiver
+if (field.id === 'sponsorJ1J2Requirement') {
+  if (currentData['sponsorJ1J2'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+if (field.id === 'sponsorJ1J2Waiver') {
+  if (currentData['sponsorJ1J2Requirement'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For native script fields
+if (field.id === 'sponsorNativeScript' || field.id === 'sponsorNativeLanguage') {
+  if (currentData['sponsorUsesNativeAlphabet'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For mailing address
+if (field.id === 'sponsorMailingAddress' || field.id === 'sponsorInCareOf') {
+  if (currentData['sponsorMailingDifferent'] === 'Yes') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For marital status date
+if (field.id === 'sponsorStatusDate') {
+  if (currentData['sponsorMaritalStatus'] === 'Divorced' || currentData['sponsorMaritalStatus'] === 'Widowed') {
+    return renderField(field);
+  }
+  return null;
+}
+
+// For employment fields
+if (field.id.includes('sponsorEmployer') || field.id.includes('sponsorSupervisor') || 
+    field.id.includes('sponsorHR') || field.id === 'sponsorJobTitle' || 
+    field.id === 'sponsorBusinessType' || field.id === 'sponsorEmploymentStartDate' ||
+    field.id === 'sponsorAnnualSalary' || field.id === 'sponsorFullTime') {
+  const empStatus = currentData['sponsorEmploymentStatus'];
+  if (empStatus === 'Employed' || empStatus === 'Self-Employed') {
+    return renderField(field);
+  }
+  return null;
+}
 
                                       return renderField(field);
                                     })()

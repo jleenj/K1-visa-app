@@ -1,0 +1,1644 @@
+SECTION 0: Eligibility Verification & Pre-Screening
+
+├── 0.1 Eligibility Status Card [Always visible at top]
+│   ├── Current Eligibility Status [Display]
+│   │   ├── ✅ Eligible for K-1 [or ❌ Not Eligible]
+│   │   ├── Your Role: [Sponsor/Beneficiary]
+│   │   ├── Sponsor Status: [U.S. Citizen]
+│   │   └── "This doesn't look right?" [Button - opens modal]
+│   │
+│   └── If "This doesn't look right?" clicked:
+│       ├── Modal: "Let's Verify Your Eligibility"
+│       │   ├── Are you the U.S. citizen sponsor or foreign fiancé(e)? [Required]
+│       │   ├── Is the sponsor a U.S. citizen? [Required - Yes/No/Green Card Holder]
+│       │   ├── Are both parties free to marry? [Required - Yes/No]
+│       │   └── Have you met in person in last 2 years? [Required - Yes/No/Religious Waiver]
+│       │
+│       ├── If answers = K-1 eligible:
+│       │   └── "Great! Your information has been updated. Continue with application."
+│       │
+│       └── If answers = NOT K-1 eligible:
+│           ├── "Important: K-1 Visa Eligibility Issue"
+│           ├── Specific reason why not eligible
+│           └── Refund Options:
+│               ├── □ Full refund (process within 3-5 business days)
+│               ├── □ Credit toward different visa application (CR-1, etc.)
+│               ├── □ Save progress and return when eligible
+│               └── [Contact Support] [Process Refund] [Explore Other Options]
+│
+└── 0.2 Pre-Filing Checklist
+    ├── Petitioner is U.S. Citizen? [Pre-filled from qualification]
+    ├── Both parties legally free to marry? [Pre-filled]
+    ├── Met in person in last 2 years? [Pre-filled]
+    ├── Previous K-1 petitions filed? [Quick check]
+    └── Ready to proceed? [Confirmation]
+
+SECTION 1: U.S. Citizen Sponsor - Complete Profile
+
+├── 1.1 Personal Information
+│   ├── Legal Name
+│   │   ├── Last Name (Family Name) [Required]
+│   │   ├── First Name (Given Name) [Required]
+│   │   └── Middle Name [Optional]
+│   │
+│   ├── Other Names Used [Optional - but if yes, then required:]
+│   │   └── For EACH name:
+│   │       ├── Last Name [Required]
+│   │       ├── First Name [Required]
+│   │       └── Middle Name [Optional]
+│   │
+│   ├── Date of Birth [Required]
+│   ├── Place of Birth
+│   │   ├── City/Town [Required]
+│   │   ├── State/Province/Region [Required if applicable to country]
+│   │   └── Country [Required]
+│   ├── Sex [Required - Male/Female]
+│   ├── Social Security Number [Required - XXX-XX-XXXX format]
+│   │
+│   ├── Physical Description (for I-129F)
+│   │   ├── Height in Feet [Required - 3-8]
+│   │   ├── Height in Inches [Required - 0-11]
+│   │   ├── Weight in Pounds [Required]
+│   │   ├── Eye Color [Required - single selection]
+│   │   │   └── Black / Blue / Brown / Gray / Green / Hazel / Maroon / Pink / Unknown/Other
+│   │   └── Hair Color [Required - single selection]
+│   │       └── Bald (No hair) / Black / Blonde / Brown / Gray / Red / Sandy / White / Unknown/Other
+│   │
+│   └── Ethnicity & Race (for I-129F)
+│       ├── Ethnicity [Required]
+│       │   └── Hispanic or Latino / Not Hispanic or Latino
+│       └── Race [Required - select all that apply]
+│           ├── American Indian or Alaska Native
+│           ├── Asian
+│           ├── Black or African American
+│           ├── Native Hawaiian or Other Pacific Islander
+│           └── White
+│
+├── 1.2 U.S. Citizenship & Identification
+│   ├── How did you obtain U.S. citizenship? [Required]
+│   │   └── Birth in U.S. / Naturalization / U.S. citizen parents
+│   │
+│   ├── Do you have a Certificate of Naturalization or Certificate of Citizenship? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Certificate Number [Required]
+│   │       ├── Date of Issuance [Required]
+│   │       └── Place of Issuance (City, State) [Required]
+│   │
+│   ├── U.S. Passport Information [Optional but recommended]
+│   │   ├── Passport Number [Optional]
+│   │   ├── Issue Date [Optional]
+│   │   └── Expiration Date [Optional]
+│   │
+│   ├── Alien Registration Number (A-Number) [Optional - "if any"]
+│   └── USCIS Online Account Number [Optional - 12 digits]
+│
+├── 1.3 Contact Information
+│   ├── Email Address [Required]
+│   ├── Daytime Phone Number [Required]
+│   ├── Mobile Phone Number [Optional]
+│   └── Work Phone Number [Optional]
+│
+├── 1.4 Complete Address History
+│   ├── Current Physical Address [Required]
+│   │   ├── Is this a military address? [Required - Yes/No]
+│   │   │   └── If Yes: APO/FPO/DPO selection [Required]
+│   │   ├── Street Number and Name [Required]
+│   │   ├── Apt/Suite/Unit Number [Optional]
+│   │   ├── City or Town [Required unless military]
+│   │   ├── State/Province/Region [Required if applicable]
+│   │   │   └── 2-letter state code for forms [Auto-generated]
+│   │   ├── ZIP/Postal Code [Required]
+│   │   └── Country [Required]
+│   │
+│   ├── Is mailing address different? [Required - Yes/No]
+│   │   └── If Yes, Mailing Address:
+│   │       ├── In Care Of Name [Optional]
+│   │       ├── Is this a military address? [Required - Yes/No]
+│   │       ├── Street Number and Name [Required]
+│   │       ├── Apt/Suite/Unit Number [Optional]
+│   │       ├── City or Town [Required unless military]
+│   │       ├── State/Province/Region [Required if applicable]
+│   │       ├── ZIP/Postal Code [Required]
+│   │       └── Country [Required]
+│   │
+│   ├── How long at current address? [Required]
+│   │   └── Less than 1 year / 1-2 / 2-3 / 3-4 / 4-5 / 5+ years
+│   │
+│   ├── Address History Requirements:
+│   │   [System calculates based on age from DOB]
+│   │   - If age ≤ 23: Only need past 5 years (covers since age 18)
+│   │   - If age > 23: Need addresses from age 18 to present
+│   │
+│   ├── Previous Addresses [Required based on above calculation]
+│   │   [System shows: "Provide addresses from [DATE] to present"]
+│   │   └── For EACH address:
+│   │       ├── Street Number and Name [Required]
+│   │       ├── Apt/Suite/Unit [Optional]
+│   │       ├── City [Required]
+│   │       ├── State/Province/Region [Required if applicable]
+│   │       ├── ZIP/Postal Code [Required]
+│   │       ├── Country [Required]
+│   │       ├── Date From (MM/YYYY) [Required]
+│   │       └── Date To (MM/YYYY) [Required]
+│   │
+│   └── Last Foreign Residence Over 1 Year (for G-325A)
+│       ├── Ever lived outside U.S. for over 1 year? [Required - Yes/No]
+│       └── If Yes:
+│           ├── Country [Required]
+│           ├── City [Required]
+│           ├── From Date [Required]
+│           └── To Date [Required]
+│
+├── 1.5 Marital History
+│   ├── Current Marital Status [Required]
+│   │   └── Single, never married / Divorced / Widowed
+│   ├── Date became current status [Required if divorced/widowed]
+│   ├── How many times previously married? [Required - 0,1,2,3+]
+│   │
+│   └── If previously married, for EACH marriage:
+│       ├── Former Spouse's Legal Name
+│       │   ├── Last Name [Required]
+│       │   ├── First Name [Required]
+│       │   └── Middle Name [Optional]
+│       ├── Former Spouse's Date of Birth [Required]
+│       ├── Former Spouse's Country of Birth [Required]
+│       ├── Former Spouse's Country of Citizenship [Required]
+│       ├── Date of Marriage (MM/DD/YYYY) [Required]
+│       ├── Place of Marriage (City, State/Country) [Required]
+│       ├── Date Marriage Ended (MM/DD/YYYY) [Required]
+│       ├── How Marriage Ended [Required]
+│       │   └── Divorce / Death / Annulment / Other (specify)
+│       ├── Place Marriage Ended 
+│       │   ├── City [Required]
+│       │   └── Country [Required]
+│       └── Do you have divorce decree? [Required - Yes/No]
+│           └── If Yes: Court name and case number [Required]
+│
+├── 1.6 Family Background
+│   ├── Father's Information
+│   │   ├── Last Name at Birth [Required]
+│   │   ├── First Name [Required]
+│   │   ├── Middle Name [Optional]
+│   │   ├── Date of Birth [Required]
+│   │   ├── City of Birth [Required]
+│   │   ├── Country of Birth [Required]
+│   │   ├── Current City of Residence [Required]
+│   │   ├── Current Country of Residence [Required]
+│   │   └── Is Father Living? [Required - Yes/No]
+│   │
+│   └── Mother's Information
+│       ├── Last Name at Birth (Maiden Name) [Required]
+│       ├── First Name [Required]
+│       ├── Middle Name [Optional]
+│       ├── Date of Birth [Required]
+│       ├── City of Birth [Required]
+│       ├── Country of Birth [Required]
+│       ├── Current City of Residence [Required]
+│       ├── Current Country of Residence [Required]
+│       └── Is Mother Living? [Required - Yes/No]
+│
+├── 1.7 Employment & Work History
+│   ├── Current Employment Status [Required]
+│   │   └── Employed / Self-Employed / Retired / Unemployed / Student / Other
+│   │
+│   ├── If Employed or Self-Employed:
+│   │   ├── Employer/Business Name [Required]
+│   │   ├── Employer/Business Address
+│   │   │   ├── Street Address [Required]
+│   │   │   ├── City [Required]
+│   │   │   ├── State [Required]
+│   │   │   ├── ZIP Code [Required]
+│   │   │   └── Country [Required - default US]
+│   │   ├── Employer Phone Number [Required - with smart extension field]
+│   │   ├── Supervisor Name [Required for employment verification]
+│   │   ├── Supervisor Title [Required]
+│   │   ├── Supervisor Phone [Required]
+│   │   ├── HR Department Phone [Optional]
+│   │   ├── Your Job Title/Occupation [Required]
+│   │   ├── Type of Business/Industry [Required]
+│   │   ├── Date Employment Began (MM/YYYY) [Required]
+│   │   ├── Annual Salary (USD) [Required]
+│   │   └── Is this full-time employment? [Required - Yes/No]
+│   │
+│   ├── Have you been at current employment 5+ years? [Required - Yes/No]
+│   │
+│   └── If No, Previous Employment (to cover 5 years):
+│       └── For EACH previous employer:
+│           ├── Employer Name [Required]
+│           ├── Employer Address
+│           │   ├── Street Address [Required]
+│           │   ├── City [Required]
+│           │   ├── State/Province [Required if applicable]
+│           │   ├── ZIP/Postal Code [Required]
+│           │   └── Country [Required]
+│           ├── Job Title [Required]
+│           ├── From Date (MM/YYYY) [Required]
+│           ├── To Date (MM/YYYY) [Required]
+│           └── Reason for Leaving [Optional]
+│
+├── 1.8 Financial Information (for I-134 Affidavit of Support)
+│   ├── Current Annual Income
+│   │   ├── Are you currently employed? [Required - Yes/No]
+│   │   ├── Annual Salary/Wages (USD) [Required if employed]
+│   │   ├── Employer's Federal EIN/Tax ID [Required]
+│   │   ├── Other Income Sources
+│   │   │   ├── Self-Employment Income [Enter 0 if none]
+│   │   │   ├── Interest/Dividends [Enter 0 if none]
+│   │   │   ├── Retirement/Pension Benefits [Enter 0 if none]
+│   │   │   ├── Rental Income [Enter 0 if none]
+│   │   │   ├── Unemployment Benefits [Enter 0 if none]
+│   │   │   ├── Social Security Benefits [Enter 0 if none]
+│   │   │   └── Other Income (specify source) [Enter 0 if none]
+│   │   └── Total Annual Income [Auto-calculated]
+│   │
+│   ├── Tax Filing Information
+│   │   ├── Most Recent Tax Year Filed [Required - e.g., 2023]
+│   │   ├── Filing Status [Required]
+│   │   │   └── Single / Married Filing Jointly / Married Filing Separately / Head of Household / Qualifying Widow(er)
+│   │   ├── Did you file required federal tax return? [Required - Yes/No]
+│   │   │   └── If No: Explanation [Required]
+│   │   ├── Adjusted Gross Income - Last 3 Years
+│   │   │   ├── Most Recent Year AGI [Required]
+│   │   │   ├── Year 2 AGI [Required]
+│   │   │   └── Year 3 AGI [Required]
+│   │   └── Can provide tax transcripts? [Required - Yes/No]
+│   │
+│   ├── Assets
+│   │   ├── Bank Accounts [Separate line items]
+│   │   │   ├── Checking Accounts
+│   │   │   │   └── For EACH account:
+│   │   │   │       ├── Bank Name [Required]
+│   │   │   │       ├── Account Number (last 4) [Required]
+│   │   │   │       └── Current Balance (USD) [Required]
+│   │   │   ├── Savings Accounts
+│   │   │   │   └── For EACH account:
+│   │   │   │       ├── Bank Name [Required]
+│   │   │   │       ├── Account Number (last 4) [Required]
+│   │   │   │       └── Current Balance (USD) [Required]
+│   │   │   └── Total Cash in Banks [Auto-calculated]
+│   │   │
+│   │   ├── Real Estate Owned [Optional]
+│   │   │   └── For EACH property:
+│   │   │       ├── Property Address [Required]
+│   │   │       ├── Purchase Date [Required]
+│   │   │       ├── Current Market Value (USD) [Required]
+│   │   │       ├── Mortgage Balance (USD) [Required]
+│   │   │       └── Net Equity [Auto-calculated]
+│   │   │
+│   │   ├── Vehicles [Optional]
+│   │   │   └── For EACH vehicle:
+│   │   │       ├── Make/Model/Year [Required]
+│   │   │       ├── Current Value (USD) [Required]
+│   │   │       └── Loan Balance (USD) [Required]
+│   │   │
+│   │   ├── Investment Accounts
+│   │   │   ├── Stocks/Bonds Value (USD) [Required - enter 0 if none]
+│   │   │   ├── Retirement Accounts Value (USD) [Required - enter 0 if none]
+│   │   │   └── Other Investments (USD) [Required - enter 0 if none]
+│   │   │
+│   │   ├── Life Insurance Cash Value (USD) [Required - enter 0 if none]
+│   │   └── Other Personal Property Value (USD) [Required - enter 0 if none]
+│   │
+│   ├── Liabilities & Monthly Expenses
+│   │   ├── Monthly Mortgage/Rent Payment (USD) [Required]
+│   │   ├── Monthly Auto Loan Payment (USD) [Required - enter 0 if none]
+│   │   ├── Monthly Credit Card Payment (USD) [Required - enter 0 if none]
+│   │   ├── Monthly Alimony Payment (USD) [Required - enter 0 if none]
+│   │   ├── Monthly Child Support Payment (USD) [Required - enter 0 if none]
+│   │   ├── Other Monthly Debts (USD) [Required - enter 0 if none]
+│   │   └── Total Monthly Obligations [Auto-calculated]
+│   │
+│   ├── Bankruptcy History
+│   │   ├── Filed bankruptcy in last 10 years? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Chapter Filed (7/11/13) [Required]
+│   │       ├── Filing Date [Required]
+│   │       └── Discharge Date [Required]
+│   │
+│   ├── Household Size & Dependents
+│   │   ├── Total Household Size (including self) [Required]
+│   │   ├── Number of Dependents Claimed on Tax Return [Required]
+│   │   └── For EACH dependent:
+│   │       ├── Full Name [Required]
+│   │       ├── Relationship to You [Required]
+│   │       ├── Date of Birth [Required]
+│   │       ├── Lives with You? [Required - Yes/No]
+│   │       ├── U.S. Citizen or LPR? [Required - Yes/No]
+│   │       └── Receives Financial Support? [Required - Yes/No]
+│   │
+│   ├── Income Sufficiency Check [Auto-calculated]
+│   │   ├── Required Income (100% poverty line) [Display based on household size]
+│   │   ├── Your Total Income [Display]
+│   │   ├── Meets Requirement? [Auto-calculate Yes/No]
+│   │   └── If No:
+│   │       ├── Will you use assets? [Required - Yes/No]
+│   │       ├── Will you have a joint sponsor? [Required - Yes/No]
+│   │       └── If Yes to joint sponsor:
+│   │           ├── Joint Sponsor Name [Required]
+│   │           ├── Relationship to You [Required]
+│   │           └── Note: Joint sponsor must file separate I-134 [Display]
+│   │
+│   └── Statement of Support Intent (I-134 Specific)
+│       ├── I intend to support the beneficiary [Required checkbox]
+│       ├── Expected duration of support [Required]
+│       │   └── Until permanent residency / Until employment / Specific period
+│       ├── Specific support I will provide [Required - check all that apply]
+│       │   ├── Housing
+│       │   ├── Food
+│       │   ├── Medical care
+│       │   ├── Transportation
+│       │   ├── Other necessities
+│       │   └── Financial assistance (specify amount/month)
+│       └── Beneficiary expected to become public charge? [Required - Yes/No]
+│           └── If No: Explanation of how they'll be supported [Required]
+│
+├── 1.9 Previous Petitions & Affidavits
+│   ├── Previous I-129F Petitions
+│   │   ├── Have you filed I-129F before? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── How many times? [Required]
+│   │       └── For EACH petition:
+│   │           ├── Beneficiary Name [Required]
+│   │           ├── Receipt Number [Required]
+│   │           ├── Filing Date [Required]
+│   │           ├── Result (Approved/Denied/Withdrawn) [Required]
+│   │           └── If Approved: Did marriage occur? [Required - Yes/No]
+│   │               └── If No: Why not? [Required]
+│   │
+│   └── Previous Affidavit Support
+│       ├── Have you filed I-134/I-864 before? [Required - Yes/No]
+│       └── If Yes:
+│           ├── How many times? [Required]
+│           ├── For whom? [Required for each]
+│           └── Are any still in effect? [Required - Yes/No]
+│
+└── 1.10 Legal History
+    ├── Criminal History
+    │   ├── Ever been arrested or convicted of any crime? [Required - Yes/No]
+    │   │   └── If Yes, for EACH incident:
+    │   │       ├── Date of Arrest/Conviction [Required]
+    │   │       ├── Location (City, State, Country) [Required]
+    │   │       ├── Charge/Offense [Required]
+    │   │       ├── Outcome/Disposition [Required]
+    │   │       ├── Sentence (if any) [Required]
+    │   │       └── Court Records Available? [Required - Yes/No]
+    │   │
+    │   ├── Ever had protection/restraining order against you? [Required - Yes/No]
+    │   │   └── If Yes: Details [Required]
+    │   │
+    │   ├── Any pending criminal charges? [Required - Yes/No]
+    │   │   └── If Yes: Details [Required]
+    │   │
+    │   └── Have you disclosed criminal history to beneficiary? [Required - Yes/No/N/A]
+    │       └── If Yes: Date disclosed [Required]
+    │
+    ├── Immigration Violations
+    │   ├── Ever violated U.S. immigration laws? [Required - Yes/No]
+    │   │   └── If Yes: Details [Required]
+    │   │
+    │   ├── Ever been in removal/deportation proceedings? [Required - Yes/No]
+    │   │   └── If Yes: Details and outcome [Required]
+    │   │
+    │   └── Ever helped anyone enter U.S. illegally? [Required - Yes/No]
+    │       └── If Yes: Details [Required]
+    │
+    └── Military Service
+        ├── Ever served in U.S. military? [Required - Yes/No]
+        └── If Yes:
+            ├── Branch of Service [Required]
+            ├── Service Dates From/To [Required]
+            ├── Type of Discharge [Required]
+            │   └── Honorable / General / Other than Honorable / Bad Conduct / Dishonorable
+            ├── Service Number [Optional]
+            └── VA Benefits? [Required - Yes/No]
+
+SECTION 2: Foreign Fiancé(e) - Complete Profile
+
+├── 2.1 Personal Information
+│   ├── Legal Name
+│   │   ├── Last Name (Family Name) [Required]
+│   │   ├── First Name (Given Name) [Required]
+│   │   └── Middle Name [Optional]
+│   │
+│   ├── Name in Native Alphabet (if applicable)
+│   │   ├── Full Name in Native Script [Required if non-Latin alphabet]
+│   │   └── Telecode Name [Required for certain countries]
+│   │
+│   ├── Other Names Used [Optional - but if yes, then required:]
+│   │   └── For EACH name:
+│   │       ├── Last Name [Required]
+│   │       ├── First Name [Required]
+│   │       └── Middle Name [Optional]
+│   │
+│   ├── Date of Birth [Required]
+│   ├── Place of Birth
+│   │   ├── City/Town [Required]
+│   │   ├── State/Province/Region [Optional]
+│   │   ├── Country [Required]
+│   │   └── City of Birth Code [Required for some embassies]
+│   ├── Sex [Required - Male/Female]
+│   ├── Country of Citizenship [Required]
+│   ├── Do you hold dual/multiple citizenship? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       └── For EACH additional citizenship:
+│   │           ├── Country [Required]
+│   │           ├── How acquired (birth/naturalization) [Required]
+│   │           └── Passport from this country? [Yes/No]
+│   ├── National Identification Number [Optional but important]
+│   ├── Alien Registration Number (A-Number) [Optional - if ever had one]
+│   └── Country of Legal Permanent Residence [Required if different from citizenship]
+│
+├── 2.2 Travel Documents
+│   ├── Current Passport
+│   │   ├── Passport Number [Required]
+│   │   ├── Passport Book Number [Required if applicable - some countries]
+│   │   ├── Passport Type [Required]
+│   │   │   └── Regular / Official / Diplomatic / Other
+│   │   ├── Country of Issuance [Required]
+│   │   ├── Place of Issuance (City) [Required]
+│   │   ├── Date of Issue [Required]
+│   │   ├── Expiration Date [Required]
+│   │   ├── Has at least 2 blank visa pages? [Required - Yes/No]
+│   │   └── Passport contains U.S. visa? [Required - Yes/No]
+│   │
+│   └── Other Passports/Travel Documents? [Required - Yes/No]
+│       └── If Yes, for EACH:
+│           ├── Document Type (Passport/Travel Document/Refugee Document) [Required]
+│           ├── Country [Required]
+│           ├── Document Number [Required]
+│           ├── Issue Date [Required]
+│           └── Expiration Date [Required]
+│
+├── 2.3 Contact Information
+│   ├── Email Address [Required]
+│   ├── Primary Phone Number (with country code) [Required]
+│   ├── Mobile Phone Number [Optional]
+│   ├── Work Phone Number [Optional]
+│   ├── Home Phone Number [Optional]
+│   │
+│   ├── Phone Numbers Used (Past 5 Years) [Required for DS-160]
+│   │   └── For EACH different number:
+│   │       ├── Phone Number with Country Code [Required]
+│   │       └── Dates Used From/To [Required]
+│   │
+│   ├── Email Addresses Used (Past 5 Years) [Required for DS-160]
+│   │   └── For EACH different email:
+│   │       ├── Email Address [Required]
+│   │       └── Dates Used From/To [Required]
+│   │
+│   └── Social Media Accounts (Past 5 Years) [Required for DS-160]
+│       └── For EACH platform used:
+│           ├── Platform Name [Required]
+│           │   └── Facebook / Instagram / Twitter / LinkedIn / TikTok / WeChat / VK / Other
+│           ├── Username/Handle [Required]
+│           └── Dates Active From/To [Required]
+│
+├── 2.4 Current Address Abroad
+│   ├── Street Number and Name [Required]
+│   ├── Apartment/Unit Number [Optional]
+│   ├── City/Town [Required]
+│   ├── State/Province/Region [Required if applicable]
+│   ├── Postal Code [Required if applicable]
+│   ├── Country [Required]
+│   ├── How long at this address? [Required]
+│   │   └── Less than 1 year / 1-2 / 2-3 / 3-4 / 4-5 / 5+ years
+│   │
+│   └── Is mailing address different? [Required - Yes/No]
+│       └── If Yes: Complete mailing address [All fields required]
+│
+├── 2.5 Marital History
+│   ├── Current Marital Status [Required]
+│   │   └── Single, never married / Divorced / Widowed / Legally Separated
+│   ├── Date became current status [Required if not single]
+│   ├── Number of Previous Marriages [Required - 0,1,2,3+]
+│   │
+│   └── If previously married, for EACH marriage:
+│       ├── Former Spouse's Legal Name
+│       │   ├── Last Name [Required]
+│       │   ├── First Name [Required]
+│       │   └── Middle Name [Optional]
+│       ├── Former Spouse's Date of Birth [Required]
+│       ├── Former Spouse's Country of Birth [Required]
+│       ├── Former Spouse's Country of Citizenship [Required]
+│       ├── Date of Marriage [Required]
+│       ├── Place of Marriage (City, Country) [Required]
+│       ├── Date Marriage Ended [Required]
+│       ├── How Marriage Ended [Required]
+│       │   └── Divorce / Death / Annulment / Other (specify)
+│       ├── Place Marriage Ended
+│       │   ├── City [Required]
+│       │   └── Country [Required]
+│       └── Have divorce/death certificate? [Required - Yes/No]
+│
+├── 2.6 Family Information
+│   ├── Father's Information
+│   │   ├── Last Name at Birth [Required]
+│   │   ├── First Name [Required]
+│   │   ├── Middle Name [Optional]
+│   │   ├── Date of Birth [Required]
+│   │   ├── Place of Birth (City, Country) [Required]
+│   │   ├── Current Address (City, Country) [Required]
+│   │   └── Is Father Living? [Required - Yes/No]
+│   │
+│   ├── Mother's Information
+│   │   ├── Last Name at Birth (Maiden Name) [Required]
+│   │   ├── First Name [Required]
+│   │   ├── Middle Name [Optional]
+│   │   ├── Date of Birth [Required]
+│   │   ├── Place of Birth (City, Country) [Required]
+│   │   ├── Current Address (City, Country) [Required]
+│   │   └── Is Mother Living? [Required - Yes/No]
+│   │
+│   ├── Do you have siblings? [Required - Yes/No]
+│   │   └── If Yes, for EACH sibling:
+│   │       ├── Full Name [Required]
+│   │       ├── Date of Birth [Optional]
+│   │       ├── Current City & Country [Optional]
+│   │       └── In U.S.? [Required - Yes/No]
+│   │           └── If Yes: Immigration Status [Required]
+│   │
+│   └── Do you have children? [Required - Yes/No]
+│       └── If Yes, for EACH child:
+│           ├── Full Name [Required]
+│           ├── Date of Birth [Required]
+│           ├── Place of Birth (City, Country) [Required]
+│           ├── Gender [Required]
+│           ├── Current Address [Required]
+│           ├── Lives with you? [Required - Yes/No]
+│           ├── Other parent's name [Required]
+│           ├── Will immigrate with you? [Required - Yes/No]
+│           └── If immigrating:
+│               ├── K-2 application status [Required]
+│               │   └── Will file / Filed / Approved
+│               ├── Child has valid passport? [Required - Yes/No]
+│               │   └── If Yes:
+│               │       ├── Passport Number [Required]
+│               │       ├── Expiration Date [Required]
+│               └── Child's A-Number (if any) [Optional]
+│
+├── 2.7 Education History
+│   ├── Highest Level of Education Completed [Required]
+│   │   └── No formal education / Primary / Secondary / Vocational / Some University / University Degree / Graduate Degree
+│   │
+│   ├── Secondary School (High School)
+│   │   ├── School Name [Required]
+│   │   ├── School Address (City, Country) [Required]
+│   │   ├── Date Started (MM/YYYY) [Required]
+│   │   ├── Date Completed (MM/YYYY) [Required]
+│   │   └── Diploma/Certificate Received? [Required - Yes/No]
+│   │
+│   └── Higher Education (if applicable)
+│       └── For EACH institution attended:
+│           ├── Institution Name [Required]
+│           ├── Address (City, Country) [Required]
+│           ├── Course of Study/Major [Required]
+│           ├── Date Started (MM/YYYY) [Required]
+│           ├── Date Completed (MM/YYYY) [Required]
+│           ├── Degree/Certificate Received [Required]
+│           └── Student ID Number [Optional]
+│
+├── 2.8 Employment Information
+│   ├── Current Employment Status [Required]
+│   │   └── Employed / Self-Employed / Unemployed / Student / Retired / Homemaker / Other
+│   │
+│   ├── If Currently Employed:
+│   │   ├── Employer Name [Required]
+│   │   ├── Employer Address
+│   │   │   ├── Street Address [Required]
+│   │   │   ├── City [Required]
+│   │   │   ├── State/Province [Required if applicable]
+│   │   │   ├── Postal Code [Required if applicable]
+│   │   │   └── Country [Required]
+│   │   ├── Employer Phone Number [Required]
+│   │   ├── Supervisor Name [Optional]
+│   │   ├── Job Title [Required]
+│   │   ├── Start Date (MM/YYYY) [Required]
+│   │   ├── Duties/Responsibilities [Required - brief description]
+│   │   ├── Monthly Salary [Required]
+│   │   │   ├── Amount [Required]
+│   │   │   └── Currency [Required]
+│   │   └── Hours per Week [Required]
+│   │
+│   ├── If Student:
+│   │   ├── School Name [Required]
+│   │   ├── Course of Study [Required]
+│   │   └── Expected Graduation [Required]
+│   │
+│   └── Employment History (Past 5 Years) [Required]
+│       └── For EACH previous position:
+│           ├── Employer Name [Required]
+│           ├── Employer Address (City, Country) [Required]
+│           ├── Job Title [Required]
+│           ├── From Date (MM/YYYY) [Required]
+│           ├── To Date (MM/YYYY) [Required]
+│           ├── Duties [Optional]
+│           └── Reason for Leaving [Optional]
+│
+├── 2.9 Language Abilities
+│   ├── Native Language [Required]
+│   ├── English Proficiency [Required]
+│   │   └── None / Basic / Conversational / Fluent / Native
+│   └── Other Languages [Optional]
+│       └── For EACH language:
+│           ├── Language [Required]
+│           └── Proficiency Level [Required]
+│               └── Basic / Conversational / Fluent / Native
+│
+├── 2.10 Military Service
+│   ├── Ever served in any military? [Required - Yes/No]
+│   └── If Yes:
+│       ├── Country of Service [Required]
+│       ├── Branch of Service [Required]
+│       ├── Rank/Position [Required]
+│       ├── Military Specialty/MOS [Required]
+│       ├── Service Dates From/To [Required]
+│       ├── Type of Discharge [Required]
+│       └── Service ID Number [Optional]
+│
+├── 2.11 U.S. Travel History
+│   ├── Have you ever been to the United States? [Required - Yes/No]
+│   │
+│   ├── If Yes, for EACH visit (last 5 visits or past 5 years):
+│   │   ├── Date of Arrival (MM/DD/YYYY) [Required]
+│   │   ├── Date of Departure (MM/DD/YYYY) [Required]
+│   │   ├── Length of Stay [Auto-calculated]
+│   │   ├── Purpose of Visit [Required]
+│   │   │   └── Tourism / Business / Study / Work / Medical / Transit / Other
+│   │   ├── Visa Type Used [Required]
+│   │   │   └── B1/B2 / F1 / J1 / H1B / L1 / ESTA/VWP / Other
+│   │   ├── Visa Number (if applicable) [Optional]
+│   │   ├── I-94 Arrival/Departure Record Number [Required if available]
+│   │   ├── SEVIS ID (if F/J/M visa) [Required if applicable]
+│   │   ├── Port of Entry (City) [Required]
+│   │   ├── U.S. Address During Visit [Required]
+│   │   └── Visa annotations/conditions [Optional]
+│   │       └── e.g., "Not for residence", "No COS/EOS"
+│   │
+│   └── U.S. Driver's License or State ID? [Required - Yes/No]
+│       └── If Yes:
+│           ├── State Issued [Required]
+│           ├── License/ID Number [Required]
+│           ├── Issue Date [Required]
+│           └── Expiration Date [Required]
+│
+├── 2.12 U.S. Immigration History
+│   ├── Ever applied for U.S. visa before? [Required - Yes/No]
+│   │   └── If Yes, for EACH application:
+│   │       ├── Date Applied [Required]
+│   │       ├── Visa Type [Required]
+│   │       ├── Location Applied (City, Country) [Required]
+│   │       ├── Result (Approved/Denied/Administrative Processing) [Required]
+│   │       └── If Denied: Reason/Section [Required]
+│   │
+│   ├── Ever been refused U.S. visa? [Required - Yes/No]
+│   │   └── If Yes: 
+│   │       ├── How many times? [Required]
+│   │       └── Section 221(g) or other code given? [Required]
+│   │
+│   ├── Ever been refused entry to U.S.? [Required - Yes/No]
+│   │   └── If Yes: Date, Port of Entry, Reason [Required]
+│   │
+│   ├── Ever overstayed U.S. visa? [Required - Yes/No]
+│   │   └── If Yes: 
+│   │       ├── Length of overstay [Required]
+│   │       └── Circumstances [Required]
+│   │
+│   ├── Ever had K-1 visa before? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── When issued? [Required]
+│   │       ├── Petitioner's name [Required]
+│   │       ├── Did you marry that petitioner? [Required - Yes/No]
+│   │       └── If No: Why not? [Required]
+│   │
+│   ├── Anyone else ever filed immigrant petition for you? [Required - Yes/No]
+│   │   └── If Yes, for EACH petition:
+│   │       ├── Petitioner Name [Required]
+│   │       ├── Relationship [Required]
+│   │       ├── Type of Petition [Required]
+│   │       ├── When Filed [Required]
+│   │       └── Result [Required]
+│   │
+│   ├── Ever been in U.S. immigration proceedings? [Required - Yes/No]
+│   │   └── If Yes: Type and Outcome [Required]
+│   │
+│   └── DS-160 Application
+│       ├── DS-160 filed? [Required - Yes/No/In Progress]
+│       └── If Yes: DS-160 Confirmation Number [Required]
+│
+├── 2.13 Legal & Criminal History
+│   ├── Ever been arrested or convicted? [Required - Yes/No]
+│   │   └── If Yes, for EACH incident:
+│   │       ├── Date [Required]
+│   │       ├── Location (City, Country) [Required]
+│   │       ├── Offense/Charge [Required]
+│   │       ├── Outcome/Disposition [Required]
+│   │       ├── Sentence (if any) [Required]
+│   │       └── Criminal records available? [Required - Yes/No]
+│   │
+│   ├── Ever violated any country's laws? [Required - Yes/No]
+│   │   └── If Yes: Details [Required]
+│   │
+│   ├── Protection/restraining orders against you? [Required - Yes/No]
+│   │   └── If Yes: Details [Required]
+│   │
+│   ├── Any pending criminal charges? [Required - Yes/No]
+│   │   └── If Yes: Details [Required]
+│   │
+│   └── Ever been victim of crime? [Required - Yes/No]
+│       └── If Yes: Brief description [Optional]
+│
+├── 2.14 Security Questions (DS-160 Requirements)
+│   ├── Countries Visited (Past 5 Years) [Required]
+│   │   └── For EACH country:
+│   │       ├── Country Name [Required]
+│   │       ├── Dates Visited (can be approximate) [Required]
+│   │       └── Purpose of Visit [Required]
+│   │
+│   ├── Clan or Tribe Name [Required if applicable]
+│   │
+│   ├── Specialized Skills Training [Required - Yes/No for each]
+│   │   ├── Firearms/Explosives? [Yes/No]
+│   │   ├── Nuclear/Biological/Chemical? [Yes/No]
+│   │   ├── Military/Paramilitary Training? [Yes/No]
+│   │   ├── Pilot Training? [Yes/No]
+│   │   └── If Yes to any: Details [Required]
+│   │
+│   ├── Organization Memberships (Past 5 Years) [Required - Yes/No]
+│   │   └── If Yes, for EACH:
+│   │       ├── Organization Name [Required]
+│   │       ├── Type of Organization [Required]
+│   │       ├── Position Held [Required]
+│   │       ├── Location [Required]
+│   │       └── Dates of Membership [Required]
+│   │
+│   └── Security & Terrorism Questions [All Required - Yes/No]
+│       ├── Terrorist organization involvement?
+│       ├── Provided support to terrorists?
+│       ├── Terrorist training received?
+│       ├── Assassination/killing involvement?
+│       ├── Genocide participation?
+│       ├── Torture involvement?
+│       ├── Extrajudicial killings?
+│       ├── Use of child soldiers?
+│       ├── Religious freedom violations?
+│       ├── Human trafficking involvement?
+│       ├── Money laundering?
+│       ├── Espionage activities?
+│       ├── Sabotage activities?
+│       ├── Communist party membership?
+│       ├── Nazi persecution (1933-1945)?
+│       ├── Illegal gambling involvement?
+│       ├── Prostitution involvement?
+│       ├── Helped others enter U.S. illegally?
+│       ├── Withheld custody of U.S. citizen child?
+│       └── If Yes to any: Full explanation [Required]
+│
+├── 2.15 Medical Information
+│   ├── Medical Examination Status
+│   │   ├── Have you completed the required medical exam? [Required - Yes/No/Scheduled]
+│   │   │   └── If Yes or Scheduled:
+│   │   │       ├── Panel Physician Name [Required]
+│   │   │       ├── Clinic Name [Required]
+│   │   │       ├── Exam Date [Required if completed]
+│   │   │       ├── Scheduled Date [Required if scheduled]
+│   │   │       ├── Location (City, Country) [Required]
+│   │   │       └── Have results/DS-3025? [Required if completed - Yes/No]
+│   │   │
+│   │   └── If No:
+│   │       └── [Information: Must complete before visa interview]
+│   │
+│   ├── Medical History Disclosure
+│   │   │   [Note: Answer to best of knowledge - physician will verify]
+│   │   │
+│   │   ├── Communicable Diseases
+│   │   │   ├── Ever diagnosed with tuberculosis? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with syphilis? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with gonorrhea? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with leprosy? [Required - Yes/No/Unknown]
+│   │   │   ├── Currently have infectious disease? [Required - Yes/No/Unknown]
+│   │   │   └── If Yes to any: Treatment details [Required]
+│   │   │
+│   │   ├── Physical or Mental Disorders
+│   │   │   ├── Physical/mental disorder with harmful behavior? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever been danger to self/others? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever hospitalized for mental health? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with psychotic disorder? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with bipolar disorder? [Required - Yes/No/Unknown]
+│   │   │   ├── Ever diagnosed with schizophrenia? [Required - Yes/No/Unknown]
+│   │   │   └── If Yes to any: Details and current treatment [Required]
+│   │   │
+│   │   ├── Substance Use History
+│   │   │   ├── Current or past substance abuse? [Required - Yes/No]
+│   │   │   ├── Ever arrested for DUI/DWI? [Required - Yes/No]
+│   │   │   ├── Ever treated for substance abuse? [Required - Yes/No]
+│   │   │   └── If Yes to any: Details and current status [Required]
+│   │   │
+│   │   └── Required Vaccinations Status
+│   │       [Note: Panel physician will verify/administer required vaccines]
+│   │       ├── Do you have vaccination records? [Required - Yes/No/Partial]
+│   │       └── If Yes or Partial, have you received:
+│   │           ├── MMR (Measles, Mumps, Rubella)? [Yes/No/Unknown]
+│   │           ├── DTaP/Td/Tdap (Diphtheria, Tetanus, Pertussis)? [Yes/No/Unknown]
+│   │           ├── Polio? [Yes/No/Unknown]
+│   │           ├── Hepatitis A? [Yes/No/Unknown]
+│   │           ├── Hepatitis B? [Yes/No/Unknown]
+│   │           ├── Varicella (Chickenpox) or had disease? [Yes/No/Unknown]
+│   │           ├── Influenza (current season)? [Yes/No/Unknown]
+│   │           ├── Meningococcal? [Yes/No/Unknown]
+│   │           ├── COVID-19? [Yes/No/Unknown]
+│   │           │   └── If Yes: Which vaccine and how many doses? [Required]
+│   │           ├── Pneumococcal (if 65+)? [Yes/No/Unknown/N/A]
+│   │           └── Can provide vaccination records? [Required - Yes/No/Partial]
+│   │
+│   └── Physical Disabilities
+│       ├── Have physical disabilities requiring assistance? [Required - Yes/No]
+│       └── If Yes: Description and accommodations needed [Required]
+│
+└── 2.16 Travel Plans & U.S. Contacts
+    ├── Travel Companions
+    │   ├── Will anyone travel with you to U.S.? [Required - Yes/No]
+    │   └── If Yes, for EACH person:
+    │       ├── Full Name [Required]
+    │       ├── Relationship to You [Required]
+    │       ├── Date of Birth [Required]
+    │       └── Applying for U.S. visa? [Required - Yes/No]
+    │
+    ├── Trip Funding
+    │   ├── Who is paying for your trip? [Required]
+    │   │   └── Self / U.S. Petitioner / Other (specify)
+    │   └── If Other: Name and relationship [Required]
+    │
+    ├── U.S. Point of Contact (Primary)
+    │   ├── Contact Type [Required]
+    │   │   └── U.S. Petitioner/Fiancé(e) / Relative / Friend / Business / Organization
+    │   ├── Contact Name [Required]
+    │   ├── Organization Name [If applicable]
+    │   ├── Relationship to You [Required]
+    │   ├── U.S. Address
+    │   │   ├── Street Address [Required]
+    │   │   ├── Apt/Suite [Optional]
+    │   │   ├── City [Required]
+    │   │   ├── State [Required]
+    │   │   ├── ZIP Code [Required]
+    │   ├── Phone Number [Required]
+    │   └── Email Address [Optional]
+    │
+    └── Additional U.S. Contacts (for emergencies)
+        └── For EACH additional contact (at least 1 recommended):
+            ├── Name [Required]
+            ├── Relationship [Required]
+            ├── Phone Number [Required]
+            └── City, State [Required]
+
+SECTION 3: Your Relationship
+
+├── 3.1 How You Met
+│   ├── How did you first meet or connect? [Required - detailed narrative]
+│   ├── Date of first contact/communication (MM/DD/YYYY) [Required]
+│   ├── Method of first contact [Required]
+│   │   └── In person / Online dating site / Social media / Through friends / Through family / At work / Paid matchmaking / Other
+│   ├── If met online: Which platform? [Required if online]
+│   ├── If through matchmaking service:
+│   │   ├── Service name [Required]
+│   │   ├── Fees paid? [Required - Yes/No]
+│   │   └── Service type (dating/marriage broker) [Required]
+│   ├── If through someone: 
+│   │   ├── Person's Name [Required]
+│   │   ├── Relationship to Petitioner [Required]
+│   │   └── Relationship to Beneficiary [Required]
+│   ├── When did relationship become romantic? (MM/DD/YYYY) [Required]
+│   └── Who initiated the romantic relationship? [Required]
+│       └── Petitioner / Beneficiary / Mutual
+│
+├── 3.2 In-Person Meetings (Critical K-1 Requirement)
+│   ├── Have you met in person within the past 2 years? [Required - Yes/No]
+│   │
+│   ├── If Yes:
+│   │   ├── Total number of in-person meetings [Required]
+│   │   ├── Total days spent together in person [Required]
+│   │   │
+│   │   ├── First In-Person Meeting
+│   │   │   ├── Date (MM/DD/YYYY) [Required]
+│   │   │   ├── End Date (MM/DD/YYYY) [Required]
+│   │   │   ├── Location (City, Country) [Required]
+│   │   │   ├── Purpose of Trip [Required]
+│   │   │   ├── Who traveled to whom? [Required]
+│   │   │   ├── Where did you stay? [Required]
+│   │   │   └── Description of meeting [Required - narrative]
+│   │   │
+│   │   └── All Subsequent Meetings
+│   │       └── For EACH meeting:
+│   │           ├── From Date [Required]
+│   │           ├── To Date [Required]
+│   │           ├── Location (City, Country) [Required]
+│   │           ├── Who traveled to whom? [Required]
+│   │           ├── Where did you stay? [Required]
+│   │           │   └── Together / Separate / With family / Hotel / Other
+│   │           ├── Activities/Places visited [Required]
+│   │           └── People you met together [Optional]
+│   │               └── Names and relationship
+│   │
+│   └── If No (Requires Waiver):
+│       ├── Reason for not meeting [Required]
+│       │   └── Extreme hardship / Religious customs / Social customs
+│       ├── Detailed explanation [Required - narrative]
+│       ├── Supporting documentation available? [Required - Yes/No]
+│       └── Future meeting plans before marriage [Required]
+│
+├── 3.3 Engagement Details
+│   ├── Date of Engagement (MM/DD/YYYY) [Required]
+│   ├── Location of Proposal (City, Country) [Required]
+│   ├── Who proposed? [Required]
+│   │   └── Petitioner / Beneficiary
+│   ├── How did the proposal happen? [Required - narrative]
+│   ├── Was it a surprise? [Required - Yes/No]
+│   ├── Engagement ring given? [Required - Yes/No]
+│   │   └── If Yes: Description and approximate value [Optional]
+│   ├── Engagement ceremony/party? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Date [Required]
+│   │       ├── Location [Required]
+│   │       ├── Number of guests [Required]
+│   │       ├── Type of ceremony (religious/cultural/civil) [Required]
+│   │       └── Description [Required]
+│   │
+│   └── Marriage Plans
+│       ├── Planned wedding date [Required - must be within 90 days of entry]
+│       ├── Wedding location (City, State) [Required]
+│       ├── Type of ceremony [Required]
+│       │   └── Religious / Civil / Both / Traditional-Cultural / Other
+│       ├── Venue selected? [Required - Yes/No]
+│       │   └── If Yes: Venue name [Required]
+│       ├── Venue booked? [Required - Yes/No]
+│       ├── Wedding invitations sent? [Required - Yes/No]
+│       ├── Approximate number of guests [Required]
+│       ├── Is marriage conditional on visa approval? [Required - Yes/No]
+│       │   └── If Yes: Explanation [Required]
+│       ├── Wedding planning details [Optional - narrative]
+│       └── Post-wedding residence address [Required]
+│
+├── 3.4 Communication Patterns
+│   ├── How often do you communicate? [Required]
+│   │   └── Multiple times daily / Daily / Several times weekly / Weekly / Less than weekly
+│   │
+│   ├── Average hours per week communicating [Required]
+│   │
+│   ├── Primary methods of communication [Required - select all that apply]
+│   │   ├── Phone calls
+│   │   ├── Video calls (Skype/WhatsApp/Zoom/etc.)
+│   │   ├── Text messages/SMS
+│   │   ├── WhatsApp messages
+│   │   ├── Email
+│   │   ├── Social media messages
+│   │   ├── Letters/Cards
+│   │   └── Other messaging apps (specify)
+│   │
+│   ├── Language of Communication
+│   │   ├── Primary language together [Required]
+│   │   ├── Does beneficiary speak English? [Required]
+│   │   │   └── No / Basic / Conversational / Fluent
+│   │   ├── Does petitioner speak beneficiary's language? [Required]
+│   │   │   └── No / Basic / Conversational / Fluent
+│   │   ├── How do you handle language differences? [Required if not same language]
+│   │   └── Use translation services/apps? [Required - Yes/No]
+│   │       └── If Yes: Which ones? [Required]
+│   │
+│   └── Evidence of Communication
+│       ├── Can provide chat logs? [Required - Yes/No]
+│       ├── Can provide call logs? [Required - Yes/No]
+│       ├── Can provide emails? [Required - Yes/No]
+│       └── Can provide photos of letters? [Required - Yes/No]
+│
+├── 3.5 Financial Support & Gifts
+│   ├── Does petitioner provide financial support? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Amount per month (USD) [Required]
+│   │       ├── Method of sending [Required]
+│   │       │   └── Wire transfer / Western Union / Online service / Bank transfer / Cash / Other
+│   │       ├── Frequency [Required]
+│   │       │   └── Weekly / Monthly / As needed / Other
+│   │       ├── How long providing support? [Required]
+│   │       ├── Purpose of support [Required]
+│   │       └── Can provide receipts? [Required - Yes/No]
+│   │
+│   ├── Significant gifts exchanged? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── From Petitioner to Beneficiary [Required - list]
+│   │       ├── From Beneficiary to Petitioner [Required - list]
+│   │       └── Approximate total value [Required]
+│   │
+│   ├── Joint financial accounts? [Required - Yes/No]
+│   │   └── If Yes: Type and details [Required]
+│   │
+│   └── Future financial plans [Required - narrative]
+│
+├── 3.6 Living Together & Intimacy
+│   ├── Have you ever lived together? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── When (From/To dates) [Required]
+│   │       ├── Where (Full Address) [Required]
+│   │       ├── Total duration [Required]
+│   │       ├── Type of accommodation [Required]
+│   │       └── Reason stopped living together [Required]
+│   │
+│   ├── Pregnancy or children together? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Currently pregnant? [Required - Yes/No]
+│   │       │   └── If Yes: Due date [Required]
+│   │       ├── Children together? [Required - Yes/No]
+│   │       │   └── If Yes, for EACH:
+│   │       │       ├── Child's Name [Required]
+│   │       │       ├── Date of Birth [Required]
+│   │       │       ├── Place of Birth [Required]
+│   │       │       └── Current Location [Required]
+│   │
+│   └── Future Living Arrangements
+│       ├── Where will you live after marriage? 
+│       │   ├── Street Address [Required]
+│       │   ├── City [Required]
+│       │   ├── State [Required]
+│       │   ├── ZIP Code [Required]
+│       ├── Housing arrangement [Required]
+│       │   └── Own home / Rent / With petitioner's family / With friends / Other
+│       ├── Is housing secured? [Required - Yes/No]
+│       └── Monthly housing cost [Required]
+│
+├── 3.7 Relationship Evidence & Witnesses
+│   ├── Family Knowledge & Approval
+│   │   ├── Does petitioner's family know about relationship? [Required - Yes/No]
+│   │   │   └── If Yes:
+│   │   │       ├── Which family members know? [Required]
+│   │   │       ├── Do they approve? [Required - Yes/No/Mixed]
+│   │   │       └── Have they met beneficiary? [Required - Yes/No]
+│   │   │           └── If Yes: When and where? [Required]
+│   │   │
+│   │   ├── Does beneficiary's family know? [Required - Yes/No]
+│   │   │   └── If Yes:
+│   │   │       ├── Which family members know? [Required]
+│   │   │       ├── Do they approve? [Required - Yes/No/Mixed]
+│   │   │       └── Have they met petitioner? [Required - Yes/No]
+│   │   │           └── If Yes: When and where? [Required]
+│   │   │
+│   │   ├── If beneficiary has children:
+│   │   │   ├── Have you met the children? [Required - Yes/No]
+│   │   │   └── If Yes: When and where? [Required]
+│   │   │
+│   │   └── Cultural/Religious considerations? [Required - Yes/No]
+│   │       └── If Yes: Explanation [Required]
+│   │
+│   ├── Witnesses to Relationship (minimum 2 required)
+│   │   └── For EACH witness:
+│   │       ├── Full Name [Required]
+│   │       ├── Address [Required]
+│   │       ├── Phone Number [Required]
+│   │       ├── Email [Required]
+│   │       ├── Relationship to Petitioner [Required]
+│   │       ├── Relationship to Beneficiary [Required]
+│   │       ├── How long known couple? [Required]
+│   │       ├── How they know about relationship [Required]
+│   │       └── Willing to provide affidavit? [Required - Yes/No]
+│   │
+│   └── Documentary Evidence Available
+│       ├── Photos together? [Required - Yes/No]
+│       │   └── If Yes: Approximate number and dates [Required]
+│       ├── Travel records (tickets, stamps)? [Required - Yes/No]
+│       ├── Communication records? [Required - Yes/No]
+│       ├── Gift receipts? [Required - Yes/No]
+│       ├── Hotel receipts? [Required - Yes/No]
+│       ├── Money transfer receipts? [Required - Yes/No]
+│       └── Other evidence? [Optional - describe]
+│
+├── 3.8 I-129F Specific Declarations
+│   ├── International Marriage Broker (IMB) Usage
+│   │   ├── Did you meet through an IMB? [Required - Yes/No]
+│   │   │   [Note: Dating websites are not necessarily IMBs]
+│   │   └── If Yes:
+│   │       ├── IMB Company Name [Required]
+│   │       ├── IMB Address [Required]
+│   │       ├── IMB Website [Required]
+│   │       └── IMB Contact Information [Required]
+│   │
+│   ├── IMBRA Disclosure
+│   │   ├── Has petitioner disclosed criminal history to beneficiary? [Required - Yes/No/N/A]
+│   │   │   └── If Yes: Date disclosed [Required]
+│   │   └── Beneficiary acknowledges receipt of information? [Required - Yes/No]
+│   │
+│   └── Intent to Marry
+│       ├── Both parties free to marry? [Required - Yes/No]
+│       ├── Both parties intend to marry within 90 days? [Required - Yes/No]
+│       └── Marriage is genuine (not for immigration)? [Required - Yes/No]
+│
+└── 3.9 Beneficiary Support Information (for I-134)
+   ├── Beneficiary's Financial Resources
+   │   ├── Does beneficiary have savings? [Required - Yes/No]
+   │   │   └── If Yes: Amount in USD [Required]
+   │   ├── Does beneficiary own property? [Required - Yes/No]
+   │   │   └── If Yes: Value in USD [Required]
+   │   ├── Will beneficiary work in U.S.? [Required - Yes/No]
+   │   │   └── If Yes:
+   │   │       ├── Expected occupation [Required]
+   │   │       └── Expected annual income [Required]
+   │   ├── Other financial support available? [Required - Yes/No]
+   │   │   └── If Yes: Source and amount [Required]
+   │   └── Beneficiary likely to become public charge? [Required - Yes/No]
+   │       └── If No: Explanation [Required]
+
+SECTION 4: Additional Information
+
+├── 4.1 Document Clarifications
+│   ├── Do any of your documents need clarification? [Required - Yes/No]
+│   │   [Help text: "Select yes if you have different names/spellings on documents, 
+│   │    missing documents, or corrections on documents"]
+│   │
+│   └── If Yes, for EACH issue:
+│       ├── Issue Type [Required - Dropdown]
+│       │   ├── Different names on documents
+│       │   ├── Different spellings of same name
+│       │   ├── Missing middle name on some documents
+│       │   ├── Maiden name vs. married name differences
+│       │   ├── Nickname used on some documents
+│       │   ├── Translation variations
+│       │   ├── Corrected/amended documents
+│       │   ├── Document not available
+│       │   └── Other document issue
+│       │
+│       ├── Documents Affected [Required - Multi-select]
+│       │   ├── Birth certificate
+│       │   ├── Passport
+│       │   ├── Divorce decree
+│       │   ├── Marriage certificate
+│       │   ├── Tax returns
+│       │   ├── Employment records
+│       │   └── Other
+│       │
+│       ├── Explanation Details [Based on type selected]
+│       │   ├── Name on Document 1: [Text - 50 chars]
+│       │   ├── Name on Document 2: [Text - 50 chars]
+│       │   └── Reason: [Dropdown]
+│       │       ├── Got married/divorced
+│       │       ├── Legal name change
+│       │       ├── Administrative error
+│       │       ├── Cultural naming convention
+│       │       ├── Common nickname usage
+│       │       └── Translation difference
+│       │
+│       └── Can you provide supporting documentation? [Required - Yes/No]
+│           └── If Yes: What type? [Multi-select]
+│               ├── Marriage/divorce certificate
+│               ├── Court order
+│               ├── Government letter
+│               ├── Affidavit
+│               └── Other
+│
+├── 4.2 Relationship Clarifications
+│   ├── Meeting Requirement Issues
+│   │   ├── Did you meet in person within past 2 years? [Auto-filled from Section 3]
+│   │   │
+│   │   └── If meetings were limited (less than 3 times or 30 days total):
+│   │       ├── Primary reason for limited meetings [Required - Dropdown]
+│   │       │   ├── COVID-19 travel restrictions
+│   │       │   ├── Beneficiary cannot get tourist visa to US
+│   │       │   ├── Military deployment/service
+│   │       │   ├── Medical treatment/condition
+│   │       │   ├── Caring for sick family member
+│   │       │   ├── Work contracts/commitments
+│   │       │   ├── Student visa restrictions
+│   │       │   ├── Financial constraints
+│   │       │   └── Other
+│   │       │
+│   │       ├── Secondary reason (optional) [Same dropdown]
+│   │       │
+│   │       ├── How do you maintain your relationship? [Required - Multi-select]
+│   │       │   ├── Daily video calls
+│   │       │   ├── Daily phone calls  
+│   │       │   ├── Constant text messaging
+│   │       │   ├── Email correspondence
+│   │       │   ├── Online activities together
+│   │       │   └── Letters/cards
+│   │       │
+│   │       └── Can you document your communication? [Required - Yes/No]
+│   │
+│   ├── International Marriage Broker (IMB)
+│   │   ├── How did you meet? [Auto-filled from Section 3]
+│   │   ├── If online: Was it a marriage broker/dating site? [Required - Yes/No/Unsure]
+│   │   │   [Help text: "Marriage brokers charge fees, focus on international 
+│   │   │    matchmaking, and primarily serve men seeking foreign wives"]
+│   │   │
+│   │   └── If Yes or Unsure:
+│   │       ├── Website/Company name: [Required - Text]
+│   │       ├── Did they charge fees? [Required - Yes/No]
+│   │       ├── Did they provide translation services? [Yes/No]
+│   │       └── Did they arrange meetings? [Yes/No]
+│   │
+│   └── Optional Relationship Context
+│       ├── Would you like to provide context for any of these? [Optional - Multi-select]
+│       │   ├── Large age difference (15+ years)
+│       │   ├── Very quick engagement (under 3 months)
+│       │   ├── Cultural/religious considerations
+│       │   ├── Previous K-1 petition (either party)
+│       │   └── None - skip this section
+│       │
+│       └── [For each selected, provide simple fields]:
+│           Age Difference:
+│           ├── What brought you together? [Dropdown]
+│           │   ├── Shared interests/hobbies
+│           │   ├── Professional connection
+│           │   ├── Family introduction
+│           │   ├── Cultural compatibility
+│           │   └── Other
+│           │
+│           Quick Engagement:
+│           ├── Reason for quick engagement [Dropdown]
+│           │   ├── Cultural tradition
+│           │   ├── Family expectations
+│           │   ├── Certain about relationship
+│           │   ├── Religious reasons
+│           │   └── Other
+│           │
+│           Cultural Considerations:
+│           ├── What should USCIS understand? [Dropdown]
+│           │   ├── Arranged marriage element
+│           │   ├── Family involvement in relationship
+│           │   ├── Religious practices affecting meetings
+│           │   ├── Cultural courtship traditions
+│           │   └── Other
+│           │
+│           Previous K-1:
+│           ├── Who had previous K-1? [Petitioner/Beneficiary]
+│           ├── Year: [Dropdown - last 10 years]
+│           ├── Why didn't marriage occur? [Dropdown]
+│           │   ├── Relationship ended
+│           │   ├── Could not travel/enter US
+│           │   ├── Family issues
+│           │   ├── Change of circumstances
+│           │   └── Other
+│
+├── 4.3 Missing Documents
+│   ├── Are any required documents unavailable? [Required - Yes/No]
+│   └── If Yes, for EACH:
+│       ├── Document Type [Required - Dropdown]
+│       │   ├── Birth certificate
+│       │   ├── Divorce decree  
+│       │   ├── Death certificate
+│       │   ├── Police certificate
+│       │   ├── Court records
+│       │   └── Other
+│       │
+│       ├── Why unavailable? [Required - Dropdown]
+│       │   ├── Never issued in that country
+│       │   ├── Records destroyed (war/natural disaster)
+│       │   ├── Government office won't issue
+│       │   ├── Unsafe to obtain
+│       │   ├── Office permanently closed
+│       │   └── Other
+│       │
+│       └── Alternative evidence available? [Required - Dropdown]
+│           ├── Affidavits from relatives
+│           ├── Church/religious records
+│           ├── School records
+│           ├── Hospital records
+│           ├── Census records
+│           ├── Government non-availability letter
+│           └── None available
+│
+└── 4.4 Other Explanations
+   ├── Anything else to clarify? [Required - Yes/No]
+   │   [Help text: "Employment gaps, address changes, family situations, etc."]
+   │
+   └── If Yes:
+       ├── Topic [Required - Dropdown]
+       │   ├── Employment gap explanation
+       │   ├── Frequent address changes
+       │   ├── Living situation (with parents, etc.)
+       │   ├── Educational gap/interruption
+       │   ├── Family complications
+       │   ├── Medical situation (non-disqualifying)
+       │   ├── Military service
+       │   ├── Previous sponsorships
+       │   ├── Beneficiary's ties to home country
+       │   ├── Plans if K-1 denied
+       │   └── Other
+       │
+       └── Brief explanation [Required - Text area, 500 chars]
+
+SECTION 5: Filing Information
+
+├── 5.1 Interview Locations
+│   ├── USCIS Field Office (for I-129F processing)
+│   │   ├── Petitioner's ZIP Code: [Auto-filled]
+│   │   ├── USCIS Service Center Assignment:
+│   │   │   └── [Auto-determine: Texas Service Center or California Service Center based on location]
+│   │   ├── Suggested USCIS Field Office: [Auto-populated based on ZIP]
+│   │   └── Confirm this office: [Required - Yes/No]
+│   │       └── If No: Select preferred office [Dropdown of nearby offices]
+│   │
+│   ├── Request Expedited Processing? [Required - Yes/No]
+│   │   └── If Yes:
+│   │       ├── Basis for Expedite [Required - Dropdown]
+│   │       │   ├── Severe financial loss
+│   │       │   ├── Urgent humanitarian reasons
+│   │       │   ├── U.S. government interests
+│   │       │   ├── Clear USCIS error
+│   │       │   └── Other compelling interest
+│   │       └── Supporting documentation available? [Required - Yes/No]
+│   │
+│   └── U.S. Embassy/Consulate (for beneficiary's visa interview)
+│       ├── Where will beneficiary interview? [Required]
+│       │   ├── Country [Required - Dropdown]
+│       │   ├── City [Required - Dropdown based on country]
+│       │   │   [Auto-populate common locations like Manila, Ciudad Juarez, etc.]
+│       │   │
+│       │   └── Can beneficiary legally interview there? [Required - Yes/No]
+│       │       [Help text: "Must be resident or citizen of that country"]
+│       │       └── If No: Where can they legally interview? [Required]
+│
+├── 5.2 Application Assistance
+│   ├── Did anyone help you prepare this application? [Required - Yes/No]
+│   │
+│   ├── If Yes - Paid Preparer:
+│   │   ├── Preparer Type [Required - Dropdown]
+│   │   │   ├── Immigration attorney
+│   │   │   ├── Accredited representative
+│   │   │   ├── Immigration service/company
+│   │   │   └── Other preparer
+│   │   │
+│   │   ├── Preparer Information
+│   │   │   ├── Full Name [Required]
+│   │   │   ├── Company/Firm Name [Optional]
+│   │   │   ├── Phone Number [Required]
+│   │   │   ├── Email [Required]
+│   │   │   ├── Address [Required - all fields]
+│   │   │   └── Bar/Accreditation Number [Required if attorney/rep]
+│   │   │
+│   │   └── Will preparer submit forms? [Required - Yes/No]
+│   │       └── If Yes: G-28 attached? [Required - Yes/No]
+│   │
+│   └── If Yes - Interpreter/Translator:
+│       ├── Did someone translate or interpret? [Required - Yes/No]
+│       └── If Yes:
+│           ├── Full Name [Required]
+│           ├── Language translated from [Required]
+│           ├── Relationship to you [Required - Dropdown]
+│           │   ├── Professional interpreter
+│           │   ├── Friend
+│           │   ├── Family member
+│           │   └── Other
+│           └── Contact phone [Required]
+│
+├── 5.3 Document Checklist
+│   ├── I-129F Package Documents
+│   │   ├── Form I-129F [Auto-checked]
+│   │   ├── Form G-325A (if required by field office) [Check if needed]
+│   │   ├── Filing fee payment [Required confirmation]
+│   │   ├── Petitioner's proof of citizenship [Required - Select type]
+│   │   │   ├── U.S. birth certificate
+│   │   │   ├── U.S. passport (photo pages)
+│   │   │   ├── Naturalization certificate
+│   │   │   └── Certificate of citizenship
+│   │   ├── Petitioner's birth certificate [Check when ready]
+│   │   ├── Beneficiary's birth certificate [Check when ready]
+│   │   ├── Passport Photos (2x2, white background)
+│   │   │   ├── Petitioner - 1 photo [Check when ready]
+│   │   │   ├── Beneficiary - 1 photo [Check when ready]
+│   │   │   └── Taken within 30 days? [Required - Yes/No]
+│   │   ├── Proof of legal name change [Check if applicable]
+│   │   ├── Divorce/death certificates [Check if applicable]
+│   │   ├── Evidence of meeting in person [Required - Multi-select]
+│   │   │   ├── Passport stamps
+│   │   │   ├── Flight itineraries
+│   │   │   ├── Hotel receipts
+│   │   │   ├── Photos together
+│   │   │   └── Other evidence
+│   │   ├── Intent to marry statements [Check when ready]
+│   │   ├── Certified translations for non-English documents
+│   │   │   ├── Translation includes translator certification? [Required - Yes/No]
+│   │   │   └── Translator info (name, signature, address) included? [Required - Yes/No]
+│   │   └── G-1145 (e-notification) [Optional]
+│   │
+│   ├── I-134 Affidavit of Support Documents
+│   │   ├── Form I-134 [Auto-checked]
+│   │   ├── Tax returns/transcripts (3 years) [Check when ready]
+│   │   ├── Employment verification letter [Check when ready]
+│   │   │   └── On company letterhead with contact info? [Required - Yes/No]
+│   │   ├── Recent pay stubs (3 months) [Check when ready]
+│   │   ├── Bank statements (3-6 months) [Check when ready]
+│   │   └── Asset documentation [Check if using assets]
+│   │
+│   └── Relationship Evidence [Optional but recommended]
+│       ├── Photos together (variety of occasions) [Check if available]
+│       ├── Communication records [Check if available]
+│       ├── Travel records [Check if available]
+│       ├── Affidavits from friends/family [Check if available]
+│       └── Other relationship evidence [Check if available]
+│
+├── 5.4 Payment Information
+│   ├── USCIS Fees
+│   │   ├── I-129F Filing Fee: $675 (as of 2024) [Display]
+│   │   ├── Payment Method [Required - Dropdown]
+│   │   │   ├── Personal check
+│   │   │   ├── Cashier's check
+│   │   │   ├── Money order
+│   │   │   └── Credit card (G-1450)
+│   │   │
+│   │   ├── If check/money order:
+│   │   │   ├── Made payable to: U.S. Department of Homeland Security [Display]
+│   │   │   └── Check/MO Number: [Optional but recommended]
+│   │   │
+│   │   └── If credit card:
+│   │       └── G-1450 form completed? [Required - Yes/No]
+│   │
+│   └── E-Notification Setup
+│       ├── Want text/email updates? [Required - Yes/No]
+│       └── If Yes (Form G-1145):
+│           ├── Email for notifications [Required]
+│           └── Mobile for text updates [Optional]
+│
+└── 5.5 Mailing Instructions
+   ├── Filing Address [Auto-populated based on petitioner location]
+   │   ├── Regular Mail Address: [Display USCIS Lockbox]
+   │   └── Express Mail Address: [Display if different]
+   │
+   ├── Package Assembly Order [Display]
+   │   1. Payment (check or G-1450)
+   │   2. Form G-1145 (if using)
+   │   3. Form I-129F
+   │   4. All supporting documents
+   │   5. Do not use binders or folders
+   │
+   └── Mailing Recommendations [Display]
+       ├── Use certified mail with return receipt
+       ├── Keep copies of everything
+       └── Expected receipt notice: 2-4 weeks
+
+SECTION 6: Certification & Review
+
+├── 6.1 Final Review Checklist
+│   ├── Information Review
+│   │   ├── All names spelled correctly [Required - Yes/No]
+│   │   ├── All dates accurate [Required - Yes/No]
+│   │   ├── All addresses complete [Required - Yes/No]
+│   │   ├── Meeting evidence documented [Required - Yes/No]
+│   │   └── Relationship timeline consistent [Required - Yes/No]
+│   │
+│   └── Document Review
+│       ├── All required documents available [Required - Yes/No]
+│       ├── All translations complete [Required - Yes/No/NA]
+│       ├── All copies clear and readable [Required - Yes/No]
+│       └── Payment ready [Required - Yes/No]
+│
+├── 6.2 Understanding & Consent
+│   ├── Petitioner Certifications [All required checkboxes]
+│   │   ├── □ I understand I must marry within 90 days of entry
+│   │   ├── □ I certify all information is true and correct
+│   │   ├── □ I understand providing false information is a crime
+│   │   ├── □ I am legally free to marry
+│   │   ├── □ This marriage is genuine, not for immigration benefit
+│   │   ├── □ I will notify USCIS of any address changes
+│   │   └── □ I understand the financial support obligations
+│   │
+│   ├── Beneficiary Acknowledgments [All required checkboxes]
+│   │   ├── □ I intend to marry petitioner within 90 days
+│   │   ├── □ All my information is true and correct
+│   │   ├── □ I am legally free to marry
+│   │   ├── □ I understand K-1 visa limitations
+│   │   └── □ I will not work without authorization
+│   │
+│   └── Digital Signature
+│       ├── Petitioner Types Full Name [Required]
+│       ├── Date [Required - Today's date]
+│       ├── Beneficiary Types Full Name [Required]
+│       └── Date [Required - Today's date]
+│
+└── 6.3 Export & Submit Options
+   ├── Export Completed Forms
+   │   ├── Download PDF Package [Button]
+   │   ├── Email Package to Self [Button]
+   │   └── Print Checklist [Button]
+   │
+   └── What's Next [Display]
+       ├── 1. Print and sign forms where indicated
+       ├── 2. Gather all supporting documents
+       ├── 3. Make copies for your records
+       ├── 4. Include payment
+       ├── 5. Mail to USCIS address shown
+       └── 6. Wait for receipt notice (2-4 weeks)
+
+SECTION 7: Post-Filing Tracking [Optional Section]
+
+├── 7.1 Case Status Tracking
+│   ├── Receipt Number (when received): [Text field]
+│   ├── Priority Date: [Date field]
+│   ├── Current Status: [Dropdown]
+│   │   ├── Mailed - awaiting receipt
+│   │   ├── Case received
+│   │   ├── Biometrics scheduled
+│   │   ├── Case processing
+│   │   ├── RFE issued
+│   │   ├── Case approved
+│   │   └── Other
+│   └── Last Update Date: [Date field]
+│
+├── 7.2 Important Dates
+│   ├── Application Mailed: [Date]
+│   ├── Receipt Notice Date: [Date]
+│   ├── Biometrics Date: [Date if applicable]
+│   ├── RFE Response Due: [Date if applicable]
+│   ├── Approval Date: [Date when received]
+│   └── Visa Interview Date: [Date when scheduled]
+│
+└── 7.3 Notes & Reminders
+   ├── Add notes about your case: [Text area]
+   └── Set reminders for important dates [Date/reminder system]
+
+SECTION 8: Post-Approval Requirements
+
+├── 8.1 Medical Exam Instructions
+│   ├── Panel Physician Locator
+│   │   ├── Embassy/Consulate Location [Auto-filled]
+│   │   ├── Approved Panel Physicians [List]
+│   │   └── Appointment Booking Info [Display]
+│   │
+│   ├── What to Bring to Medical Exam
+│   │   ├── Valid passport
+│   │   ├── Vaccination records
+│   │   ├── 4 passport photos
+│   │   ├── Medical history
+│   │   └── Payment (varies by country)
+│   │
+│   └── Age-Specific Vaccination Requirements
+│       ├── Under 2 years [List required]
+│       ├── 2-18 years [List required]
+│       ├── 18-64 years [List required]
+│       └── 65+ years [List required]
+│
+├── 8.2 Police Certificate Requirements
+│   ├── Countries Requiring Police Certificates
+│   │   ├── Country of citizenship [Always required]
+│   │   ├── Countries lived 6+ months since age 16 [Required]
+│   │   └── Country-specific requirements [Display based on country]
+│   │
+│   ├── How to Obtain
+│   │   └── [Country-specific instructions]
+│   │
+│   └── Validity Period
+│       └── Usually valid for 1 year from issue date
+│
+└── 8.3 Country-Specific Requirements
+   ├── Philippines
+   │   └── CFO Seminar required before departure
+   ├── China
+   │   └── Notarial certificates for documents
+   ├── Morocco
+   │   └── Single status certificate required
+   ├── Mexico
+   │   └── Long-form birth certificates required
+   └── Middle East Countries
+       └── Extended administrative processing likely
+
+APPENDIX: Form-Specific Field Mappings
+
+├── I-129F Form Mapping
+│   ├── Part 1: Petitioner Information → Section 1
+│   ├── Part 2: Beneficiary Information → Section 2
+│   ├── Part 3: Other Information → Sections 1 & 3
+│   │   ├── Question 48: Criminal convictions → Section 1.10
+│   │   ├── Questions 49-54: Previous K petitions → Section 1.9
+│   │   └── Question 55: IMBRA certification → Section 3.8
+│   ├── Part 4: Petitioner's Statement → Section 6.2
+│   └── Part 5: Signature → Section 6.2
+│
+├── G-325A Form Mapping (if still required)
+│   ├── Biographic Information → Sections 1 & 2
+│   ├── Residence Last 5 Years → Section 1.4 & 2.4
+│   ├── Employment Last 5 Years → Section 1.7 & 2.8
+│   └── Marital History → Section 1.5 & 2.5
+│
+├── I-134 Form Mapping
+│   ├── Part 1: Sponsor Info → Section 1
+│   ├── Part 2: Beneficiary Info → Section 2
+│   ├── Part 3: Financial Info → Section 1.8
+│   ├── Part 4: Statement of Support → Section 1.8
+│   └── Part 5: Signature → Section 6.2
+│
+├── DS-160 Form Mapping
+│   ├── Personal Information → Section 2.1
+│   ├── Travel Documents → Section 2.2
+│   ├── Travel Information → Section 2.16
+│   ├── Previous U.S. Travel → Section 2.11
+│   ├── Address and Phone → Sections 2.3 & 2.4
+│   ├── Family Information → Section 2.6
+│   ├── Work/Education/Training → Sections 2.7, 2.8, 2.10
+│   ├── Security Questions → Section 2.14
+│   └── Medical and Health → Section 2.15
+│
+└── Data Validation Rules
+   ├── Date Validations
+   │   ├── Divorce date < Engagement date
+   │   ├── Meeting dates within 2 years of filing
+   │   └── Marriage within 90 days of entry
+   ├── Age Validations
+   │   ├── Both parties 18+ (or check state laws)
+   │   └── Children's ages consistent with parent ages
+   └── Address/Employment Continuity
+       ├── No gaps in address history
+       └── No gaps in employment history
