@@ -1,5 +1,52 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronDown, Check, Info, User, Users, FileText, Home, Phone, MapPin } from 'lucide-react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
+// Yup schema for marriage history validation
+const marriageHistorySchema = yup.object().shape({
+  marriages: yup.array().of(
+    yup.object().shape({
+      spouseLastName: yup.string().required('Spouse last name is required'),
+      spouseFirstName: yup.string().required('Spouse first name is required'),
+      spouseDOB: yup.date().required('Spouse date of birth is required'),
+      spouseBirthCountry: yup.string().required('Spouse country of birth is required'),
+      marriageDate: yup.date().required('Marriage date is required'),
+      marriageEndDate: yup.date()
+        .required('Marriage end date is required')
+        .min(yup.ref('marriageDate'), 'Marriage end date must be after marriage date')
+    })
+  ).test('no-overlapping-dates', 'Marriage dates cannot overlap', function(marriages) {
+    if (!marriages || marriages.length < 2) return true;
+    
+    // Check for overlapping dates
+    for (let i = 0; i < marriages.length; i++) {
+      for (let j = i + 1; j < marriages.length; j++) {
+        const marriage1 = marriages[i];
+        const marriage2 = marriages[j];
+        
+        if (marriage1.marriageDate && marriage1.marriageEndDate && 
+            marriage2.marriageDate && marriage2.marriageEndDate) {
+          
+          const m1Start = new Date(marriage1.marriageDate);
+          const m1End = new Date(marriage1.marriageEndDate);
+          const m2Start = new Date(marriage2.marriageDate);
+          const m2End = new Date(marriage2.marriageEndDate);
+          
+          // Check if dates overlap
+          if (m1Start <= m2End && m1End >= m2Start) {
+            return this.createError({
+              message: `Marriage ${i + 1} and Marriage ${j + 1} have overlapping dates`,
+              path: `marriages[${i}].marriageEndDate`
+            });
+          }
+        }
+      }
+    }
+    return true;
+  })
+});
 
 const K1VisaQuestionnaire = () => {
   const [expandedSections, setExpandedSections] = useState({ 0: true });
@@ -209,7 +256,7 @@ const sponsorSubsections = [
         { id: 'sponsorOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false },
         
         // Basic Information
-        { id: 'sponsorDOB', label: 'Date of Birth', type: 'date', required: true },
+        { id: 'sponsorDOB', label: '[SponsorFirstName]\'s Date of Birth', type: 'date', required: true },
         { id: 'sponsorBirthLocation', label: 'Place of Birth', type: 'birth-location', required: true },
         { id: 'sponsorSex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
         { id: 'sponsorSSN', label: 'Social Security Number', type: 'ssn', required: true },
@@ -304,11 +351,13 @@ const sponsorSubsections = [
       questionCount: 4,
       fields: [
         { id: 'sponsorMaritalStatus', label: 'Current Marital Status', type: 'select', 
-          options: ['Single, never married', 'Divorced', 'Widowed'], 
-          required: true 
+          options: ['Single', 'Divorced', 'Widowed', 'Married'], 
+          required: true,
+          helpText: 'Choose based on how your most recent marriage ended. For example, if you were widowed then remarried and divorced, select "Divorced".'
         },
-        { id: 'sponsorStatusDate', label: 'Date you became single/divorced/widowed', type: 'date', required: false, conditional: true },
-        { id: 'sponsorPreviousMarriages', label: 'How many times have you been previously married?', type: 'select', 
+        { id: 'marriedEligibilityCheck', type: 'married-eligibility-check', hideLabel: true, required: false, conditional: true },
+        { id: 'sponsorStatusDate', label: 'Date', type: 'date', required: false, conditional: true },
+        { id: 'sponsorPreviousMarriages', label: 'How many times has [SponsorFirstName] been previously married?', type: 'select', 
           options: ['0', '1', '2', '3', '4', '5+'], 
           required: true 
         },
@@ -463,10 +512,10 @@ const sections = [
       { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
       { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
       { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
-      { id: 'beneficiaryDOB', label: 'Date of Birth', type: 'date', required: true },
+      { id: 'beneficiaryDOB', label: '[BeneficiaryFirstName]\'s Date of Birth', type: 'date', required: true },
       { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
       { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
-      { id: 'beneficiaryBirthCountry', label: 'Country of Birth', type: 'text', required: true },
+      { id: 'beneficiaryBirthCountry', label: '[BeneficiaryFirstName]\'s Country of Birth', type: 'text', required: true },
       { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
       { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
     ]
@@ -2578,18 +2627,46 @@ case 'country':
         );
 
       case 'marriage-history':
-        const marriageCount = parseInt(currentData['sponsorPreviousMarriages']) || 0;
+        const previousMarriagesValue = currentData['sponsorPreviousMarriages'] || '0';
+        let marriageCount = parseInt(previousMarriagesValue) || 0;
+        
+        // Handle "5+" option - start with 5 marriages and allow adding more
+        if (previousMarriagesValue === '5+') {
+          marriageCount = 5;
+        }
+        
         const marriageHistoryValue = currentData[field.id] || [];
+        
+        // If user selected "5+" but has more than 5 entries, show all entries
+        const actualMarriageCount = previousMarriagesValue === '5+' 
+          ? Math.max(5, marriageHistoryValue.length)
+          : marriageCount;
         
         if (marriageCount === 0) return null;
         
         return (
           <div className="space-y-4">
-            {[...Array(marriageCount)].map((_, index) => {
+            {[...Array(actualMarriageCount)].map((_, index) => {
               const marriage = marriageHistoryValue[index] || {};
               return (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <h4 className="font-medium text-gray-800 mb-3">Marriage #{index + 1}</h4>
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-medium text-gray-800">Marriage #{index + 1}</h4>
+                    {/* Show remove button for "5+" scenario when there are more than 5 entries, or if it's beyond the base count */}
+                    {(previousMarriagesValue === '5+' && marriageHistoryValue.length > 5) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newHistory = marriageHistoryValue.filter((_, i) => i !== index);
+                          updateField(field.id, newHistory);
+                        }}
+                        className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-sm font-medium"
+                        title="Remove this marriage"
+                      >
+                        ✕ Remove
+                      </button>
+                    )}
+                  </div>
                   <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">
                       <input
@@ -2629,7 +2706,7 @@ case 'country':
                     
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Spouse's Date of Birth</label>
                         <input
                           type="date"
                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -2642,7 +2719,7 @@ case 'country':
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Country of Birth</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Spouse's Country of Birth</label>
                         <select
                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                           value={marriage.spouseBirthCountry || ''}
@@ -2671,7 +2748,15 @@ case 'country':
                           value={marriage.marriageDate || ''}
                           onChange={(e) => {
                             const newHistory = [...marriageHistoryValue];
-                            newHistory[index] = { ...marriage, marriageDate: e.target.value };
+                            const newStartDate = e.target.value;
+                            const updatedMarriage = { ...marriage, marriageDate: newStartDate };
+                            
+                            // If new start date is after current end date, clear the end date
+                            if (marriage.marriageEndDate && newStartDate > marriage.marriageEndDate) {
+                              updatedMarriage.marriageEndDate = '';
+                            }
+                            
+                            newHistory[index] = updatedMarriage;
                             updateField(field.id, newHistory);
                           }}
                         />
@@ -2682,34 +2767,101 @@ case 'country':
                           type="date"
                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                           value={marriage.marriageEndDate || ''}
+                          min={marriage.marriageDate || ''}
                           onChange={(e) => {
+                            // Allow all changes during typing
                             const newHistory = [...marriageHistoryValue];
                             newHistory[index] = { ...marriage, marriageEndDate: e.target.value };
                             updateField(field.id, newHistory);
                           }}
+                          onBlur={(e) => {
+                            // Only validate when user finishes editing (loses focus)
+                            const newEndDate = e.target.value;
+                            if (marriage.marriageDate && newEndDate && newEndDate < marriage.marriageDate) {
+                              // Clear invalid date
+                              const newHistory = [...marriageHistoryValue];
+                              newHistory[index] = { ...marriage, marriageEndDate: '' };
+                              updateField(field.id, newHistory);
+                            }
+                          }}
                         />
                       </div>
                     </div>
-                    
-                    <select
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={marriage.howEnded || ''}
-                      onChange={(e) => {
-                        const newHistory = [...marriageHistoryValue];
-                        newHistory[index] = { ...marriage, howEnded: e.target.value };
-                        updateField(field.id, newHistory);
-                      }}
-                    >
-                      <option value="">How did marriage end?</option>
-                      <option value="Divorce">Divorce</option>
-                      <option value="Death">Death</option>
-                      <option value="Annulment">Annulment</option>
-                      <option value="Other">Other</option>
-                    </select>
                   </div>
                 </div>
               );
             })}
+            
+            {/* Date overlap validation warning */}
+            {(() => {
+              // Check for overlapping dates across marriages
+              const marriages = marriageHistoryValue.filter(m => m.marriageDate && m.marriageEndDate);
+              let hasOverlap = false;
+              
+              for (let i = 0; i < marriages.length; i++) {
+                for (let j = i + 1; j < marriages.length; j++) {
+                  const marriage1Start = new Date(marriages[i].marriageDate);
+                  const marriage1End = new Date(marriages[i].marriageEndDate);
+                  const marriage2Start = new Date(marriages[j].marriageDate);
+                  const marriage2End = new Date(marriages[j].marriageEndDate);
+                  
+                  // Check if dates overlap
+                  if ((marriage1Start <= marriage2End && marriage1End >= marriage2Start)) {
+                    hasOverlap = true;
+                    break;
+                  }
+                }
+                if (hasOverlap) break;
+              }
+              
+              if (hasOverlap) {
+                return (
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <span className="text-amber-600 text-lg">⚠️</span>
+                      <div>
+                        <h4 className="font-medium text-amber-800 mb-2">Overlapping Marriage Dates Detected</h4>
+                        <p className="text-sm text-amber-700 mb-3">
+                          We noticed some of your marriage dates overlap. Having multiple marriages at the same time can significantly impact your visa approval chances and may require additional explanation to USCIS.
+                        </p>
+                        <p className="text-sm text-amber-700 mb-3">
+                          <strong>What to do:</strong> Please double-check your dates to ensure they're accurate. If the dates are correct and you have a unique situation, we recommend contacting our support team for guidance.
+                        </p>
+                        <button 
+                          className="text-sm bg-amber-600 text-white px-3 py-1 rounded hover:bg-amber-700 transition-colors"
+                          onClick={() => {
+                            // TODO: Route to support
+                            console.log('TODO: Route to support for overlapping marriage dates');
+                          }}
+                        >
+                          Contact Support Team
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              
+              return null;
+            })()}
+            
+            {/* Add Another Marriage button - only show if user selected "5+" */}
+            {previousMarriagesValue === '5+' && (
+              <div className="text-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Add a new empty marriage entry
+                    const newHistory = [...marriageHistoryValue];
+                    newHistory.push({});
+                    updateField(field.id, newHistory);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  + Add Another Previous Marriage
+                </button>
+              </div>
+            )}
           </div>
         );
 
@@ -2757,6 +2909,326 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
       </div>
     </div>
   );
+
+      case 'married-eligibility-check':
+        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+        const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
+        const beneficiaryFirstName = currentData['beneficiaryFirstName'] || '[BeneficiaryFirstName]';
+        const sponsorSex = currentData['sponsorSex'] || '';
+        const sponsorPronoun = sponsorSex === 'Male' ? 'he' : sponsorSex === 'Female' ? 'she' : 'they';
+        
+        const marriedTo = currentData['marriedTo'] || '';
+        const spouseLocation = currentData['spouseLocation'] || '';
+        const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+        
+        // Show initial married eligibility check
+        if (maritalStatus === 'Married' && !marriedTo) {
+          return (
+            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center mb-3">
+                <span className="text-orange-600 text-xl mr-2">⚠️</span>
+                <h3 className="text-lg font-semibold text-orange-800">Important: K-1 Visa Eligibility Check</h3>
+              </div>
+              <p className="text-gray-700 mb-4">
+                K-1 visas are only for engaged couples. We need to determine the right path for {sponsorFirstName}.
+              </p>
+              
+              <div className="space-y-3">
+                <p className="font-medium text-gray-800">Who is {sponsorFirstName} married to?</p>
+                
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="marriedTo"
+                      value="sponsor"
+                      checked={marriedTo === 'sponsor'}
+                      onChange={(e) => updateField('marriedTo', e.target.value)}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="marriedTo"
+                      value="someone-else"
+                      checked={marriedTo === 'someone-else'}
+                      onChange={(e) => updateField('marriedTo', e.target.value)}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Someone else</span>
+                  </label>
+                </div>
+                
+                <p className="text-xs text-gray-500 mt-3">
+                  Note: If {beneficiaryFirstName} isn't the correct name, that's okay. We just need to know if {sponsorFirstName} is married to the person {sponsorPronoun} wants to sponsor. Names can be updated later.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
+        // Show spouse location question after selecting "married to sponsor"
+        if (maritalStatus === 'Married' && marriedTo === 'sponsor' && !spouseLocation) {
+          return (
+            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center mb-3">
+                <span className="text-orange-600 text-xl mr-2">⚠️</span>
+                <h3 className="text-lg font-semibold text-orange-800">Important: K-1 Visa Eligibility Check</h3>
+              </div>
+              <p className="text-gray-700 mb-4">
+                K-1 visas are only for engaged couples. We need to determine the right path for {sponsorFirstName}.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="font-medium text-gray-800 mb-2">Who is {sponsorFirstName} married to?</p>
+                  <p className="text-green-600 text-sm">✓ The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="font-medium text-gray-800">Where is {beneficiaryFirstName} currently?</p>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="spouseLocation"
+                        value="in-us"
+                        checked={spouseLocation === 'in-us'}
+                        onChange={(e) => updateField('spouseLocation', e.target.value)}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>In the United States</span>
+                    </label>
+                    
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="spouseLocation"
+                        value="outside-us"
+                        checked={spouseLocation === 'outside-us'}
+                        onChange={(e) => updateField('spouseLocation', e.target.value)}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Outside the United States</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        // Path A: Married to sponsor + In US (AOS)
+        if (maritalStatus === 'Married' && marriedTo === 'sponsor' && spouseLocation === 'in-us') {
+          return (
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center mb-3">
+                  <span className="text-orange-600 text-xl mr-2">⚠️</span>
+                  <h3 className="text-lg font-semibold text-orange-800">Important: K-1 Visa Eligibility Check</h3>
+                </div>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>✓ Married to: The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</p>
+                  <p>✓ Location: In the United States</p>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                  → Spousal Green Card: Adjustment of Status (AOS)
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  Being married means {beneficiaryFirstName} can directly apply for a green card - no need for the fiancé visa step, which eventually requires a separate green card application.
+                </p>
+                
+                <details className="mb-4">
+                  <summary className="cursor-pointer text-blue-600 font-medium hover:text-blue-800">
+                    What is AOS? (click to expand)
+                  </summary>
+                  <div className="mt-2 pl-4 text-gray-600">
+                    <p className="mb-2">Adjustment of Status is a spousal green card application that allows the spouse to become a permanent resident while staying in the US</p>
+                    <p>Estimated timeline: 6-10 months for work/travel permit, 12-18 months for green card approval</p>
+                  </div>
+                </details>
+
+                <div className="flex flex-col space-y-3">
+                  <button 
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={() => {
+                      // TODO: Route to AOS eligibility test
+                      console.log('TODO: Route to AOS qualifying test');
+                    }}
+                  >
+                    Continue to Spousal Green Card Application →
+                  </button>
+                  <button 
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    onClick={() => {
+                      setCurrentData(prev => ({
+                        ...prev,
+                        sponsorMaritalStatus: '',
+                        marriedTo: '',
+                        spouseLocation: ''
+                      }));
+                    }}
+                  >
+                    ← Back to K-1 Form
+                  </button>
+                  <button 
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      // TODO: Route to support
+                      console.log('TODO: Route to support for clarification/refund requests');
+                    }}
+                  >
+                    Have questions? Contact support
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        // Path B: Married to sponsor + Outside US (Consular)
+        if (maritalStatus === 'Married' && marriedTo === 'sponsor' && spouseLocation === 'outside-us') {
+          return (
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center mb-3">
+                  <span className="text-orange-600 text-xl mr-2">⚠️</span>
+                  <h3 className="text-lg font-semibold text-orange-800">Important: K-1 Visa Eligibility Check</h3>
+                </div>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>✓ Married to: The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</p>
+                  <p>✓ Location: Outside the United States</p>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                  → Spousal Green Card: Consular Processing
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  Being married means {beneficiaryFirstName} can directly apply for a green card - no need for the fiancé visa step, which eventually requires a separate green card application.
+                </p>
+                
+                <details className="mb-4">
+                  <summary className="cursor-pointer text-blue-600 font-medium hover:text-blue-800">
+                    What is Consular Processing? (click to expand)
+                  </summary>
+                  <div className="mt-2 pl-4 text-gray-600 space-y-2">
+                    <p>Consular Processing is when the spouse applies for their green card from outside the US and enters as a permanent resident</p>
+                    <p><strong>Estimated timeline:</strong> 12-16 months until approval</p>
+                    <div className="ml-4">
+                      <p>• Month 1-12: Application processing ({beneficiaryFirstName} remains outside the US)</p>
+                      <p>• Month 12-16: Interview at local U.S. Embassy or Consulate in {beneficiaryFirstName}'s country</p>
+                      <p>• Note: If no U.S. Embassy/Consulate is available locally, interview may be scheduled in a neighboring country</p>
+                      <p>• After approval: {beneficiaryFirstName} can enter US as permanent resident</p>
+                      <p>• Physical green card arrives by mail within 30-60 days after entering the US</p>
+                    </div>
+                    <p className="mt-2 font-medium text-amber-600">
+                      Important: Many temporary visas (tourist visas, ESTA, etc.) are often denied during green card processing due to immigration intent. {beneficiaryFirstName} should plan to remain outside the US until the process is complete.
+                    </p>
+                  </div>
+                </details>
+
+                <div className="flex flex-col space-y-3">
+                  <button 
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={() => {
+                      // TODO: Route to Consular eligibility test
+                      console.log('TODO: Route to Consular qualifying test');
+                    }}
+                  >
+                    Continue to Spousal Green Card Application →
+                  </button>
+                  <button 
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    onClick={() => {
+                      setCurrentData(prev => ({
+                        ...prev,
+                        sponsorMaritalStatus: '',
+                        marriedTo: '',
+                        spouseLocation: ''
+                      }));
+                    }}
+                  >
+                    ← Back to K-1 Form
+                  </button>
+                  <button 
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      // TODO: Route to support
+                      console.log('TODO: Route to support for clarification/refund requests');
+                    }}
+                  >
+                    Have questions? Contact support
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        // Path C: Married to someone else
+        if (maritalStatus === 'Married' && marriedTo === 'someone-else') {
+          return (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <h3 className="text-lg font-semibold text-amber-800 mb-3">
+                → Let's understand {sponsorFirstName}'s current marriage situation
+              </h3>
+              <p className="text-gray-700 mb-4">
+                For a K-1 visa, both parties need to be legally free to marry. We understand divorces can be complex, and we're here to help {sponsorFirstName} prepare the visa application for when it's time to file.
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">{sponsorFirstName}'s options:</p>
+                  {!preparingWhileDivorcing ? (
+                    <button 
+                      className="w-full px-6 py-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-left"
+                      onClick={() => {
+                        setCurrentData(prev => ({
+                          ...prev,
+                          preparingWhileDivorcing: true
+                        }));
+                      }}
+                    >
+                      <div className="font-medium">Continue preparing the application now and file when the divorce is finalized</div>
+                      <div className="text-sm text-amber-100 mt-1">We'll help {sponsorFirstName} get everything ready to file as soon as possible</div>
+                    </button>
+                  ) : (
+                    <div className="w-full px-6 py-4 bg-green-100 border border-green-300 rounded-lg text-left">
+                      <div className="flex items-center">
+                        <span className="text-green-600 text-xl mr-2">✓</span>
+                        <div>
+                          <div className="font-medium text-green-800">Great - let's keep going!</div>
+                          <div className="text-sm text-green-600 mt-1">Form is now active and ready to continue</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <button 
+                  className="text-sm text-amber-600 hover:text-amber-800"
+                  onClick={() => {
+                    // TODO: Route to support system with context
+                    console.log('TODO: Route to support system with context for married to someone else scenario');
+                  }}
+                >
+                  Need to discuss {sponsorFirstName}'s situation? Contact support
+                </button>
+              </div>
+            </div>
+          );
+        }
+        
+        return null;
 
 default:
   // This handles 'text', 'number', and any other basic input types
@@ -2967,12 +3439,40 @@ return (
                         {isExpanded && (
                           <div className="p-6 bg-white">
                             <div className="space-y-6">
-                              {subsection.fields.map((field) => (
-                                <div key={field.id}>
+                              {subsection.fields.map((field) => {
+                                // Check if form should be grayed out for marital section
+                                const isMaritalSection = subsection.id === '1.4-marital';
+                                const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                const marriedTo = currentData['marriedTo'] || '';
+                                const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+                                
+                                // Gray out form except for marital status dropdown and married eligibility check questions
+                                const shouldGrayField = isMaritalSection && 
+                                  maritalStatus === 'Married' &&
+                                  (marriedTo === 'sponsor' || (marriedTo === 'someone-else' && !preparingWhileDivorcing)) &&
+                                  field.id !== 'sponsorMaritalStatus' && 
+                                  field.id !== 'marriedEligibilityCheck';
+                                
+                                return (
+                                <div key={field.id} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
 {!field.hideLabel ? (
   <label className="block text-sm font-medium text-gray-700 mb-2">
     <span className="inline-flex items-center">
-      {field.label}
+      {(() => {
+        // Dynamic label for sponsorStatusDate based on marital status
+        if (field.id === 'sponsorStatusDate') {
+          const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+          const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
+          if (maritalStatus === 'Divorced') {
+            return `Date`;
+          } else if (maritalStatus === 'Widowed') {
+            return `When did ${sponsorFirstName}'s latest spouse pass away?`;
+          }
+          return field.label;
+        }
+        // Replace placeholder for other fields
+        return field.label.replace('[SponsorFirstName]', currentData['sponsorFirstName'] || '[SponsorFirstName]');
+      })()}
       {field.required && <span className="text-red-500 ml-1">*</span>}
       {field.hasInfo && field.id === 'sponsorInCareOf' && (
         <button
@@ -3020,51 +3520,60 @@ return (
                                         }
                                         return null;
                                       }
-// Add these conditions to your existing conditional logic:
 
-// For certificate fields
-if (field.id === 'sponsorCertNumber' || field.id === 'sponsorCertIssueDate' || field.id === 'sponsorCertIssuePlace') {
-  if (currentData['sponsorHasCertificate'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
+                                      // Handle marital status special cases
+                                      if (field.id === 'sponsorStatusDate') {
+                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                        // Only show for widowed (not divorced, since divorce date is captured in marriage history)
+                                        if (maritalStatus === 'Widowed') {
+                                          return renderField(field);
+                                        }
+                                        return null;
+                                      }
 
-// For physical address - only show if different from mailing
-if (field.id === 'sponsorCurrentAddress') {
-  if (currentData['sponsorMailingDifferent'] === 'Yes') {
-    return renderField(field);
-  }
-  return null;
-}
+                                      if (field.id === 'marriedEligibilityCheck') {
+                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                        if (maritalStatus === 'Married') {
+                                          return renderField(field);
+                                        }
+                                        return null;
+                                      }
 
-// For marital status date
-if (field.id === 'sponsorStatusDate') {
-  if (currentData['sponsorMaritalStatus'] === 'Divorced' || currentData['sponsorMaritalStatus'] === 'Widowed') {
-    return renderField(field);
-  }
-  return null;
-}
+                                      if (field.id === 'sponsorPreviousMarriages') {
+                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                        // Show for all statuses except Married (since married people are in different flow)
+                                        if (maritalStatus !== 'Married') {
+                                          return renderField(field);
+                                        }
+                                        return null;
+                                      }
 
-// For employment fields
-if (field.id.includes('sponsorEmployer') || field.id.includes('sponsorSupervisor') || 
-    field.id.includes('sponsorHR') || field.id === 'sponsorJobTitle' || 
-    field.id === 'sponsorBusinessType' || field.id === 'sponsorEmploymentStartDate' ||
-    field.id === 'sponsorAnnualSalary' || field.id === 'sponsorFullTime') {
-  const empStatus = currentData['sponsorEmploymentStatus'];
-  if (empStatus === 'Employed' || empStatus === 'Self-Employed') {
-    return renderField(field);
-  }
-  return null;
-}
+                                      if (field.id === 'sponsorMarriageHistory') {
+                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                        const previousMarriages = parseInt(currentData['sponsorPreviousMarriages']) || 0;
+                                        // Show marriage history for anyone with previous marriages (Single, Divorced, Widowed)
+                                        if (maritalStatus !== 'Married' && previousMarriages > 0) {
+                                          return renderField(field);
+                                        }
+                                        return null;
+                                      }
 
                                       return renderField(field);
                                     })()
                                   ) : (
-                                    renderField(field)
+                                    <div>
+                                      {renderField(field)}
+                                      {/* Show help text if available */}
+                                      {field.helpText && (
+                                        <p className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                          💡 {field.helpText}
+                                        </p>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         )}
