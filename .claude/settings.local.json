@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start)",
+      "WebSearch",
+      "WebFetch(domain:www.uscis.gov)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

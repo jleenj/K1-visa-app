@@ -17,23 +17,23 @@ const marriageHistorySchema = yup.object().shape({
         .required('Marriage end date is required')
         .min(yup.ref('marriageDate'), 'Marriage end date must be after marriage date')
     })
-  ).test('no-overlapping-dates', 'Marriage dates cannot overlap', function(marriages) {
+  ).test('no-overlapping-dates', 'Marriage dates cannot overlap', function (marriages) {
     if (!marriages || marriages.length < 2) return true;
-    
+
     // Check for overlapping dates
     for (let i = 0; i < marriages.length; i++) {
       for (let j = i + 1; j < marriages.length; j++) {
         const marriage1 = marriages[i];
         const marriage2 = marriages[j];
-        
-        if (marriage1.marriageDate && marriage1.marriageEndDate && 
-            marriage2.marriageDate && marriage2.marriageEndDate) {
-          
+
+        if (marriage1.marriageDate && marriage1.marriageEndDate &&
+          marriage2.marriageDate && marriage2.marriageEndDate) {
+
           const m1Start = new Date(marriage1.marriageDate);
           const m1End = new Date(marriage1.marriageEndDate);
           const m2Start = new Date(marriage2.marriageDate);
           const m2End = new Date(marriage2.marriageEndDate);
-          
+
           // Check if dates overlap
           if (m1Start <= m2End && m1End >= m2Start) {
             return this.createError({
@@ -56,19 +56,19 @@ const K1VisaQuestionnaire = () => {
   const [touchedFields, setTouchedFields] = useState({});
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [showEarlierPlaces, setShowEarlierPlaces] = useState(false);
-  
-// TODO: Expand phone validation for international support
-// Current implementation only supports 5 countries (US, CA, GB, AU, DE)
-// Required improvements:
-// 1. Add comprehensive country list with ISO 3166-1 alpha-2 codes
-// 2. Implement country-specific phone validation rules:
-//    - Min/max digit requirements per country
-//    - Format patterns (use libphonenumber-js or similar library)
-//    - Mobile vs landline number detection where applicable
-// 3. Consider using international phone input library (e.g., react-phone-number-input)
-// 4. Add phone number validation against ITU-T E.164 standard
-// 5. Support for extension numbers and country-specific prefixes
-// Reference: https://github.com/google/libphonenumber for validation rules
+
+  // TODO: Expand phone validation for international support
+  // Current implementation only supports 5 countries (US, CA, GB, AU, DE)
+  // Required improvements:
+  // 1. Add comprehensive country list with ISO 3166-1 alpha-2 codes
+  // 2. Implement country-specific phone validation rules:
+  //    - Min/max digit requirements per country
+  //    - Format patterns (use libphonenumber-js or similar library)
+  //    - Mobile vs landline number detection where applicable
+  // 3. Consider using international phone input library (e.g., react-phone-number-input)
+  // 4. Add phone number validation against ITU-T E.164 standard
+  // 5. Support for extension numbers and country-specific prefixes
+  // Reference: https://github.com/google/libphonenumber for validation rules
   const phoneCountries = [
     { code: 'US', name: 'United States', flag: '🇺🇸', dialCode: '+1', format: '(XXX) XXX-XXXX' },
     { code: 'CA', name: 'Canada', flag: '🇨🇦', dialCode: '+1', format: '(XXX) XXX-XXXX' },
@@ -239,7 +239,7 @@ const K1VisaQuestionnaire = () => {
   };
 
   // Define subsections for the sponsor section
-const sponsorSubsections = [
+  const sponsorSubsections = [
     {
       id: '1.1-personal-info',
       title: '1.1 Personal Information',
@@ -251,48 +251,52 @@ const sponsorSubsections = [
         { id: 'sponsorLastName', label: 'Legal Last Name (Family Name)', type: 'text', required: true },
         { id: 'sponsorFirstName', label: 'Legal First Name (Given Name)', type: 'text', required: true },
         { id: 'sponsorMiddleName', label: 'Middle Name', type: 'text', required: false },
-        
+
         // Other Names
         { id: 'sponsorOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false },
-        
+
         // Basic Information
         { id: 'sponsorDOB', label: '[SponsorFirstName]\'s Date of Birth', type: 'date', required: true },
         { id: 'sponsorBirthLocation', label: 'Place of Birth', type: 'birth-location', required: true },
         { id: 'sponsorSex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
         { id: 'sponsorSSN', label: 'Social Security Number', type: 'ssn', required: true },
-        
+
         // Ethnicity and Race (NEW FIELDS)
-        { id: 'sponsorEthnicity', label: 'Ethnicity', type: 'select', 
-          options: ['Hispanic or Latino', 'Not Hispanic or Latino'], 
-          required: true 
+        {
+          id: 'sponsorEthnicity', label: 'Ethnicity', type: 'select',
+          options: ['Hispanic or Latino', 'Not Hispanic or Latino'],
+          required: true
         },
-        { id: 'sponsorRace', label: 'Race (Select all that apply)', type: 'multi-select', 
-          options: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White'], 
-          required: true 
+        {
+          id: 'sponsorRace', label: 'Race (Select all that apply)', type: 'multi-select',
+          options: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White'],
+          required: true
         },
-        
+
         // Physical Description
         { id: 'sponsorHeight', label: 'Height', type: 'height-converter', required: true },
         { id: 'sponsorWeight', label: 'Weight', type: 'weight', required: true },
-        { id: 'sponsorEyeColor', label: 'Eye Color', type: 'select', 
-          options: ['Black', 'Blue', 'Brown', 'Gray', 'Green', 'Hazel', 'Maroon', 'Pink', 'Unknown/Other'], 
-          required: true 
+        {
+          id: 'sponsorEyeColor', label: 'Eye Color', type: 'select',
+          options: ['Black', 'Blue', 'Brown', 'Gray', 'Green', 'Hazel', 'Maroon', 'Pink', 'Unknown/Other'],
+          required: true
         },
-        { id: 'sponsorHairColor', label: 'Hair Color', type: 'select', 
-          options: ['Bald (No hair)', 'Black', 'Blonde', 'Brown', 'Gray', 'Red', 'Sandy', 'White', 'Unknown/Other'], 
-          required: true 
+        {
+          id: 'sponsorHairColor', label: 'Hair Color', type: 'select',
+          options: ['Bald (No hair)', 'Black', 'Blonde', 'Brown', 'Gray', 'Red', 'Sandy', 'White', 'Unknown/Other'],
+          required: true
         },
-        
+
         // Account Numbers
         { id: 'sponsorANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
         { id: 'sponsorUSCISAccount', label: 'USCIS Online Account Number (if any)', type: 'text', required: false },
 
         // Certificates
         // U.S. Citizenship Information
-{ id: 'sponsorCitizenshipThrough', label: 'How did you obtain U.S. citizenship?', type: 'citizenship-method', required: true },
+        { id: 'sponsorCitizenshipThrough', label: 'How did you obtain U.S. citizenship?', type: 'citizenship-method', required: true },
 
-// Certificates
-{ id: 'sponsorHasCertificate', label: 'Do you have a Certificate of Naturalization or Certificate of Citizenship?', type: 'cert-question', required: true },
+        // Certificates
+        { id: 'sponsorHasCertificate', label: 'Do you have a Certificate of Naturalization or Certificate of Citizenship?', type: 'cert-question', required: true },
         { id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: true, conditional: true },
         { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: true, conditional: true },
         { id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'cert-place', required: true, conditional: true },
@@ -305,8 +309,8 @@ const sponsorSubsections = [
       description: 'Phone numbers, email, and contact preferences',
       questionCount: 4,
       fields: [
-        { id: 'sponsorEmail', label: 'Email Address', type: 'smart-email', required: true },   
-        { id: 'sponsorNewsletter', label: 'Keep me informed about immigration policy changes, news, and updates that may affect my case', type: 'checkbox', required: false, hideLabel: true },  
+        { id: 'sponsorEmail', label: 'Email Address', type: 'smart-email', required: true },
+        { id: 'sponsorNewsletter', label: 'Keep me informed about immigration policy changes, news, and updates that may affect my case', type: 'checkbox', required: false, hideLabel: true },
         { id: 'sponsorDaytimePhone', label: 'Daytime Phone Number', type: 'international-phone', required: true },
         { id: 'sponsorMobilePhone', label: 'Mobile Phone Number', type: 'international-phone', required: false }
       ]
@@ -321,23 +325,23 @@ const sponsorSubsections = [
       description: 'Mailing, current, and previous addresses',
       questionCount: 8,
       fields: [
-// Mailing Address (FIRST)
-{ id: 'sponsorMailingAddress', label: 'Mailing Address', type: 'address-with-careof', required: true },
+        // Mailing Address (FIRST)
+        { id: 'sponsorMailingAddress', label: 'Mailing Address', type: 'address-with-careof', required: true },
 
-// Check if physical is different
-{ id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['No', 'Yes'], required: true },
+        // Check if physical is different
+        { id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['No', 'Yes'], required: true },
 
-// Physical Address (conditional)
-{ id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address', required: true, conditional: true },
+        // Physical Address (conditional)
+        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address', required: true, conditional: true },
 
-// Move-in date (shows for mailing address if same, physical if different)
-{ id: 'sponsorMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
+        // Move-in date (shows for mailing address if same, physical if different)
+        { id: 'sponsorMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
 
-// Address History (if needed based on move-in date)
-{ id: 'sponsorAddressHistory', label: 'Previous Addresses (Past 5 Years)', type: 'conditional-address-history', required: true },
+        // Address History (if needed based on move-in date)
+        { id: 'sponsorAddressHistory', label: 'Previous Addresses (Past 5 Years)', type: 'conditional-address-history', required: true },
 
-// Places lived since age 18
-{ id: 'sponsorPlacesResided', label: 'Places Lived Since Age 18', type: 'states-countries-list', required: true }
+        // Places lived since age 18
+        { id: 'sponsorPlacesResided', label: 'Places Lived Since Age 18', type: 'states-countries-list', required: true }
       ]
     }
   ];
@@ -350,16 +354,18 @@ const sponsorSubsections = [
       description: 'Current and previous marriages',
       questionCount: 4,
       fields: [
-        { id: 'sponsorMaritalStatus', label: 'Current Marital Status', type: 'select', 
-          options: ['Single', 'Divorced', 'Widowed', 'Married'], 
+        {
+          id: 'sponsorMaritalStatus', label: 'Current Marital Status', type: 'select',
+          options: ['Single', 'Divorced', 'Widowed', 'Married'],
           required: true,
           helpText: 'Choose based on how your most recent marriage ended. For example, if you were widowed then remarried and divorced, select "Divorced".'
         },
         { id: 'marriedEligibilityCheck', type: 'married-eligibility-check', hideLabel: true, required: false, conditional: true },
         { id: 'sponsorStatusDate', label: 'Date', type: 'date', required: false, conditional: true },
-        { id: 'sponsorPreviousMarriages', label: 'How many times has [SponsorFirstName] been previously married?', type: 'select', 
-          options: ['0', '1', '2', '3', '4', '5+'], 
-          required: true 
+        {
+          id: 'sponsorPreviousMarriages', label: 'How many times has [SponsorFirstName] been previously married?', type: 'select',
+          options: ['0', '1', '2', '3', '4', '5+'],
+          required: true
         },
         { id: 'sponsorMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, conditional: true }
       ]
@@ -372,29 +378,32 @@ const sponsorSubsections = [
       title: '1.5 Family Background',
       icon: Users,
       description: 'Information about your parents',
-      questionCount: 18,
+      helpText: 'We\'re asking about your legal parents here (if you were adopted, that means your adoptive parents). We understand that gathering parent information can sometimes be challenging, but it\'s worth taking time to collect what you can. Try reaching out to family members, checking old records, or contacting adoption agencies if applicable. "Unknown" is completely acceptable when information truly isn\'t available after you\'ve made a reasonable effort - just know that USCIS may ask you to explain how you tried to find the information.',
+      questionCount: 17,
       fields: [
-        // Father's Information
-        { id: 'sponsorFatherLastName', label: "Father's Last Name at Birth", type: 'text', required: true },
-        { id: 'sponsorFatherFirstName', label: "Father's First Name", type: 'text', required: true },
-        { id: 'sponsorFatherMiddleName', label: "Father's Middle Name", type: 'text', required: false },
-        { id: 'sponsorFatherDOB', label: "Father's Date of Birth", type: 'date', required: true },
-        { id: 'sponsorFatherBirthCity', label: "Father's City of Birth", type: 'text', required: true },
-        { id: 'sponsorFatherBirthCountry', label: "Father's Country of Birth", type: 'country', required: true },
-        { id: 'sponsorFatherCurrentCity', label: "Father's Current City of Residence", type: 'text', required: true },
-        { id: 'sponsorFatherCurrentCountry', label: "Father's Current Country of Residence", type: 'country', required: true },
-        { id: 'sponsorFatherLiving', label: 'Is your father living?', type: 'select', options: ['Yes', 'No'], required: true },
-        
-        // Mother's Information
-        { id: 'sponsorMotherMaidenName', label: "Mother's Last Name at Birth (Maiden Name)", type: 'text', required: true },
-        { id: 'sponsorMotherFirstName', label: "Mother's First Name", type: 'text', required: true },
-        { id: 'sponsorMotherMiddleName', label: "Mother's Middle Name", type: 'text', required: false },
-        { id: 'sponsorMotherDOB', label: "Mother's Date of Birth", type: 'date', required: true },
-        { id: 'sponsorMotherBirthCity', label: "Mother's City of Birth", type: 'text', required: true },
-        { id: 'sponsorMotherBirthCountry', label: "Mother's Country of Birth", type: 'country', required: true },
-        { id: 'sponsorMotherCurrentCity', label: "Mother's Current City of Residence", type: 'text', required: true },
-        { id: 'sponsorMotherCurrentCountry', label: "Mother's Current Country of Residence", type: 'country', required: true },
-        { id: 'sponsorMotherLiving', label: 'Is your mother living?', type: 'select', options: ['Yes', 'No'], required: true }
+        { id: 'sponsorParentCount', label: 'How many parents do you have/have you had?', type: 'select', options: ['0', '1', '2'], required: true, helpText: '• "2" - Most people will select this since they have at least some information about both parents\n\n• "1" - Choose this if you know about one parent but the other is truly unknown despite your best efforts to find out\n\n• "0" - This is quite rare and would be for situations like institutional care where no parent information exists at all' },
+
+        // Parent 1's Information
+        { id: 'sponsorParent1Header', type: 'section-header', label: "Parent 1's Information", conditional: true },
+        { id: 'sponsorParent1FirstName', label: "Parent 1's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'sponsorParent1MiddleName', label: "Parent 1's Middle Name", type: 'text', required: false, conditional: true },
+        { id: 'sponsorParent1LastName', label: "Parent 1's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable', helpText: 'USCIS requires a best-effort basis for finding this information - such as reaching out to family members or checking old records. "Unknown" is also allowed when information isn\'t available despite these efforts.' },
+        { id: 'sponsorParent1DOB', label: "Parent 1's Date of Birth", type: 'date', required: true, conditional: true },
+        { id: 'sponsorParent1Sex', label: "Parent 1's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
+        { id: 'sponsorParent1BirthCountry', label: "Parent 1's Country of Birth", type: 'country', required: true, conditional: true },
+        { id: 'sponsorParent1ResidenceCountry', label: "Parent 1's Country of Residence", type: 'country', required: true, conditional: true },
+        { id: 'sponsorParent1ResidenceCity', label: "Parent 1's City/Town/Village of Residence", type: 'text', required: true, conditional: true, helpText: '• Enter the most specific location where your parent resides. For cities, use the official city name. For small towns or villages, use that name even if it\'s very small.\n\n• If your parent is deceased, please enter their last known residence before they passed away' },
+
+        // Parent 2's Information  
+        { id: 'sponsorParent2Header', type: 'section-header', label: "Parent 2's Information", conditional: true },
+        { id: 'sponsorParent2FirstName', label: "Parent 2's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'sponsorParent2MiddleName', label: "Parent 2's Middle Name", type: 'text', required: false, conditional: true },
+        { id: 'sponsorParent2LastName', label: "Parent 2's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable', helpText: 'USCIS requires a best-effort basis for finding this information - such as reaching out to family members or checking old records. "Unknown" is completely fine when information truly isn\'t available despite these efforts.' },
+        { id: 'sponsorParent2DOB', label: "Parent 2's Date of Birth", type: 'date', required: true, conditional: true },
+        { id: 'sponsorParent2Sex', label: "Parent 2's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
+        { id: 'sponsorParent2BirthCountry', label: "Parent 2's Country of Birth", type: 'country', required: true, conditional: true },
+        { id: 'sponsorParent2ResidenceCountry', label: "Parent 2's Country of Residence", type: 'country', required: true, conditional: true },
+        { id: 'sponsorParent2ResidenceCity', label: "Parent 2's City/Town/Village of Residence", type: 'text', required: true, conditional: true, helpText: '• Enter the most specific location where your parent resides. For cities, use the official city name. For small towns or villages, use that name even if it\'s very small.\n\n• If your parent is deceased, please enter their last known residence before they passed away' }
       ]
     }
   ];
@@ -404,33 +413,46 @@ const sponsorSubsections = [
       id: '1.6-employment',
       title: '1.6 Employment & Work History',
       icon: FileText,
-      description: 'Current and previous employment information',
-      questionCount: 15,
+      description: 'Employment history for the last 5 years (I-129F Items 13-20)',
+      helpText: 'USCIS requires a complete 5-year history with no unexplained gaps. You must account for ALL periods - including employment, unemployment, education, family care, etc. Having gaps won\'t cause petition denial, but leaving them unexplained may trigger a Request for Evidence (RFE).',
+      questionCount: 8,
       fields: [
-        { id: 'sponsorEmploymentStatus', label: 'Current Employment Status', type: 'select', 
-          options: ['Employed', 'Self-Employed', 'Retired', 'Unemployed', 'Student', 'Other'], 
-          required: true 
-        },
-        
-        // If Employed or Self-Employed (conditional fields)
-        { id: 'sponsorEmployerName', label: 'Employer/Business Name', type: 'text', required: false, conditional: true },
-        { id: 'sponsorEmployerAddress', label: 'Employer/Business Address', type: 'address', required: false, conditional: true },
-        { id: 'sponsorEmployerPhone', label: 'Employer Phone Number', type: 'international-phone', required: false, conditional: true },
-        { id: 'sponsorSupervisorName', label: 'Supervisor Name', type: 'text', required: false, conditional: true },
-        { id: 'sponsorSupervisorTitle', label: 'Supervisor Title', type: 'text', required: false, conditional: true },
-        { id: 'sponsorSupervisorPhone', label: 'Supervisor Phone', type: 'international-phone', required: false, conditional: true },
-        { id: 'sponsorHRPhone', label: 'HR Department Phone', type: 'international-phone', required: false, conditional: true },
-        { id: 'sponsorJobTitle', label: 'Your Job Title/Occupation', type: 'text', required: false, conditional: true },
-        { id: 'sponsorBusinessType', label: 'Type of Business/Industry', type: 'text', required: false, conditional: true },
-        { id: 'sponsorEmploymentStartDate', label: 'Date Employment Began', type: 'date', required: false, conditional: true },
-        { id: 'sponsorAnnualSalary', label: 'Annual Salary (USD)', type: 'currency', required: false, conditional: true },
-        { id: 'sponsorFullTime', label: 'Is this full-time employment?', type: 'select', options: ['Yes', 'No'], required: false, conditional: true },
-        
-        // Employment Duration - uses your existing dynamic-employment-duration
-        { id: 'sponsorEmploymentDuration', label: 'Employment Duration', type: 'dynamic-employment-duration', required: false, conditional: true },
-        
-        // Employment History - uses your existing conditional-employment-history
-        { id: 'sponsorEmploymentHistory', label: 'Previous Employment (Last 5 Years)', type: 'conditional-employment-history', required: true }
+        { id: 'sponsorHasEmployment', label: 'Have you been employed in the last 5 years?', type: 'select', options: ['Yes', 'No'], required: true, helpText: 'This includes any job, self-employment, or business ownership in the past 5 years. If you answer "No," you\'ll need to explain what you were doing (e.g., "Student," "Homemaker," "Stay-at-home parent," "Unemployed," "Retired," etc.)' },
+
+        // First Employer (always shown when has employment = Yes)
+        { id: 'sponsorEmployer1Header', type: 'section-header', label: 'Employer 1 (Current or Most Recent)', conditional: true },
+        { id: 'sponsorEmployer1Name', label: 'Company/Organization Name', type: 'text', required: true, conditional: true },
+        { id: 'sponsorEmployer1Address', label: 'Employer Address', type: 'address', required: true, conditional: true },
+        { id: 'sponsorEmployer1Occupation', label: 'Your Job Title/Occupation', type: 'text', required: true, conditional: true },
+        { id: 'sponsorEmployer1StartDate', label: 'Employment Start Date', type: 'date', required: true, conditional: true },
+        { id: 'sponsorEmployer1EndDate', label: 'Employment End Date', type: 'date-with-current-job', required: true, conditional: true, helpText: 'Select the end date or mark as current job' },
+
+        // Add more employers option
+        { id: 'sponsorHasMoreEmployers', label: 'Do you have other employers to add?', type: 'select', options: ['No', 'Yes'], required: false, conditional: true },
+
+        // Employer 2 (shown when has more employers = Yes)
+        { id: 'sponsorEmployer2Header', type: 'section-header', label: 'Employer 2', conditional: true },
+        { id: 'sponsorEmployer2Name', label: 'Company/Organization Name', type: 'text', required: true, conditional: true },
+        { id: 'sponsorEmployer2Address', label: 'Employer Address', type: 'address', required: true, conditional: true },
+        { id: 'sponsorEmployer2Occupation', label: 'Your Job Title/Occupation', type: 'text', required: true, conditional: true },
+        { id: 'sponsorEmployer2StartDate', label: 'Employment Start Date', type: 'date', required: true, conditional: true },
+        { id: 'sponsorEmployer2EndDate', label: 'Employment End Date', type: 'date', required: true, conditional: true },
+
+        // Add even more employers button
+        { id: 'sponsorAddMoreEmployersButton', label: 'Add Another Employer', type: 'add-employer-button', required: false, conditional: true },
+
+        // Dynamic employer fields (will be rendered when employerCount > 2)
+        { id: 'sponsorDynamicEmployers', label: 'Additional Employers', type: 'dynamic-employers', required: false, conditional: true },
+
+        // Non-employment periods (for those who answered No to employment)
+        { id: 'sponsorNonEmploymentHeader', type: 'section-header', label: 'Activity During the Last 5 Years', conditional: true },
+        { id: 'sponsorNonEmploymentActivity', label: 'What was your primary activity during this period?', type: 'select', options: ['Student', 'Homemaker', 'Stay-at-home parent', 'Unemployed', 'Retired', 'Disabled/Medical leave', 'Military service', 'Other'], required: true, conditional: true },
+        { id: 'sponsorNonEmploymentOther', label: 'Please specify other activity', type: 'text', required: true, conditional: true },
+        { id: 'sponsorNonEmploymentStartDate', label: 'Start Date of this activity', type: 'date', required: true, conditional: true },
+        { id: 'sponsorNonEmploymentEndDate', label: 'End Date of this activity', type: 'date-with-current-activity', required: true, conditional: true, helpText: 'Enter end date or mark as current activity' },
+
+        // Gap detection and explanation
+        { id: 'sponsorGapDetection', label: 'Employment History Gap Analysis', type: 'employment-gap-detector', required: false, conditional: true, helpText: 'We\'ll analyze your employment dates to identify any gaps that need explanation. Common reasons include: Student, Homemaker, Stay-at-home parent, Unemployed (job searching), Medical leave, Between jobs, Military service, Retired, or Other circumstances.' }
       ]
     }
   ];
@@ -482,46 +504,46 @@ const sponsorSubsections = [
     }
   ];
 
-const sections = [
-  {
-    id: 'sponsor-section-1',
-    title: 'Section 1: U.S. Citizen Sponsor - Complete Profile',
-    subtitle: 'All sponsor information required for K-1 visa',
-    questionCount: 150,
-    role: 'sponsor',
-    hasSubsections: true,
-    subsections: [
-      ...sponsorSubsections,
-      ...sponsorAddressSubsections,
-      ...sponsorMaritalSubsections,
-      ...sponsorFamilySubsections,
-      ...sponsorEmploymentSubsections,
-      ...sponsorFinancialSubsections,
-      ...sponsorPetitionsSubsections,
-      ...sponsorLegalSubsections
-    ]
-  },
-  {
-    id: 'beneficiary-personal',
-    title: 'Beneficiary Identity & Demographics',
-    subtitle: 'Foreign fiancé(e) core identifying information',
-    questionCount: 10,
-    role: 'beneficiary',
-    fields: [
-      { id: 'beneficiaryLastName', label: 'Legal Last Name', type: 'text', required: true },
-      { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
-      { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
-      { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
-      { id: 'beneficiaryDOB', label: '[BeneficiaryFirstName]\'s Date of Birth', type: 'date', required: true },
-      { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
-      { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
-      { id: 'beneficiaryBirthCountry', label: '[BeneficiaryFirstName]\'s Country of Birth', type: 'text', required: true },
-      { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
-      { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
-    ]
-  }
-  // Add your other sections here if you have them
-];
+  const sections = [
+    {
+      id: 'sponsor-section-1',
+      title: 'Section 1: U.S. Citizen Sponsor - Complete Profile',
+      subtitle: 'All sponsor information required for K-1 visa',
+      questionCount: 150,
+      role: 'sponsor',
+      hasSubsections: true,
+      subsections: [
+        ...sponsorSubsections,
+        ...sponsorAddressSubsections,
+        ...sponsorMaritalSubsections,
+        ...sponsorFamilySubsections,
+        ...sponsorEmploymentSubsections,
+        ...sponsorFinancialSubsections,
+        ...sponsorPetitionsSubsections,
+        ...sponsorLegalSubsections
+      ]
+    },
+    {
+      id: 'beneficiary-personal',
+      title: 'Beneficiary Identity & Demographics',
+      subtitle: 'Foreign fiancé(e) core identifying information',
+      questionCount: 10,
+      role: 'beneficiary',
+      fields: [
+        { id: 'beneficiaryLastName', label: 'Legal Last Name', type: 'text', required: true },
+        { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
+        { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
+        { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
+        { id: 'beneficiaryDOB', label: '[BeneficiaryFirstName]\'s Date of Birth', type: 'date', required: true },
+        { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
+        { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
+        { id: 'beneficiaryBirthCountry', label: '[BeneficiaryFirstName]\'s Country of Birth', type: 'text', required: true },
+        { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
+        { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
+      ]
+    }
+    // Add your other sections here if you have them
+  ];
 
   const toggleSection = (index) => {
     setExpandedSections(prev => ({
@@ -538,276 +560,349 @@ const sections = [
     }));
   };
 
-const updateField = (field, value) => {
-  setCurrentData(prev => ({
-    ...prev,
-    [field]: value
-  }));
-};
-  
+  const updateField = (field, value) => {
+    setCurrentData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Function to detect employment gaps
+  const detectEmploymentGaps = (data) => {
+    const gaps = [];
+    const employmentPeriods = [];
+
+    // Collect all employment periods
+    const employer1Start = data['sponsorEmployer1StartDate'];
+    const employer1End = data['sponsorEmployer1EndDate'];
+    const employer1Current = data['sponsorEmployer1EndDate_current'];
+
+    const employer2Start = data['sponsorEmployer2StartDate'];
+    const employer2End = data['sponsorEmployer2EndDate'];
+
+    if (employer1Start) {
+      employmentPeriods.push({
+        start: new Date(employer1Start),
+        end: employer1Current ? new Date() : (employer1End ? new Date(employer1End) : new Date())
+      });
+    }
+
+    if (employer2Start) {
+      employmentPeriods.push({
+        start: new Date(employer2Start),
+        end: employer2End ? new Date(employer2End) : new Date()
+      });
+    }
+
+    if (employmentPeriods.length === 0) {
+      return gaps;
+    }
+
+    // Sort periods by start date
+    employmentPeriods.sort((a, b) => a.start - b.start);
+
+    // Calculate 5 years ago from today
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+
+    // Check for gap before first employment
+    const firstPeriod = employmentPeriods[0];
+    if (firstPeriod.start > fiveYearsAgo) {
+      gaps.push({
+        startDate: fiveYearsAgo.toISOString().split('T')[0],
+        endDate: firstPeriod.start.toISOString().split('T')[0]
+      });
+    }
+
+    // Check for gaps between employment periods
+    for (let i = 0; i < employmentPeriods.length - 1; i++) {
+      const currentEnd = employmentPeriods[i].end;
+      const nextStart = employmentPeriods[i + 1].start;
+
+      // If there's a gap of more than 1 day between periods
+      if (nextStart - currentEnd > 24 * 60 * 60 * 1000) {
+        gaps.push({
+          startDate: currentEnd.toISOString().split('T')[0],
+          endDate: nextStart.toISOString().split('T')[0]
+        });
+      }
+    }
+
+    return gaps;
+  };
+
   const renderField = (field) => {
     const value = currentData[field.id] || '';
 
     switch (field.type) {
 
-case 'states-countries-list':
-  const sponsorDOBForList = currentData['sponsorDOB'] || '';
-  
-  // If no DOB provided, don't show anything
-  if (!sponsorDOBForList) {
-    return null;
-  }
-  
-  // Calculate age
-  let userAge = null;
-  const today = new Date();
-  const birthDate = new Date(sponsorDOBForList);
-  userAge = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    userAge--;
-  }
-  
-  // If 23 or younger, the 5-year history already covers since age 18
-  if (userAge <= 23) {
-    return (
-      <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded p-3">
-        <p className="font-medium">✅ Your 5-year address history already covers all places since age 18</p>
-        <p className="text-xs mt-1">No additional information needed for this section.</p>
-      </div>
-    );
-  }
-  
-// Auto-extract states/countries from existing address data
-  const extractedPlaces = new Set();
-  
-  // From current physical address (could be mailing or separate physical)
-  const physicalAddr = currentData['sponsorMailingDifferent'] === 'Yes' 
-    ? (currentData['sponsorCurrentAddress'] || {})
-    : (currentData['sponsorMailingAddress'] || {});
-  
-  if (physicalAddr.country === 'United States' && physicalAddr.state) {
-    extractedPlaces.add(`${physicalAddr.state}, USA`);
-  } else if (physicalAddr.country && physicalAddr.country !== 'United States') {
-    extractedPlaces.add(physicalAddr.country);
-  }
-  
-  // From address history
-  const addrHistory = currentData['sponsorAddressHistory'] || [];
-  addrHistory.forEach(addr => {
-    if (addr.country === 'United States' && addr.state) {
-      extractedPlaces.add(`${addr.state}, USA`);
-    } else if (addr.country && addr.country !== 'United States') {
-      extractedPlaces.add(addr.country);
-    }
-  });
-  
-  // From mailing address if different
-  if (currentData['sponsorMailingDifferent'] === 'Yes') {
-    const mailingAddr = currentData['sponsorMailingAddress'] || {};
-    if (mailingAddr.country === 'United States' && mailingAddr.state) {
-      extractedPlaces.add(`${mailingAddr.state}, USA`);
-    } else if (mailingAddr.country && mailingAddr.country !== 'United States') {
-      extractedPlaces.add(mailingAddr.country);
-    }
-  }
-  
-  // User's additional places (from before the 5-year period)
-const additionalPlaces = currentData[field.id] || [];
+      case 'states-countries-list':
+        const sponsorDOBForList = currentData['sponsorDOB'] || '';
 
-// Track whether user needs to add earlier places
-const showEarlierPlaces = currentData[`${field.id}_answer`] === 'yes';
+        // If no DOB provided, don't show anything
+        if (!sponsorDOBForList) {
+          return null;
+        }
 
-// Calculate date ranges
-const currentYear = today.getFullYear();
-const currentMonth = today.getMonth() + 1;
-const currentDay = today.getDate();
+        // Calculate age
+        let userAge = null;
+        const today = new Date();
+        const birthDate = new Date(sponsorDOBForList);
+        userAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          userAge--;
+        }
 
-// Date when user turned 18
-const turned18Date = new Date(birthDate);
-turned18Date.setFullYear(birthDate.getFullYear() + 18);
-const turned18DateStr = `${turned18Date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
-
-// Date 5 years ago
-const fiveYearsAgoDate = new Date(today);
-fiveYearsAgoDate.setFullYear(currentYear - 5);
-const fiveYearsAgoStr = `${fiveYearsAgoDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
-
-// Current date string
-const currentDateStr = `${today.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
-
-return (
-  <div className="space-y-4">
-    {/* Show extracted places */}
-    {extractedPlaces.size > 0 && (
-      <div className="bg-green-50 border border-green-200 rounded p-3">
-        <p className="text-sm font-medium text-green-800 mb-2">
-          ✅ We have these locations from your addresses:
-        </p>
-        <div className="space-y-1">
-          {Array.from(extractedPlaces).map((place, index) => (
-            <div key={index} className="text-sm text-green-700">
-              • {place} ({fiveYearsAgoStr} - {currentDateStr})
+        // If 23 or younger, the 5-year history already covers since age 18
+        if (userAge <= 23) {
+          return (
+            <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded p-3">
+              <p className="font-medium">✅ Your 5-year address history already covers all places since age 18</p>
+              <p className="text-xs mt-1">No additional information needed for this section.</p>
             </div>
-          ))}
-        </div>
-      </div>
-    )}
-    
-{/* Simple Yes/No Question */}
-    <div className="space-y-3">
-      <p className="text-sm font-medium text-gray-700">
-        Did you live anywhere else between {turned18DateStr} - {fiveYearsAgoStr}?
-      </p>
+          );
+        }
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            updateField(`${field.id}_answer`, 'yes');
-          }}
-          className={`px-4 py-2 rounded border transition-colors ${
-            showEarlierPlaces 
-              ? 'bg-blue-500 text-white border-blue-500' 
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          Yes
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            updateField(`${field.id}_answer`, 'no');
-            updateField(field.id, []); // Clear any added places
-          }}
-          className={`px-4 py-2 rounded border transition-colors ${
-            !showEarlierPlaces && currentData[`${field.id}_answer`] === 'no'
-              ? 'bg-blue-500 text-white border-blue-500' 
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          No - same places
-        </button>
-      </div>
-    </div>
-    
-    {/* Only show fields if they answered Yes */}
-    {showEarlierPlaces && (
-      <div className="space-y-3 border-l-4 border-blue-400 pl-4">
-        <p className="text-sm text-gray-600">
-          Add all states and countries where you lived between {turned18DateStr} - {fiveYearsAgoStr}:
-        </p>
-        
-        {additionalPlaces.map((place, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <select
-              className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
-              value={place.type || ''}
-              onChange={(e) => {
-                const newPlaces = [...additionalPlaces];
-                newPlaces[index] = { ...place, type: e.target.value, location: '' };
-                updateField(field.id, newPlaces);
-              }}
-            >
-              <option value="">Select type...</option>
-              <option value="us-state">U.S. State</option>
-              <option value="foreign-country">Foreign Country</option>
-            </select>
-            
-            {place.type === 'us-state' && (
-              <select
-                className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                value={place.location || ''}
-                onChange={(e) => {
-                  const newPlaces = [...additionalPlaces];
-                  newPlaces[index] = { ...place, location: e.target.value };
-                  updateField(field.id, newPlaces);
-                }}
-              >
-                <option value="">Select state...</option>
-                {addressFormats['United States'].states.map(state => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
+        // Auto-extract states/countries from existing address data
+        const extractedPlaces = new Set();
+
+        // From current physical address (could be mailing or separate physical)
+        const physicalAddr = currentData['sponsorMailingDifferent'] === 'Yes'
+          ? (currentData['sponsorCurrentAddress'] || {})
+          : (currentData['sponsorMailingAddress'] || {});
+
+        if (physicalAddr.country === 'United States' && physicalAddr.state) {
+          extractedPlaces.add(`${physicalAddr.state}, USA`);
+        } else if (physicalAddr.country && physicalAddr.country !== 'United States') {
+          extractedPlaces.add(physicalAddr.country);
+        }
+
+        // From address history
+        const addrHistory = currentData['sponsorAddressHistory'] || [];
+        addrHistory.forEach(addr => {
+          if (addr.country === 'United States' && addr.state) {
+            extractedPlaces.add(`${addr.state}, USA`);
+          } else if (addr.country && addr.country !== 'United States') {
+            extractedPlaces.add(addr.country);
+          }
+        });
+
+        // From mailing address if different
+        if (currentData['sponsorMailingDifferent'] === 'Yes') {
+          const mailingAddr = currentData['sponsorMailingAddress'] || {};
+          if (mailingAddr.country === 'United States' && mailingAddr.state) {
+            extractedPlaces.add(`${mailingAddr.state}, USA`);
+          } else if (mailingAddr.country && mailingAddr.country !== 'United States') {
+            extractedPlaces.add(mailingAddr.country);
+          }
+        }
+
+        // User's additional places (from before the 5-year period)
+        const additionalPlaces = currentData[field.id] || [];
+
+        // Track whether user needs to add earlier places
+        const showEarlierPlaces = currentData[`${field.id}_answer`] === 'yes';
+
+        // Calculate date ranges
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
+
+        // Date when user turned 18
+        const turned18Date = new Date(birthDate);
+        turned18Date.setFullYear(birthDate.getFullYear() + 18);
+        const turned18DateStr = `${turned18Date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+
+        // Date 5 years ago
+        const fiveYearsAgoDate = new Date(today);
+        fiveYearsAgoDate.setFullYear(currentYear - 5);
+        const fiveYearsAgoStr = `${fiveYearsAgoDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+
+        // Current date string
+        const currentDateStr = `${today.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+
+        return (
+          <div className="space-y-4">
+            {/* Show extracted places */}
+            {extractedPlaces.size > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded p-3">
+                <p className="text-sm font-medium text-green-800 mb-2">
+                  ✅ We have these locations from your addresses:
+                </p>
+                <div className="space-y-1">
+                  {Array.from(extractedPlaces).map((place, index) => (
+                    <div key={index} className="text-sm text-green-700">
+                      • {place} ({fiveYearsAgoStr} - {currentDateStr})
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-            
-            {place.type === 'foreign-country' && (
-              <select
-                className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                value={place.location || ''}
-                onChange={(e) => {
-                  const newPlaces = [...additionalPlaces];
-                  newPlaces[index] = { ...place, location: e.target.value };
-                  updateField(field.id, newPlaces);
-                }}
-              >
-                <option value="">Select country...</option>
-                {phoneCountries.map(c => (
-                  <option key={c.code} value={c.name}>
-                    {c.flag} {c.name}
-                  </option>
+
+            {/* Simple Yes/No Question */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-gray-700">
+                Did you live anywhere else between {turned18DateStr} - {fiveYearsAgoStr}?
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField(`${field.id}_answer`, 'yes');
+                  }}
+                  className={`px-4 py-2 rounded border transition-colors ${showEarlierPlaces
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField(`${field.id}_answer`, 'no');
+                    updateField(field.id, []); // Clear any added places
+                  }}
+                  className={`px-4 py-2 rounded border transition-colors ${!showEarlierPlaces && currentData[`${field.id}_answer`] === 'no'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                  No - same places
+                </button>
+              </div>
+            </div>
+
+            {/* Only show fields if they answered Yes */}
+            {showEarlierPlaces && (
+              <div className="space-y-3 border-l-4 border-blue-400 pl-4">
+                <p className="text-sm text-gray-600">
+                  Add all states and countries where you lived between {turned18DateStr} - {fiveYearsAgoStr}:
+                </p>
+
+                {additionalPlaces.map((place, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <select
+                      className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={place.type || ''}
+                      onChange={(e) => {
+                        const newPlaces = [...additionalPlaces];
+                        newPlaces[index] = { ...place, type: e.target.value, location: '' };
+                        updateField(field.id, newPlaces);
+                      }}
+                    >
+                      <option value="">Select type...</option>
+                      <option value="us-state">U.S. State</option>
+                      <option value="foreign-country">Foreign Country</option>
+                    </select>
+
+                    {place.type === 'us-state' && (
+                      <select
+                        className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={place.location || ''}
+                        onChange={(e) => {
+                          const newPlaces = [...additionalPlaces];
+                          newPlaces[index] = { ...place, location: e.target.value };
+                          updateField(field.id, newPlaces);
+                        }}
+                      >
+                        <option value="">Select state...</option>
+                        {addressFormats['United States'].states.map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                    )}
+
+                    {place.type === 'foreign-country' && (
+                      <select
+                        className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={place.location || ''}
+                        onChange={(e) => {
+                          const newPlaces = [...additionalPlaces];
+                          newPlaces[index] = { ...place, location: e.target.value };
+                          updateField(field.id, newPlaces);
+                        }}
+                      >
+                        <option value="">Select country...</option>
+                        {phoneCountries.map(c => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newPlaces = additionalPlaces.filter((_, i) => i !== index);
+                        updateField(field.id, newPlaces);
+                      }}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 ))}
-              </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField(field.id, [...additionalPlaces, { type: '', location: '' }]);
+                  }}
+                  className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors"
+                >
+                  + Add State or Country
+                </button>
+              </div>
             )}
-            
-            <button
-              type="button"
-              onClick={() => {
-                const newPlaces = additionalPlaces.filter((_, i) => i !== index);
-                updateField(field.id, newPlaces);
-              }}
-              className="text-red-600 hover:text-red-800"
-            >
-              Remove
-            </button>
           </div>
-        ))}
-        
-        <button
-          type="button"
-          onClick={() => {
-            updateField(field.id, [...additionalPlaces, { type: '', location: '' }]);
-          }}
-          className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors"
-        >
-          + Add State or Country
-        </button>
-      </div>
-    )}
-  </div>
-);
+        );
 
       case 'select':
-  const isSelectFieldTouched = touchedFields && touchedFields[field.id];
-  const showSelectError = isSelectFieldTouched && field.required && (!value || value === '');
-  
-  return (
-    <div>
-      <select
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showSelectError ? 'border-red-500' : ''
-        }`}
-        value={value}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => updateField(field.id, e.target.value)}
-      >
-        <option value="">Select...</option>
-        {field.options.map(opt => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-      {showSelectError && (
-        <div className="mt-1 text-sm text-red-600">
-          ⚠️ Please select an option
-        </div>
-      )}
-    </div>
-  );
+        const isSelectFieldTouched = touchedFields && touchedFields[field.id];
+        const showSelectError = isSelectFieldTouched && field.required && (!value || value === '');
+
+        // Dynamic options for sponsorPreviousMarriages field
+        let selectOptions = field.options;
+        if (field.id === 'sponsorPreviousMarriages') {
+          const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+          const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+
+          // For married users preparing while divorcing, start from 1 (not 0) since they must include current marriage
+          if (maritalStatus === 'Married' && preparingWhileDivorcing) {
+            selectOptions = ['1', '2', '3', '4', '5+'];
+          }
+        }
+
+        return (
+          <div>
+            <select
+              className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showSelectError ? 'border-red-500' : ''
+                }`}
+              value={value}
+              onFocus={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+              }}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+              }}
+              onChange={(e) => updateField(field.id, e.target.value)}
+            >
+              <option value="">Select...</option>
+              {selectOptions.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            {showSelectError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ Please select an option
+              </div>
+            )}
+          </div>
+        );
 
       case 'address-duration':
         return (
@@ -935,19 +1030,19 @@ return (
           </div>
         );
 
-case 'conditional-address-history':
+      case 'conditional-address-history':
         const moveInDate = currentData['sponsorMoveInDate'] || '';
-        
+
         // If no move-in date is entered yet, don't show anything
         if (!moveInDate) {
           return null;
         }
-        
+
         // Check if address history is needed
         const fiveYearsAgo = new Date();
         fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
         const needsAddressHistory = new Date(moveInDate) > fiveYearsAgo;
-        
+
         if (!needsAddressHistory) {
           return (
             <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded p-3">
@@ -956,15 +1051,15 @@ case 'conditional-address-history':
             </div>
           );
         }
-        
+
         const addressHistoryValue = currentData[field.id] || [];
         const fiveYearsAgoString = fiveYearsAgo.toISOString().split('T')[0];
-        
+
         // Check if we have complete 5-year coverage
         const lastAddress = addressHistoryValue[addressHistoryValue.length - 1];
-        const hasCompleteCoverage = lastAddress && lastAddress.dateFrom && 
+        const hasCompleteCoverage = lastAddress && lastAddress.dateFrom &&
           new Date(lastAddress.dateFrom) <= fiveYearsAgo;
-        
+
         // Calculate coverage gap if any
         let coverageGap = null;
         if (addressHistoryValue.length > 0 && lastAddress && lastAddress.dateFrom) {
@@ -974,7 +1069,7 @@ case 'conditional-address-history':
             coverageGap = gapMonths;
           }
         }
-        
+
         return (
           <div className="space-y-4">
             <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded p-3">
@@ -982,7 +1077,7 @@ case 'conditional-address-history':
               <p>You must provide all addresses where you've lived from <strong>{fiveYearsAgoString}</strong> to <strong>{moveInDate}</strong>.</p>
               <p className="text-xs mt-1">Each address must connect directly to the next with no gaps in dates.</p>
             </div>
-            
+
             {addressHistoryValue.map((address, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <div className="flex items-center justify-between mb-3">
@@ -1001,14 +1096,14 @@ case 'conditional-address-history':
                     Remove
                   </button>
                 </div>
-                
+
                 <div className="space-y-3">
                   {/* Date Range */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
                         Date From
-                        {index === addressHistoryValue.length - 1 && 
+                        {index === addressHistoryValue.length - 1 &&
                           <span className="text-gray-500 ml-1">(oldest)</span>}
                       </label>
                       <input
@@ -1020,12 +1115,12 @@ case 'conditional-address-history':
                         onChange={(e) => {
                           const newHistory = [...addressHistoryValue];
                           newHistory[index] = { ...address, dateFrom: e.target.value };
-                          
+
                           // Auto-update the previous address's dateTo
                           if (index < addressHistoryValue.length - 1) {
                             newHistory[index + 1].dateTo = e.target.value;
                           }
-                          
+
                           updateField(field.id, newHistory);
                         }}
                       />
@@ -1043,14 +1138,14 @@ case 'conditional-address-history':
                       />
                     </div>
                   </div>
-                  
+
                   {/* Date validation messages */}
                   {address.dateFrom && address.dateTo && new Date(address.dateFrom) >= new Date(address.dateTo) && (
                     <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2">
                       ⚠️ "Date From" must be before "Date To"
                     </div>
                   )}
-                  
+
                   {/* Country Selection */}
                   <select
                     className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -1068,7 +1163,7 @@ case 'conditional-address-history':
                       </option>
                     ))}
                   </select>
-                  
+
                   {address.country && (
                     <>
                       {/* Street Address */}
@@ -1083,7 +1178,7 @@ case 'conditional-address-history':
                         }}
                         placeholder="Street Number and Name"
                       />
-                      
+
                       {/* City and State */}
                       <div className="grid grid-cols-2 gap-2">
                         <input
@@ -1131,7 +1226,7 @@ case 'conditional-address-history':
                           })()}
                         </div>
                       </div>
-                      
+
                       {/* Postal Code */}
                       <input
                         type="text"
@@ -1153,29 +1248,29 @@ case 'conditional-address-history':
                 </div>
               </div>
             ))}
-            
+
             {/* Add Address Button - only show if history is incomplete */}
-{!hasCompleteCoverage && (
-  <button
-    type="button"
-    onClick={() => {
-      const newAddress = {
-        dateFrom: '',
-        dateTo: addressHistoryValue.length === 0 ? moveInDate : (addressHistoryValue[addressHistoryValue.length - 1]?.dateFrom || ''),
-        country: '',
-        street: '',
-        city: '',
-        state: '',
-        zipCode: ''
-      };
-      updateField(field.id, [...addressHistoryValue, newAddress]);
-    }}
-    className="w-full p-3 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-400 hover:text-blue-800 transition-colors bg-blue-50 hover:bg-blue-100"
-  >
-    + Add Previous Address
-  </button>
-)}
-            
+            {!hasCompleteCoverage && (
+              <button
+                type="button"
+                onClick={() => {
+                  const newAddress = {
+                    dateFrom: '',
+                    dateTo: addressHistoryValue.length === 0 ? moveInDate : (addressHistoryValue[addressHistoryValue.length - 1]?.dateFrom || ''),
+                    country: '',
+                    street: '',
+                    city: '',
+                    state: '',
+                    zipCode: ''
+                  };
+                  updateField(field.id, [...addressHistoryValue, newAddress]);
+                }}
+                className="w-full p-3 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-400 hover:text-blue-800 transition-colors bg-blue-50 hover:bg-blue-100"
+              >
+                + Add Previous Address
+              </button>
+            )}
+
             {/* Coverage Status Messages */}
             {!hasCompleteCoverage && addressHistoryValue.length > 0 && (
               <div className="text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded p-3">
@@ -1186,14 +1281,14 @@ case 'conditional-address-history':
                 <p className="text-xs mt-1">Your oldest address must start on or before {fiveYearsAgoString}.</p>
               </div>
             )}
-            
+
             {hasCompleteCoverage && (
               <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded p-3">
                 <p className="font-medium">✅ 5-Year Address History Complete</p>
                 <p>Your address history covers the full required period.</p>
               </div>
             )}
-            
+
             {addressHistoryValue.length === 0 && (
               <p className="text-sm text-gray-500 italic text-center py-4">
                 Click "Add Previous Address" to start adding your address history.
@@ -1401,35 +1496,35 @@ case 'conditional-address-history':
           </div>
         );
 
-case 'citizenship-method':
-  return (
-    <div className="space-y-2">
-      <select
-        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-        value={value}
-        onChange={(e) => updateField(field.id, e.target.value)}
-      >
-        <option value="">Select...</option>
-        <option value="Birth in the United States">Birth in the United States</option>
-        <option value="Naturalization">Naturalization</option>
-        <option value="U.S. citizen parents">U.S. citizen parents</option>
-      </select>
-      
-      <div className="text-xs text-gray-600 bg-blue-50 border border-blue-200 rounded p-2">
-        <p className="font-medium mb-1">📝 Quick Guide:</p>
-        <ul className="space-y-1 ml-2">
-          <li><strong>Birth in the United States:</strong> You were born on U.S. soil</li>
-          <li><strong>Naturalization:</strong> You personally applied for citizenship (Form N-400) and took the oath</li>
-          <li><strong>U.S. citizen parents:</strong> You became a citizen through your parents. This means that either of the following applies:
-  <ul className="ml-4 mt-1 text-xs">
-    <li>• Born abroad to U.S. citizen parents, OR</li>
-    <li>• Automatically became a citizen when your parents naturalized (and you were under 18)</li>
-  </ul>
-</li>
-        </ul>
-      </div>
-    </div>
-  );
+      case 'citizenship-method':
+        return (
+          <div className="space-y-2">
+            <select
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={value}
+              onChange={(e) => updateField(field.id, e.target.value)}
+            >
+              <option value="">Select...</option>
+              <option value="Birth in the United States">Birth in the United States</option>
+              <option value="Naturalization">Naturalization</option>
+              <option value="U.S. citizen parents">U.S. citizen parents</option>
+            </select>
+
+            <div className="text-xs text-gray-600 bg-blue-50 border border-blue-200 rounded p-2">
+              <p className="font-medium mb-1">📝 Quick Guide:</p>
+              <ul className="space-y-1 ml-2">
+                <li><strong>Birth in the United States:</strong> You were born on U.S. soil</li>
+                <li><strong>Naturalization:</strong> You personally applied for citizenship (Form N-400) and took the oath</li>
+                <li><strong>U.S. citizen parents:</strong> You became a citizen through your parents. This means that either of the following applies:
+                  <ul className="ml-4 mt-1 text-xs">
+                    <li>• Born abroad to U.S. citizen parents, OR</li>
+                    <li>• Automatically became a citizen when your parents naturalized (and you were under 18)</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        );
 
       case 'cert-question':
         return (
@@ -1469,143 +1564,139 @@ case 'citizenship-method':
         const { city: birthLocationCity = '', state: birthLocationState = '', country: birthLocationCountry = '' } = birthLocationValue;
         const isBirthLocationTouched = touchedFields && touchedFields[field.id];
         const showCityError = isBirthLocationTouched && field.required && birthLocationCountry && !birthLocationCity;
-const countryFormat = addressFormats[birthLocationCountry] || { stateRequired: false };
-const showStateError = isBirthLocationTouched && countryFormat.stateRequired && birthLocationCountry && !birthLocationState;
-const showCountryError = isBirthLocationTouched && field.required && !birthLocationCountry;
+        const countryFormat = addressFormats[birthLocationCountry] || { stateRequired: false };
+        const showStateError = isBirthLocationTouched && countryFormat.stateRequired && birthLocationCountry && !birthLocationState;
+        const showCountryError = isBirthLocationTouched && field.required && !birthLocationCountry;
 
-return (
-  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-    <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
-      📍 Place of Birth Information
-    </h4>
-    <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country <span className="text-red-500">*</span>
-              </label>
-              <select
-  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-    showCountryError ? 'border-red-500' : ''
-  }`}
-  value={birthLocationCountry}
-  onFocus={() => {
-    setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-  }}
-  onBlur={() => {
-    setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-  }}
-  onChange={(e) => {
-    updateField(field.id, { ...birthLocationValue, country: e.target.value, state: '' });
-  }}
->
-  <option value="">Select country...</option>
-  {phoneCountries.map(c => (
-    <option key={c.code} value={c.name}>
-      {c.flag} {c.name}
-    </option>
-  ))}
-</select>
-  {showCountryError && (
-  <div className="mt-1 text-sm text-red-600">
-    ⚠️ Please select a country
-  </div>
-)}
-            </div>
+        return (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
+              📍 Place of Birth Information
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Country <span className="text-red-500">*</span>
+                </label>
+                <select
+                  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showCountryError ? 'border-red-500' : ''
+                    }`}
+                  value={birthLocationCountry}
+                  onFocus={() => {
+                    setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                  }}
+                  onBlur={() => {
+                    setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                  }}
+                  onChange={(e) => {
+                    updateField(field.id, { ...birthLocationValue, country: e.target.value, state: '' });
+                  }}
+                >
+                  <option value="">Select country...</option>
+                  {phoneCountries.map(c => (
+                    <option key={c.code} value={c.name}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+                {showCountryError && (
+                  <div className="mt-1 text-sm text-red-600">
+                    ⚠️ Please select a country
+                  </div>
+                )}
+              </div>
 
-            {birthLocationCountry && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City/Town/Village <span className="text-red-500">*</span>
-                  </label>
-                  <input
-  type="text"
-  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-    showCityError ? 'border-red-500' : ''
-  }`}
-  value={birthLocationCity}
-  onFocus={() => {
-    setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-  }}
-  onBlur={() => {
-    setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-  }}
-  onChange={(e) => updateField(field.id, { ...birthLocationValue, city: e.target.value })}
-  placeholder="Enter city/town/village"
-/>
-{showCityError && (
-  <div className="mt-1 text-sm text-red-600">
-    ⚠️ City/Town/Village is required
-  </div>
-)}
-                </div>
+              {birthLocationCountry && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City/Town/Village <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showCityError ? 'border-red-500' : ''
+                        }`}
+                      value={birthLocationCity}
+                      onFocus={() => {
+                        setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                      }}
+                      onBlur={() => {
+                        setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                      }}
+                      onChange={(e) => updateField(field.id, { ...birthLocationValue, city: e.target.value })}
+                      placeholder="Enter city/town/village"
+                    />
+                    {showCityError && (
+                      <div className="mt-1 text-sm text-red-600">
+                        ⚠️ City/Town/Village is required
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {(() => {
+                        const countryFormat = addressFormats[birthLocationCountry] || { stateLabel: 'State/Province' };
+                        return (
+                          <>
+                            {countryFormat.stateLabel} {countryFormat.stateRequired && <span className="text-red-500">*</span>}
+                          </>
+                        );
+                      })()}
+                    </label>
                     {(() => {
-  const countryFormat = addressFormats[birthLocationCountry] || { stateLabel: 'State/Province' };
-  return (
-    <>
-      {countryFormat.stateLabel} {countryFormat.stateRequired && <span className="text-red-500">*</span>}
-    </>
-  );
-})()}
-                  </label>
-{(() => {
-  const countryFormat = addressFormats[birthLocationCountry] || { stateRequired: false, stateLabel: 'State' };
-  
-  if (birthLocationCountry === 'United States' || birthLocationCountry === 'Canada' || birthLocationCountry === 'Australia' || birthLocationCountry === 'Germany') {
-    return (
-      <select
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showStateError ? 'border-red-500' : ''
-        }`}
-        value={birthLocationState}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => updateField(field.id, { ...birthLocationValue, state: e.target.value })}
-      >
-        <option value="">Select state...</option>
-        {countryFormat.states && countryFormat.states.map(stateOption => (
-          <option key={stateOption} value={stateOption}>{stateOption}</option>
-        ))}
-      </select>
-    );
-  } else {
-    return (
-      <input
-        type="text"
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showStateError ? 'border-red-500' : ''
-        }`}
-        value={birthLocationState}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => updateField(field.id, { ...birthLocationValue, state: e.target.value })}
-        placeholder={`Enter ${countryFormat.stateLabel ? countryFormat.stateLabel.toLowerCase() : 'state/province'}`}
-      />
-    );
-  }
-})()}
-                </div>
-              </>
+                      const countryFormat = addressFormats[birthLocationCountry] || { stateRequired: false, stateLabel: 'State' };
+
+                      if (birthLocationCountry === 'United States' || birthLocationCountry === 'Canada' || birthLocationCountry === 'Australia' || birthLocationCountry === 'Germany') {
+                        return (
+                          <select
+                            className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showStateError ? 'border-red-500' : ''
+                              }`}
+                            value={birthLocationState}
+                            onFocus={() => {
+                              setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                            }}
+                            onBlur={() => {
+                              setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                            }}
+                            onChange={(e) => updateField(field.id, { ...birthLocationValue, state: e.target.value })}
+                          >
+                            <option value="">Select state...</option>
+                            {countryFormat.states && countryFormat.states.map(stateOption => (
+                              <option key={stateOption} value={stateOption}>{stateOption}</option>
+                            ))}
+                          </select>
+                        );
+                      } else {
+                        return (
+                          <input
+                            type="text"
+                            className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showStateError ? 'border-red-500' : ''
+                              }`}
+                            value={birthLocationState}
+                            onFocus={() => {
+                              setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                            }}
+                            onBlur={() => {
+                              setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                            }}
+                            onChange={(e) => updateField(field.id, { ...birthLocationValue, state: e.target.value })}
+                            placeholder={`Enter ${countryFormat.stateLabel ? countryFormat.stateLabel.toLowerCase() : 'state/province'}`}
+                          />
+                        );
+                      }
+                    })()}
+                  </div>
+                </>
+              )}
+            </div>
+            {showStateError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ State is required
+              </div>
             )}
           </div>
-          {showStateError && (
-  <div className="mt-1 text-sm text-red-600">
-    ⚠️ State is required
-  </div>
-)}
-      </div>
-    );
+        );
 
       case 'other-names':
         const otherNamesValue = currentData[field.id] || [];
@@ -1681,153 +1772,152 @@ return (
           </div>
         );
 
-case 'address-with-careof':
-  const mailingAddrValue = currentData[field.id] || {};
-  const { 
-    street: mailingStreet = '', 
-    city: mailingCity = '', 
-    state: mailingState = '', 
-    zipCode: mailingZipCode = '', 
-    country: mailingCountry = '',
-    inCareOf: mailingInCareOf = ''
-  } = mailingAddrValue;
-  const mailingCountryFormat = addressFormats[mailingCountry] || addressFormats['United States'];
+      case 'address-with-careof':
+        const mailingAddrValue = currentData[field.id] || {};
+        const {
+          street: mailingStreet = '',
+          city: mailingCity = '',
+          state: mailingState = '',
+          zipCode: mailingZipCode = '',
+          country: mailingCountry = '',
+          inCareOf: mailingInCareOf = ''
+        } = mailingAddrValue;
+        const mailingCountryFormat = addressFormats[mailingCountry] || addressFormats['United States'];
 
-  return (
-    <div className="space-y-3">
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Country <span className="text-red-500">*</span>
-        </label>
-        <select
-          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-          value={mailingCountry}
-          onChange={(e) => {
-            updateField(field.id, { ...mailingAddrValue, country: e.target.value, state: '', zipCode: '' });
-          }}
-        >
-          <option value="">Select country...</option>
-          {phoneCountries.map(c => (
-            <option key={c.code} value={c.name}>
-              {c.flag} {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {mailingCountry && (
-        <>
-          {/* In Care Of Name field */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              <span className="inline-flex items-center">
-                In Care Of Name (if applicable)
-                <button
-                  type="button"
-                  onClick={() => setShowInfoPanel(!showInfoPanel)}
-                  className="ml-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-0.5 rounded border border-blue-300 transition-colors"
-                >
-                  What's this?
-                </button>
-              </span>
-            </label>
-            <input
-              type="text"
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-              value={mailingInCareOf}
-              onChange={(e) => updateField(field.id, { ...mailingAddrValue, inCareOf: e.target.value })}
-              placeholder="e.g., John Smith or ABC Company"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Street Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-              value={mailingStreet}
-              onChange={(e) => updateField(field.id, { ...mailingAddrValue, street: e.target.value })}
-              placeholder="Street Number and Name"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
+        return (
+          <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                City <span className="text-red-500">*</span>
+                Country <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                className="p-2 border rounded focus:ring-2 focus:ring-blue-500 w-full"
-                value={mailingCity}
-                onChange={(e) => updateField(field.id, { ...mailingAddrValue, city: e.target.value })}
-                placeholder="City"
-              />
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={mailingCountry}
+                onChange={(e) => {
+                  updateField(field.id, { ...mailingAddrValue, country: e.target.value, state: '', zipCode: '' });
+                }}
+              >
+                <option value="">Select country...</option>
+                {phoneCountries.map(c => (
+                  <option key={c.code} value={c.name}>
+                    {c.flag} {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                {mailingCountryFormat.stateLabel || 'State'} 
-                {mailingCountryFormat.stateRequired && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              {mailingCountryFormat.states ? (
-                <select
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                  value={mailingState}
-                  onChange={(e) => updateField(field.id, { ...mailingAddrValue, state: e.target.value })}
-                >
-                  <option value="">Select {mailingCountryFormat.stateLabel.toLowerCase()}...</option>
-                  {mailingCountryFormat.states.map(stateOption => (
-                    <option key={stateOption} value={stateOption}>{stateOption}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-                    !mailingCountryFormat.stateRequired && mailingCountry !== 'United States' && mailingCountry !== 'Canada' ? 'bg-gray-50' : ''
-                  }`}
-                  value={mailingState}
-                  onChange={(e) => updateField(field.id, { ...mailingAddrValue, state: e.target.value })}
-                  placeholder={mailingCountryFormat.stateLabel}
-                  disabled={!mailingCountryFormat.stateRequired && mailingCountry !== 'United States' && mailingCountry !== 'Canada'}
-                />
-              )}
-            </div>
+
+            {mailingCountry && (
+              <>
+                {/* In Care Of Name field */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <span className="inline-flex items-center">
+                      In Care Of Name (if applicable)
+                      <button
+                        type="button"
+                        onClick={() => setShowInfoPanel(!showInfoPanel)}
+                        className="ml-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-0.5 rounded border border-blue-300 transition-colors"
+                      >
+                        What's this?
+                      </button>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={mailingInCareOf}
+                    onChange={(e) => updateField(field.id, { ...mailingAddrValue, inCareOf: e.target.value })}
+                    placeholder="e.g., John Smith or ABC Company"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Street Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={mailingStreet}
+                    onChange={(e) => updateField(field.id, { ...mailingAddrValue, street: e.target.value })}
+                    placeholder="Street Number and Name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500 w-full"
+                      value={mailingCity}
+                      onChange={(e) => updateField(field.id, { ...mailingAddrValue, city: e.target.value })}
+                      placeholder="City"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      {mailingCountryFormat.stateLabel || 'State'}
+                      {mailingCountryFormat.stateRequired && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {mailingCountryFormat.states ? (
+                      <select
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={mailingState}
+                        onChange={(e) => updateField(field.id, { ...mailingAddrValue, state: e.target.value })}
+                      >
+                        <option value="">Select {mailingCountryFormat.stateLabel.toLowerCase()}...</option>
+                        {mailingCountryFormat.states.map(stateOption => (
+                          <option key={stateOption} value={stateOption}>{stateOption}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${!mailingCountryFormat.stateRequired && mailingCountry !== 'United States' && mailingCountry !== 'Canada' ? 'bg-gray-50' : ''
+                          }`}
+                        value={mailingState}
+                        onChange={(e) => updateField(field.id, { ...mailingAddrValue, state: e.target.value })}
+                        placeholder={mailingCountryFormat.stateLabel}
+                        disabled={!mailingCountryFormat.stateRequired && mailingCountry !== 'United States' && mailingCountry !== 'Canada'}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={mailingZipCode}
+                    onChange={(e) => {
+                      const formatted = formatPostalCode(e.target.value, mailingCountry);
+                      updateField(field.id, { ...mailingAddrValue, zipCode: formatted });
+                    }}
+                    placeholder={mailingCountryFormat.postalPlaceholder}
+                  />
+                  <label className="absolute -top-2 left-2 bg-white px-1 text-xs text-gray-600">
+                    {mailingCountryFormat.postalLabel} <span className="text-red-500">*</span>
+                  </label>
+                </div>
+
+                {mailingZipCode && !mailingCountryFormat.postalFormat.test(mailingZipCode) && (
+                  <div className="text-sm text-orange-600 flex items-center">
+                    <span>Please enter a valid {mailingCountryFormat.postalLabel.toLowerCase()} for {mailingCountry}</span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
+        );
 
-          <div className="relative">
-            <input
-              type="text"
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-              value={mailingZipCode}
-              onChange={(e) => {
-                const formatted = formatPostalCode(e.target.value, mailingCountry);
-                updateField(field.id, { ...mailingAddrValue, zipCode: formatted });
-              }}
-              placeholder={mailingCountryFormat.postalPlaceholder}
-            />
-            <label className="absolute -top-2 left-2 bg-white px-1 text-xs text-gray-600">
-              {mailingCountryFormat.postalLabel} <span className="text-red-500">*</span>
-            </label>
-          </div>
-
-          {mailingZipCode && !mailingCountryFormat.postalFormat.test(mailingZipCode) && (
-            <div className="text-sm text-orange-600 flex items-center">
-              <span>Please enter a valid {mailingCountryFormat.postalLabel.toLowerCase()} for {mailingCountry}</span>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-
-case 'address':
+      case 'address':
         const mainAddressValue = currentData[field.id] || {};
         const { street: mainStreet = '', city: mainCity = '', state: mainState = '', zipCode: mainZipCode = '', country: mainCountry = '', inCareOf: mainInCareOf = '' } = mainAddressValue;
         const mainCountryFormat = addressFormats[mainCountry] || addressFormats['United States'];
-        
+
         // Check if this is a required mailing address
         const isRequiredMailingAddress = field.id === 'sponsorMailingAddress' && field.required;
 
@@ -1932,9 +2022,8 @@ case 'address':
                     ) : (
                       <input
                         type="text"
-                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-                          !mainCountryFormat.stateRequired && mainCountry !== 'United States' && mainCountry !== 'Canada' ? 'bg-gray-50' : ''
-                        }`}
+                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${!mainCountryFormat.stateRequired && mainCountry !== 'United States' && mainCountry !== 'Canada' ? 'bg-gray-50' : ''
+                          }`}
                         value={mainState}
                         onChange={(e) => updateField(field.id, { ...mainAddressValue, state: e.target.value })}
                         placeholder={mainCountryFormat.stateLabel}
@@ -1970,21 +2059,21 @@ case 'address':
           </div>
         );
 
-case 'checkbox':
-  return (
-    <div className="flex items-start space-x-2">
-      <input
-        type="checkbox"
-        id={field.id}
-        className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        checked={value || false}
-        onChange={(e) => updateField(field.id, e.target.checked)}
-      />
-      <label htmlFor={field.id} className="text-sm text-gray-700">
-        {field.label}
-      </label>
-    </div>
-  );
+      case 'checkbox':
+        return (
+          <div className="flex items-start space-x-2">
+            <input
+              type="checkbox"
+              id={field.id}
+              className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={value || false}
+              onChange={(e) => updateField(field.id, e.target.checked)}
+            />
+            <label htmlFor={field.id} className="text-sm text-gray-700">
+              {field.label}
+            </label>
+          </div>
+        );
 
       case 'multi-select':
         const multiSelectValue = currentData[field.id] || [];
@@ -2011,33 +2100,32 @@ case 'checkbox':
           </div>
         );
 
-case 'date':
-  const isDateFieldTouched = touchedFields && touchedFields[field.id];
-  const showDateError = isDateFieldTouched && field.required && (!value || value === '');
-  
-  return (
-    <div>
-      <input
-        type="date"
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showDateError ? 'border-red-500' : ''
-        }`}
-        value={value}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => updateField(field.id, e.target.value)}
-      />
-      {showDateError && (
-        <div className="mt-1 text-sm text-red-600">
-          ⚠️ Please select a date
-        </div>
-      )}
-    </div>
-  );
+      case 'date':
+        const isDateFieldTouched = touchedFields && touchedFields[field.id];
+        const showDateError = isDateFieldTouched && field.required && (!value || value === '');
+
+        return (
+          <div>
+            <input
+              type="date"
+              className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showDateError ? 'border-red-500' : ''
+                }`}
+              value={value}
+              onFocus={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+              }}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+              }}
+              onChange={(e) => updateField(field.id, e.target.value)}
+            />
+            {showDateError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ Please select a date
+              </div>
+            )}
+          </div>
+        );
 
       case 'textarea':
         return (
@@ -2049,110 +2137,108 @@ case 'date':
           />
         );
 
-case 'ssn':
-  // Remove the test line if you added it
-  const ssnDigits = (value || '').replace(/\D/g, '');
-  const isSSNFieldTouched = touchedFields && touchedFields[field.id];
-  const showSSNError = isSSNFieldTouched && field.required && ssnDigits.length > 0 && ssnDigits.length < 9;
-  
-  return (
-    <div>
-      <input
-        type="text"
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showSSNError ? 'border-red-500' : ''
-        }`}
-        value={value}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => {
-          let digits = e.target.value.replace(/\D/g, '');
-          digits = digits.slice(0, 9);
-          
-          let formatted = '';
-          if (digits.length > 0) {
-            formatted = digits.slice(0, 3);
-            if (digits.length > 3) {
-              formatted += '-' + digits.slice(3, 5);
-            }
-            if (digits.length > 5) {
-              formatted += '-' + digits.slice(5, 9);
-            }
-          }
-          
-          updateField(field.id, formatted);
-        }}
-        placeholder="XXX-XX-XXXX"
-        maxLength="11"
-      />
-      {showSSNError && (
-        <div className="mt-1 text-sm text-red-600">
-          ⚠️ Please enter all 9 digits
-        </div>
-      )}
-    </div>
-  );
+      case 'ssn':
+        // Remove the test line if you added it
+        const ssnDigits = (value || '').replace(/\D/g, '');
+        const isSSNFieldTouched = touchedFields && touchedFields[field.id];
+        const showSSNError = isSSNFieldTouched && field.required && ssnDigits.length > 0 && ssnDigits.length < 9;
 
-case 'international-phone':
-  const intlPhoneValue = currentData[field.id] || {};
-  const selectedPhoneCountry = intlPhoneValue.country || 'US';
-  const phoneNumberValue = intlPhoneValue.number || '';
-  
-  // Check if field is touched for this specific phone field
-  const isPhoneFieldTouched = touchedFields && touchedFields[field.id];
-  const phoneDigits = phoneNumberValue.replace(/\D/g, '').length;
-const minDigits = selectedPhoneCountry === 'US' || selectedPhoneCountry === 'CA' ? 10 : 7;
-const showPhoneError = isPhoneFieldTouched && field.required && phoneNumberValue && phoneDigits < minDigits;
+        return (
+          <div>
+            <input
+              type="text"
+              className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showSSNError ? 'border-red-500' : ''
+                }`}
+              value={value}
+              onFocus={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+              }}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+              }}
+              onChange={(e) => {
+                let digits = e.target.value.replace(/\D/g, '');
+                digits = digits.slice(0, 9);
 
-  return (
-    <div className="space-y-2">
-      <select
-        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-        value={selectedPhoneCountry}
-        onChange={(e) => {
-          updateField(field.id, { ...intlPhoneValue, country: e.target.value, number: '' });
-        }}
-      >
-        {phoneCountries.map(country => (
-          <option key={country.code} value={country.code}>
-            {country.flag} {country.name} ({country.dialCode})
-          </option>
-        ))}
-      </select>
-      <div className="flex">
-        <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l">
-          {phoneCountries.find(c => c.code === selectedPhoneCountry)?.dialCode}
-        </span>
-        <input
-          type="tel"
-          className={`flex-1 p-2 border rounded-r focus:ring-2 focus:ring-blue-500 ${
-            showPhoneError ? 'border-red-500' : 'border-gray-300'
-          }`}
-          value={phoneNumberValue}
-          onFocus={() => {
-            setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-          }}
-          onBlur={() => {
-            setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-          }}
-          onChange={(e) => {
-            const formatted = formatPhoneByCountry(e.target.value, selectedPhoneCountry);
-            updateField(field.id, { ...intlPhoneValue, number: formatted });
-          }}
-          placeholder={phoneCountries.find(c => c.code === selectedPhoneCountry)?.format.replace(/X/g, '0')}
-        />
-      </div>
-      {showPhoneError && (
-        <div className="text-sm text-red-600">
-          ⚠️ Please enter a valid phone number
-        </div>
-      )}
-    </div>
-  );
+                let formatted = '';
+                if (digits.length > 0) {
+                  formatted = digits.slice(0, 3);
+                  if (digits.length > 3) {
+                    formatted += '-' + digits.slice(3, 5);
+                  }
+                  if (digits.length > 5) {
+                    formatted += '-' + digits.slice(5, 9);
+                  }
+                }
+
+                updateField(field.id, formatted);
+              }}
+              placeholder="XXX-XX-XXXX"
+              maxLength="11"
+            />
+            {showSSNError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ Please enter all 9 digits
+              </div>
+            )}
+          </div>
+        );
+
+      case 'international-phone':
+        const intlPhoneValue = currentData[field.id] || {};
+        const selectedPhoneCountry = intlPhoneValue.country || 'US';
+        const phoneNumberValue = intlPhoneValue.number || '';
+
+        // Check if field is touched for this specific phone field
+        const isPhoneFieldTouched = touchedFields && touchedFields[field.id];
+        const phoneDigits = phoneNumberValue.replace(/\D/g, '').length;
+        const minDigits = selectedPhoneCountry === 'US' || selectedPhoneCountry === 'CA' ? 10 : 7;
+        const showPhoneError = isPhoneFieldTouched && field.required && phoneNumberValue && phoneDigits < minDigits;
+
+        return (
+          <div className="space-y-2">
+            <select
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={selectedPhoneCountry}
+              onChange={(e) => {
+                updateField(field.id, { ...intlPhoneValue, country: e.target.value, number: '' });
+              }}
+            >
+              {phoneCountries.map(country => (
+                <option key={country.code} value={country.code}>
+                  {country.flag} {country.name} ({country.dialCode})
+                </option>
+              ))}
+            </select>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l">
+                {phoneCountries.find(c => c.code === selectedPhoneCountry)?.dialCode}
+              </span>
+              <input
+                type="tel"
+                className={`flex-1 p-2 border rounded-r focus:ring-2 focus:ring-blue-500 ${showPhoneError ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                value={phoneNumberValue}
+                onFocus={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
+                onChange={(e) => {
+                  const formatted = formatPhoneByCountry(e.target.value, selectedPhoneCountry);
+                  updateField(field.id, { ...intlPhoneValue, number: formatted });
+                }}
+                placeholder={phoneCountries.find(c => c.code === selectedPhoneCountry)?.format.replace(/X/g, '0')}
+              />
+            </div>
+            {showPhoneError && (
+              <div className="text-sm text-red-600">
+                ⚠️ Please enter a valid phone number
+              </div>
+            )}
+          </div>
+        );
 
       case 'smart-email':
         const smartEmailValue = currentData[field.id] || {};
@@ -2169,7 +2255,7 @@ const showPhoneError = isPhoneFieldTouched && field.required && phoneNumberValue
         ];
 
         const isEmailFieldTouched = touchedFields && touchedFields[field.id];
-const showEmailError = isEmailFieldTouched && (emailLocalPart || emailDomain || emailCustomDomain) && !emailValidationResult.isValid;
+        const showEmailError = isEmailFieldTouched && (emailLocalPart || emailDomain || emailCustomDomain) && !emailValidationResult.isValid;
 
         return (
           <div className="space-y-2">
@@ -2179,11 +2265,11 @@ const showEmailError = isEmailFieldTouched && (emailLocalPart || emailDomain || 
                 className="flex-1 p-2 border rounded-l focus:ring-2 focus:ring-blue-500"
                 value={emailLocalPart}
                 onFocus={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-}}
-onBlur={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-}}
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
                 onChange={(e) => {
                   const cleanValue = e.target.value.replace(/[^a-zA-Z0-9._-]/g, '');
                   const newValue = { ...smartEmailValue, localPart: cleanValue };
@@ -2198,11 +2284,11 @@ onBlur={() => {
                 className="flex-1 p-2 border rounded-r focus:ring-2 focus:ring-blue-500 min-w-0"
                 value={emailDomain}
                 onFocus={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-}}
-onBlur={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-}}
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
                 onChange={(e) => {
                   const newValue = { ...smartEmailValue, domain: e.target.value };
                   if (e.target.value !== 'other') {
@@ -2226,11 +2312,11 @@ onBlur={() => {
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 value={emailCustomDomain}
                 onFocus={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-}}
-onBlur={() => {
-  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-}}
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
                 onChange={(e) => {
                   const cleanValue = e.target.value.replace(/[^a-zA-Z0-9.-]/g, '');
                   const newValue = { ...smartEmailValue, customDomain: cleanValue };
@@ -2556,7 +2642,7 @@ onBlur={() => {
           </div>
         );
 
-case 'country':
+      case 'country':
         return (
           <select
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -2591,9 +2677,9 @@ case 'country':
       case 'foreign-residence':
         const foreignResValue = currentData[field.id] || {};
         const showForeignRes = currentData['sponsorLivedAbroad'] === 'Yes';
-        
+
         if (!showForeignRes) return null;
-        
+
         return (
           <div className="space-y-3">
             <input
@@ -2629,21 +2715,21 @@ case 'country':
       case 'marriage-history':
         const previousMarriagesValue = currentData['sponsorPreviousMarriages'] || '0';
         let marriageCount = parseInt(previousMarriagesValue) || 0;
-        
+
         // Handle "5+" option - start with 5 marriages and allow adding more
         if (previousMarriagesValue === '5+') {
           marriageCount = 5;
         }
-        
+
         const marriageHistoryValue = currentData[field.id] || [];
-        
+
         // If user selected "5+" but has more than 5 entries, show all entries
-        const actualMarriageCount = previousMarriagesValue === '5+' 
+        const actualMarriageCount = previousMarriagesValue === '5+'
           ? Math.max(5, marriageHistoryValue.length)
           : marriageCount;
-        
+
         if (marriageCount === 0) return null;
-        
+
         return (
           <div className="space-y-4">
             {[...Array(actualMarriageCount)].map((_, index) => {
@@ -2703,7 +2789,7 @@ case 'country':
                         placeholder="Middle Name"
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Spouse's Date of Birth</label>
@@ -2738,7 +2824,7 @@ case 'country':
                         </select>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Date of Marriage</label>
@@ -2750,12 +2836,12 @@ case 'country':
                             const newHistory = [...marriageHistoryValue];
                             const newStartDate = e.target.value;
                             const updatedMarriage = { ...marriage, marriageDate: newStartDate };
-                            
+
                             // If new start date is after current end date, clear the end date
                             if (marriage.marriageEndDate && newStartDate > marriage.marriageEndDate) {
                               updatedMarriage.marriageEndDate = '';
                             }
-                            
+
                             newHistory[index] = updatedMarriage;
                             updateField(field.id, newHistory);
                           }}
@@ -2791,20 +2877,20 @@ case 'country':
                 </div>
               );
             })}
-            
+
             {/* Date overlap validation warning */}
             {(() => {
               // Check for overlapping dates across marriages
               const marriages = marriageHistoryValue.filter(m => m.marriageDate && m.marriageEndDate);
               let hasOverlap = false;
-              
+
               for (let i = 0; i < marriages.length; i++) {
                 for (let j = i + 1; j < marriages.length; j++) {
                   const marriage1Start = new Date(marriages[i].marriageDate);
                   const marriage1End = new Date(marriages[i].marriageEndDate);
                   const marriage2Start = new Date(marriages[j].marriageDate);
                   const marriage2End = new Date(marriages[j].marriageEndDate);
-                  
+
                   // Check if dates overlap
                   if ((marriage1Start <= marriage2End && marriage1End >= marriage2Start)) {
                     hasOverlap = true;
@@ -2813,7 +2899,7 @@ case 'country':
                 }
                 if (hasOverlap) break;
               }
-              
+
               if (hasOverlap) {
                 return (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -2827,7 +2913,7 @@ case 'country':
                         <p className="text-sm text-amber-700 mb-3">
                           <strong>What to do:</strong> Please double-check your dates to ensure they're accurate. If the dates are correct and you have a unique situation, we recommend contacting our support team for guidance.
                         </p>
-                        <button 
+                        <button
                           className="text-sm bg-amber-600 text-white px-3 py-1 rounded hover:bg-amber-700 transition-colors"
                           onClick={() => {
                             // TODO: Route to support
@@ -2841,10 +2927,10 @@ case 'country':
                   </div>
                 );
               }
-              
+
               return null;
             })()}
-            
+
             {/* Add Another Marriage button - only show if user selected "5+" */}
             {previousMarriagesValue === '5+' && (
               <div className="text-center pt-4">
@@ -2865,50 +2951,50 @@ case 'country':
           </div>
         );
 
-case 'cert-place':
-  const certPlaceValue = currentData[field.id] || {};
-  const { city: certCity = '', state: certState = '' } = certPlaceValue;
-  const isCertPlaceTouched = touchedFields && touchedFields[field.id];
-const showCertCityError = isCertPlaceTouched && field.required && !certCity;
-const showCertStateError = isCertPlaceTouched && field.required && !certState;
-  
-  return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-      <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
-        📍 Place of Issuance
-      </h4>
-      <div className="space-y-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            City <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={certCity}
-            onChange={(e) => updateField(field.id, { ...certPlaceValue, city: e.target.value })}
-            placeholder="Enter city (e.g., Los Angeles, New York)"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            State <span className="text-red-500">*</span>
-          </label>
-          <select
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            value={certState}
-            onChange={(e) => updateField(field.id, { ...certPlaceValue, state: e.target.value })}
-          >
-            <option value="">Select state...</option>
-            {addressFormats['United States'].states.map(stateOption => (
-              <option key={stateOption} value={stateOption}>{stateOption}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </div>
-  );
+      case 'cert-place':
+        const certPlaceValue = currentData[field.id] || {};
+        const { city: certCity = '', state: certState = '' } = certPlaceValue;
+        const isCertPlaceTouched = touchedFields && touchedFields[field.id];
+        const showCertCityError = isCertPlaceTouched && field.required && !certCity;
+        const showCertStateError = isCertPlaceTouched && field.required && !certState;
+
+        return (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
+              📍 Place of Issuance
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  City <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={certCity}
+                  onChange={(e) => updateField(field.id, { ...certPlaceValue, city: e.target.value })}
+                  placeholder="Enter city (e.g., Los Angeles, New York)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  State <span className="text-red-500">*</span>
+                </label>
+                <select
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={certState}
+                  onChange={(e) => updateField(field.id, { ...certPlaceValue, state: e.target.value })}
+                >
+                  <option value="">Select state...</option>
+                  {addressFormats['United States'].states.map(stateOption => (
+                    <option key={stateOption} value={stateOption}>{stateOption}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        );
 
       case 'married-eligibility-check':
         const maritalStatus = currentData['sponsorMaritalStatus'] || '';
@@ -2916,11 +3002,11 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
         const beneficiaryFirstName = currentData['beneficiaryFirstName'] || '[BeneficiaryFirstName]';
         const sponsorSex = currentData['sponsorSex'] || '';
         const sponsorPronoun = sponsorSex === 'Male' ? 'he' : sponsorSex === 'Female' ? 'she' : 'they';
-        
+
         const marriedTo = currentData['marriedTo'] || '';
         const spouseLocation = currentData['spouseLocation'] || '';
         const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
-        
+
         // Show initial married eligibility check
         if (maritalStatus === 'Married' && !marriedTo) {
           return (
@@ -2932,10 +3018,10 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
               <p className="text-gray-700 mb-4">
                 K-1 visas are only for engaged couples. We need to determine the right path for {sponsorFirstName}.
               </p>
-              
+
               <div className="space-y-3">
                 <p className="font-medium text-gray-800">Who is {sponsorFirstName} married to?</p>
-                
+
                 <div className="space-y-2">
                   <label className="flex items-center space-x-3 cursor-pointer">
                     <input
@@ -2948,7 +3034,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                     />
                     <span>The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</span>
                   </label>
-                  
+
                   <label className="flex items-center space-x-3 cursor-pointer">
                     <input
                       type="radio"
@@ -2961,7 +3047,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                     <span>Someone else</span>
                   </label>
                 </div>
-                
+
                 <p className="text-xs text-gray-500 mt-3">
                   Note: If {beneficiaryFirstName} isn't the correct name, that's okay. We just need to know if {sponsorFirstName} is married to the person {sponsorPronoun} wants to sponsor. Names can be updated later.
                 </p>
@@ -2969,7 +3055,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
             </div>
           );
         }
-        
+
         // Show spouse location question after selecting "married to sponsor"
         if (maritalStatus === 'Married' && marriedTo === 'sponsor' && !spouseLocation) {
           return (
@@ -2981,16 +3067,16 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
               <p className="text-gray-700 mb-4">
                 K-1 visas are only for engaged couples. We need to determine the right path for {sponsorFirstName}.
               </p>
-              
+
               <div className="space-y-4">
                 <div>
                   <p className="font-medium text-gray-800 mb-2">Who is {sponsorFirstName} married to?</p>
                   <p className="text-green-600 text-sm">✓ The person {sponsorFirstName} wants to sponsor ({beneficiaryFirstName})</p>
                 </div>
-                
+
                 <div className="space-y-3">
                   <p className="font-medium text-gray-800">Where is {beneficiaryFirstName} currently?</p>
-                  
+
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3 cursor-pointer">
                       <input
@@ -3003,7 +3089,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                       />
                       <span>In the United States</span>
                     </label>
-                    
+
                     <label className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="radio"
@@ -3021,7 +3107,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
             </div>
           );
         }
-        
+
         // Path A: Married to sponsor + In US (AOS)
         if (maritalStatus === 'Married' && marriedTo === 'sponsor' && spouseLocation === 'in-us') {
           return (
@@ -3036,7 +3122,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   <p>✓ Location: In the United States</p>
                 </div>
               </div>
-              
+
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
                   → Spousal Green Card: Adjustment of Status (AOS)
@@ -3044,7 +3130,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                 <p className="text-gray-700 mb-4">
                   Being married means {beneficiaryFirstName} can directly apply for a green card - no need for the fiancé visa step, which eventually requires a separate green card application.
                 </p>
-                
+
                 <details className="mb-4">
                   <summary className="cursor-pointer text-blue-600 font-medium hover:text-blue-800">
                     What is AOS? (click to expand)
@@ -3056,7 +3142,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                 </details>
 
                 <div className="flex flex-col space-y-3">
-                  <button 
+                  <button
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     onClick={() => {
                       // TODO: Route to AOS eligibility test
@@ -3065,7 +3151,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   >
                     Continue to Spousal Green Card Application →
                   </button>
-                  <button 
+                  <button
                     className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                     onClick={() => {
                       setCurrentData(prev => ({
@@ -3078,7 +3164,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   >
                     ← Back to K-1 Form
                   </button>
-                  <button 
+                  <button
                     className="text-sm text-blue-600 hover:text-blue-800"
                     onClick={() => {
                       // TODO: Route to support
@@ -3092,7 +3178,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
             </div>
           );
         }
-        
+
         // Path B: Married to sponsor + Outside US (Consular)
         if (maritalStatus === 'Married' && marriedTo === 'sponsor' && spouseLocation === 'outside-us') {
           return (
@@ -3107,7 +3193,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   <p>✓ Location: Outside the United States</p>
                 </div>
               </div>
-              
+
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
                   → Spousal Green Card: Consular Processing
@@ -3115,7 +3201,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                 <p className="text-gray-700 mb-4">
                   Being married means {beneficiaryFirstName} can directly apply for a green card - no need for the fiancé visa step, which eventually requires a separate green card application.
                 </p>
-                
+
                 <details className="mb-4">
                   <summary className="cursor-pointer text-blue-600 font-medium hover:text-blue-800">
                     What is Consular Processing? (click to expand)
@@ -3137,7 +3223,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                 </details>
 
                 <div className="flex flex-col space-y-3">
-                  <button 
+                  <button
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     onClick={() => {
                       // TODO: Route to Consular eligibility test
@@ -3146,7 +3232,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   >
                     Continue to Spousal Green Card Application →
                   </button>
-                  <button 
+                  <button
                     className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                     onClick={() => {
                       setCurrentData(prev => ({
@@ -3159,7 +3245,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                   >
                     ← Back to K-1 Form
                   </button>
-                  <button 
+                  <button
                     className="text-sm text-blue-600 hover:text-blue-800"
                     onClick={() => {
                       // TODO: Route to support
@@ -3173,7 +3259,7 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
             </div>
           );
         }
-        
+
         // Path C: Married to someone else
         if (maritalStatus === 'Married' && marriedTo === 'someone-else') {
           return (
@@ -3184,12 +3270,11 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
               <p className="text-gray-700 mb-4">
                 For a K-1 visa, both parties need to be legally free to marry. We understand divorces can be complex, and we're here to help {sponsorFirstName} prepare the visa application for when it's time to file.
               </p>
-              
+
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">{sponsorFirstName}'s options:</p>
                   {!preparingWhileDivorcing ? (
-                    <button 
+                    <button
                       className="w-full px-6 py-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-left"
                       onClick={() => {
                         setCurrentData(prev => ({
@@ -3213,60 +3298,343 @@ const showCertStateError = isCertPlaceTouched && field.required && !certState;
                     </div>
                   )}
                 </div>
-                
-                <button 
-                  className="text-sm text-amber-600 hover:text-amber-800"
-                  onClick={() => {
-                    // TODO: Route to support system with context
-                    console.log('TODO: Route to support system with context for married to someone else scenario');
-                  }}
-                >
-                  Need to discuss {sponsorFirstName}'s situation? Contact support
-                </button>
+
+                <div className="flex flex-col space-y-2">
+                  <button
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                    onClick={() => {
+                      setCurrentData(prev => ({
+                        ...prev,
+                        marriedTo: '',
+                        preparingWhileDivorcing: false
+                      }));
+                    }}
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    className="text-sm text-amber-600 hover:text-amber-800"
+                    onClick={() => {
+                      // TODO: Route to support system with context
+                      console.log('TODO: Route to support system with context for married to someone else scenario');
+                    }}
+                  >
+                    Need to discuss {sponsorFirstName}'s situation? Contact support
+                  </button>
+                </div>
               </div>
             </div>
           );
         }
-        
+
         return null;
 
-default:
-  // This handles 'text', 'number', and any other basic input types
-const isDefaultTouched = touchedFields && touchedFields[field.id];
-const showError = isDefaultTouched && field.required && (!value || value === '');
-  
-  return (
-    <div>
-      <input
-        type={field.type}
-        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${
-          showError ? 'border-red-500' : ''
-        }`}
-        value={value}
-        onFocus={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: false }));
-        }}
-        onBlur={() => {
-          setTouchedFields(prev => ({ ...prev, [field.id]: true }));
-        }}
-        onChange={(e) => updateField(field.id, e.target.value)}
-      />
-      {showError && (
-        <div className="mt-1 text-sm text-red-600">
-          ⚠️ This field is required
-        </div>
-      )}
-    </div>
-  );
+      case 'section-header':
+        return (
+          <div className="border-t-2 border-blue-200 pt-6 mt-8 mb-4 first:border-t-0 first:pt-0 first:mt-0">
+            <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+              <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+              {field.label}
+            </h4>
+          </div>
+        );
+
+      case 'date-with-current-job':
+        const isDateCurrentJobTouched = touchedFields && touchedFields[field.id];
+        const isCurrentJob = currentData[field.id + '_current'] === true;
+        const showDateCurrentJobError = isDateCurrentJobTouched && field.required && !isCurrentJob && (!value || value === '');
+
+        return (
+          <div>
+            <div className="flex items-center space-x-4">
+              <input
+                type="date"
+                className={`flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showDateCurrentJobError ? 'border-red-500' : ''}`}
+                value={isCurrentJob ? '' : (value || '')}
+                disabled={isCurrentJob}
+                onFocus={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
+                onChange={(e) => {
+                  updateField(field.id, e.target.value);
+                  updateField(field.id + '_current', false);
+                }}
+              />
+              <button
+                type="button"
+                className={`px-4 py-2 rounded transition-colors ${isCurrentJob
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                onClick={() => {
+                  const newCurrentState = !isCurrentJob;
+                  updateField(field.id + '_current', newCurrentState);
+                  if (newCurrentState) {
+                    updateField(field.id, '');
+                  }
+                }}
+              >
+                {isCurrentJob ? '✓ Current Job' : 'This is my current job'}
+              </button>
+            </div>
+            {showDateCurrentJobError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ Please enter an end date or mark as current job
+              </div>
+            )}
+          </div>
+        );
+
+      case 'add-employer-button':
+        const employerCount = currentData['sponsorEmployerCount'] || 2;
+        return (
+          <div className="mt-4">
+            <button
+              type="button"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              onClick={() => {
+                const newCount = employerCount + 1;
+                updateField('sponsorEmployerCount', newCount);
+              }}
+            >
+              + Add Another Employer
+            </button>
+          </div>
+        );
+
+      case 'dynamic-employers':
+        const employerCount = currentData['sponsorEmployerCount'] || 2;
+        console.log('Rendering dynamic-employers with count:', employerCount);
+        if (employerCount <= 2) {
+          return null; // No additional employers to show
+        }
+
+        return (
+          <div>
+            {Array.from({ length: employerCount - 2 }, (_, i) => {
+              const employerNum = i + 3;
+              return (
+                <div key={employerNum} className="mb-6">
+                  <div className="border-t-2 border-blue-200 pt-6 mt-8 mb-4">
+                    <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                      <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                      Employer {employerNum}
+                    </h4>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Company Name */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Company/Organization Name *</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={currentData[`sponsorEmployer${employerNum}Name`] || ''}
+                        onChange={(e) => updateField(`sponsorEmployer${employerNum}Name`, e.target.value)}
+                      />
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Employer Address *</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="Full employer address"
+                        value={currentData[`sponsorEmployer${employerNum}Address`] || ''}
+                        onChange={(e) => updateField(`sponsorEmployer${employerNum}Address`, e.target.value)}
+                      />
+                    </div>
+
+                    {/* Job Title */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Your Job Title/Occupation *</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={currentData[`sponsorEmployer${employerNum}Occupation`] || ''}
+                        onChange={(e) => updateField(`sponsorEmployer${employerNum}Occupation`, e.target.value)}
+                      />
+                    </div>
+
+                    {/* Start Date */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Employment Start Date *</label>
+                      <input
+                        type="date"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={currentData[`sponsorEmployer${employerNum}StartDate`] || ''}
+                        onChange={(e) => updateField(`sponsorEmployer${employerNum}StartDate`, e.target.value)}
+                      />
+                    </div>
+
+                    {/* End Date */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Employment End Date *</label>
+                      <input
+                        type="date"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={currentData[`sponsorEmployer${employerNum}EndDate`] || ''}
+                        onChange={(e) => updateField(`sponsorEmployer${employerNum}EndDate`, e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+
+      case 'date-with-current-activity':
+        const isDateCurrentActivityTouched = touchedFields && touchedFields[field.id];
+        const isCurrentActivity = currentData[field.id + '_current'] === true;
+        const showDateCurrentActivityError = isDateCurrentActivityTouched && field.required && !isCurrentActivity && (!value || value === '');
+
+        return (
+          <div>
+            <div className="flex items-center space-x-4">
+              <input
+                type="date"
+                className={`flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showDateCurrentActivityError ? 'border-red-500' : ''}`}
+                value={isCurrentActivity ? '' : (value || '')}
+                disabled={isCurrentActivity}
+                onFocus={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+                }}
+                onBlur={() => {
+                  setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+                }}
+                onChange={(e) => {
+                  updateField(field.id, e.target.value);
+                  updateField(field.id + '_current', false);
+                }}
+              />
+              <button
+                type="button"
+                className={`px-4 py-2 rounded transition-colors ${isCurrentActivity
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                onClick={() => {
+                  const newCurrentState = !isCurrentActivity;
+                  updateField(field.id + '_current', newCurrentState);
+                  if (newCurrentState) {
+                    updateField(field.id, '');
+                  }
+                }}
+              >
+                {isCurrentActivity ? '✓ Current Activity' : 'This is my current activity'}
+              </button>
+            </div>
+            {showDateCurrentActivityError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ Please enter an end date or mark as current activity
+              </div>
+            )}
+          </div>
+        );
+
+      case 'employment-gap-detector':
+        // This will analyze employment dates and show gap explanations
+        const employmentGaps = detectEmploymentGaps(currentData);
+
+        if (employmentGaps.length === 0) {
+          return (
+            <div className="bg-green-50 border-l-4 border-green-300 pl-3 py-3 rounded">
+              <span className="text-green-600">✅ No gaps detected in your employment history</span>
+            </div>
+          );
+        }
+
+        return (
+          <div>
+            <div className="bg-amber-50 border-l-4 border-amber-300 pl-3 py-3 rounded mb-4">
+              <span className="text-amber-800 font-medium">⚠️ We found {employmentGaps.length} gap(s) in your employment history that need explanation:</span>
+            </div>
+            {employmentGaps.map((gap, index) => (
+              <div key={index} className="mb-4 p-4 border rounded">
+                <h5 className="font-medium mb-2">Gap #{index + 1}: {gap.startDate} to {gap.endDate}</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      What were you doing during this period?
+                    </label>
+                    <select
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={currentData[`gapActivity_${index}`] || ''}
+                      onChange={(e) => updateField(`gapActivity_${index}`, e.target.value)}
+                    >
+                      <option value="">Select activity...</option>
+                      <option value="Unemployed">Unemployed (job searching)</option>
+                      <option value="Student">Student</option>
+                      <option value="Homemaker">Homemaker</option>
+                      <option value="Stay-at-home parent">Stay-at-home parent</option>
+                      <option value="Between jobs">Between jobs</option>
+                      <option value="Medical leave">Medical leave</option>
+                      <option value="Military service">Military service</option>
+                      <option value="Retired">Retired</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  {currentData[`gapActivity_${index}`] === 'Other' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Please specify:
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={currentData[`gapExplanation_${index}`] || ''}
+                        onChange={(e) => updateField(`gapExplanation_${index}`, e.target.value)}
+                        placeholder="Explain your activity during this period"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        // This handles 'text', 'number', and any other basic input types
+        const isDefaultTouched = touchedFields && touchedFields[field.id];
+        const showError = isDefaultTouched && field.required && (!value || value === '');
+
+        return (
+          <div>
+            <input
+              type={field.type}
+              className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${showError ? 'border-red-500' : ''
+                }`}
+              value={value}
+              placeholder={field.placeholder}
+              onFocus={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+              }}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+              }}
+              onChange={(e) => updateField(field.id, e.target.value)}
+            />
+            {showError && (
+              <div className="mt-1 text-sm text-red-600">
+                ⚠️ This field is required
+              </div>
+            )}
+          </div>
+        );
     }
   };
 
-return (
+  return (
     <>
       {/* Info Panel for In Care Of */}
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
-        showInfoPanel ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${showInfoPanel ? 'translate-x-0' : 'translate-x-full'
+        }`}>
         <div className="h-full overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -3281,36 +3649,36 @@ return (
                 </svg>
               </button>
             </div>
-            
+
             <div className="space-y-4 text-sm text-gray-700">
               <p className="text-gray-600">
-                "In Care Of" (often abbreviated as "c/o") is used when mail for you is being sent to someone else's address. 
+                "In Care Of" (often abbreviated as "c/o") is used when mail for you is being sent to someone else's address.
                 It tells the postal service who should receive and hold your mail at that address.
               </p>
-              
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-900 mb-3">Common Examples:</h4>
-                
+
                 <div className="space-y-3">
                   <div className="border-l-4 border-blue-400 pl-3">
                     <p className="font-medium text-blue-800">Living with someone temporarily:</p>
                     <p className="text-gray-600 text-xs mt-1">You're staying with your friend John Smith</p>
                     <div className="bg-white rounded p-2 mt-2 text-xs font-mono">
-                      In Care Of: John Smith<br/>
-                      123 Main Street<br/>
+                      In Care Of: John Smith<br />
+                      123 Main Street<br />
                       City, State ZIP
                     </div>
                   </div>
-                  
+
                   <div className="border-l-4 border-blue-400 pl-3">
                     <p className="font-medium text-blue-800">Using a business address:</p>
                     <p className="text-gray-600 text-xs mt-1">You receive mail at your workplace</p>
                     <div className="bg-white rounded p-2 mt-2 text-xs font-mono">
-                      In Care Of: ABC Company<br/>
+                      In Care Of: ABC Company<br />
                       456 Business Blvd
                     </div>
                   </div>
-                  
+
                   <div className="border-l-4 border-blue-400 pl-3">
                     <p className="font-medium text-blue-800">Staying with family:</p>
                     <p className="text-gray-600 text-xs mt-1">Living with parents but mail comes in their name</p>
@@ -3318,17 +3686,17 @@ return (
                       In Care Of: Mr. and Mrs. Johnson
                     </div>
                   </div>
-                  
+
                   <div className="border-l-4 border-blue-400 pl-3">
                     <p className="font-medium text-blue-800">Using a mail service:</p>
                     <div className="bg-white rounded p-2 mt-2 text-xs font-mono">
-                      In Care Of: UPS Store #1234<br/>
+                      In Care Of: UPS Store #1234<br />
                       Or: Your Attorney's Name
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-900 mb-2">Why you might use it:</h4>
                 <ul className="list-disc list-inside space-y-1 text-xs text-gray-600">
@@ -3338,11 +3706,11 @@ return (
                   <li>Having someone reliable receive time-sensitive USCIS mail</li>
                 </ul>
               </div>
-              
+
               <div className="bg-gray-100 rounded-lg p-3">
                 <p className="font-semibold text-gray-800 text-sm">✨ Bottom line:</p>
                 <p className="text-xs mt-1">
-                  If mail comes directly to you at your own address, leave this blank. Only fill it in if someone 
+                  If mail comes directly to you at your own address, leave this blank. Only fill it in if someone
                   else's name needs to be on the mail for it to be properly delivered to you.
                 </p>
               </div>
@@ -3350,257 +3718,435 @@ return (
           </div>
         </div>
       </div>
-      
+
       {/* Overlay when panel is open */}
       {showInfoPanel && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setShowInfoPanel(false)}
         />
       )}
-      
-      <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">K-1 Visa Application</h1>
-        <p className="text-gray-600 mb-4">Complete form with organized subsections</p>
-        <div className="bg-blue-50 border border-blue-200 rounded p-3">
-          <p className="text-blue-800 text-sm">
-            ✨ The "Sponsor Identity & Demographics" section now has clickable subsection ribbons to organize the questions!
-          </p>
-        </div>
-      </div>
 
-      {sections.map((section, index) => (
-        <div key={section.id} className="bg-white rounded-lg shadow-lg mb-4">
-          <div className="p-6 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => toggleSection(index)}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800">{section.title}</h3>
-                  <p className="text-gray-600">{section.subtitle}</p>
-                  <div className="flex items-center space-x-4 mt-2">
-                    <span className="text-sm text-blue-600 font-medium">
-                      {section.questionCount} questions
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {section.role === 'sponsor' ? '👤 Sponsor' : '💑 Beneficiary'}
-                    </span>
-                    {section.hasSubsections && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                        Organized in subsections
+      <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">K-1 Visa Application</h1>
+          <p className="text-gray-600 mb-4">Complete form with organized subsections</p>
+          <div className="bg-blue-50 border border-blue-200 rounded p-3">
+            <p className="text-blue-800 text-sm">
+              ✨ The "Sponsor Identity & Demographics" section now has clickable subsection ribbons to organize the questions!
+            </p>
+          </div>
+        </div>
+
+        {sections.map((section, index) => (
+          <div key={section.id} className="bg-white rounded-lg shadow-lg mb-4">
+            <div className="p-6 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => toggleSection(index)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">{section.title}</h3>
+                    <p className="text-gray-600">{section.subtitle}</p>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <span className="text-sm text-blue-600 font-medium">
+                        {section.questionCount} questions
                       </span>
-                    )}
+                      <span className="text-sm text-gray-500">
+                        {section.role === 'sponsor' ? '👤 Sponsor' : '💑 Beneficiary'}
+                      </span>
+                      {section.hasSubsections && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          Organized in subsections
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="text-gray-400">
-                {expandedSections[index] ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+                <div className="text-gray-400">
+                  {expandedSections[index] ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+                </div>
               </div>
             </div>
-          </div>
 
-          {expandedSections[index] && (
-            <div className="border-t border-gray-200">
-              {section.hasSubsections ? (
-                <div className="space-y-2 p-4">
-                  {section.subsections.map((subsection) => {
-                    const subsectionKey = `${index}-${subsection.id}`;
-                    const isExpanded = expandedSubsections[subsectionKey];
-                    const IconComponent = subsection.icon;
+            {expandedSections[index] && (
+              <div className="border-t border-gray-200">
+                {section.hasSubsections ? (
+                  <div className="space-y-2 p-4">
+                    {section.subsections.map((subsection) => {
+                      const subsectionKey = `${index}-${subsection.id}`;
+                      const isExpanded = expandedSubsections[subsectionKey];
+                      const IconComponent = subsection.icon;
 
-                    return (
-                      <div key={subsection.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-4 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
-                          onClick={() => toggleSubsection(index, subsection.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg">
-                                <IconComponent size={20} />
+                      return (
+                        <div key={subsection.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-4 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
+                            onClick={() => toggleSubsection(index, subsection.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg">
+                                  <IconComponent size={20} />
+                                </div>
+                                <div>
+                                  <h4 className="text-lg font-semibold text-gray-800">{subsection.title}</h4>
+                                  <p className="text-sm text-gray-600">{subsection.description}</p>
+                                  <span className="text-xs text-blue-600 font-medium">
+                                    {subsection.questionCount} questions
+                                  </span>
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="text-lg font-semibold text-gray-800">{subsection.title}</h4>
-                                <p className="text-sm text-gray-600">{subsection.description}</p>
-                                <span className="text-xs text-blue-600 font-medium">
-                                  {subsection.questionCount} questions
-                                </span>
+                              <div className="text-gray-400">
+                                {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                               </div>
-                            </div>
-                            <div className="text-gray-400">
-                              {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                             </div>
                           </div>
-                        </div>
 
-                        {isExpanded && (
-                          <div className="p-6 bg-white">
-                            <div className="space-y-6">
-                              {subsection.fields.map((field) => {
-                                // Check if form should be grayed out for marital section
-                                const isMaritalSection = subsection.id === '1.4-marital';
-                                const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-                                const marriedTo = currentData['marriedTo'] || '';
-                                const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
-                                
-                                // Gray out form except for marital status dropdown and married eligibility check questions
-                                const shouldGrayField = isMaritalSection && 
-                                  maritalStatus === 'Married' &&
-                                  (marriedTo === 'sponsor' || (marriedTo === 'someone-else' && !preparingWhileDivorcing)) &&
-                                  field.id !== 'sponsorMaritalStatus' && 
-                                  field.id !== 'marriedEligibilityCheck';
-                                
-                                return (
-                                <div key={field.id} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
-{!field.hideLabel ? (
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    <span className="inline-flex items-center">
-      {(() => {
-        // Dynamic label for sponsorStatusDate based on marital status
-        if (field.id === 'sponsorStatusDate') {
-          const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-          const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
-          if (maritalStatus === 'Divorced') {
-            return `Date`;
-          } else if (maritalStatus === 'Widowed') {
-            return `When did ${sponsorFirstName}'s latest spouse pass away?`;
-          }
-          return field.label;
-        }
-        // Replace placeholder for other fields
-        return field.label.replace('[SponsorFirstName]', currentData['sponsorFirstName'] || '[SponsorFirstName]');
-      })()}
-      {field.required && <span className="text-red-500 ml-1">*</span>}
-      {field.hasInfo && field.id === 'sponsorInCareOf' && (
-        <button
-          type="button"
-          onClick={() => setShowInfoPanel(!showInfoPanel)}
-          className="ml-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-0.5 rounded border border-blue-300 transition-colors"
-        >
-          What's this?
-        </button>
-      )}
-    </span>
-  </label>
-) : null}
+                          {isExpanded && (
+                            <div className="p-6 bg-white">
+                              <div className="space-y-6">
+                                {subsection.fields.map((field) => {
+                                  // Check if form should be grayed out for marital section
+                                  const isMaritalSection = subsection.id === '1.4-marital';
+                                  const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                  const marriedTo = currentData['marriedTo'] || '';
+                                  const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
 
-                                  {field.conditional ? (
-                                    (() => {
-                                      const hasCert = currentData['sponsorHasCertificate'] || '';
-                                      const physicalSameCheck = currentData['sponsorPhysicalSame'] || '';
-                                      const employmentStatus = currentData['sponsorEmploymentStatus'] || '';
+                                  // Gray out form except for marital status dropdown and married eligibility check questions
+                                  const shouldGrayField = isMaritalSection &&
+                                    maritalStatus === 'Married' &&
+                                    (marriedTo === 'sponsor' || (marriedTo === 'someone-else' && !preparingWhileDivorcing)) &&
+                                    field.id !== 'sponsorMaritalStatus' &&
+                                    field.id !== 'marriedEligibilityCheck';
 
-                                      if (field.id.includes('Cert')) {
-                                        if (hasCert === 'Yes') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                  return (
+                                    <div key={field.id} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
+                                      {!field.hideLabel && field.type !== 'section-header' ? (
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                          <span className="inline-flex items-center">
+                                            {(() => {
+                                              // Dynamic label for sponsorStatusDate based on marital status
+                                              if (field.id === 'sponsorStatusDate') {
+                                                const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                                const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
+                                                if (maritalStatus === 'Divorced') {
+                                                  return `Date`;
+                                                } else if (maritalStatus === 'Widowed') {
+                                                  return `Date`;
+                                                }
+                                                return field.label;
+                                              }
+                                              // Special labels for married users preparing while divorcing
+                                              const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                              const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+                                              const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
 
-                                      if (field.id === 'sponsorPhysicalAddress') {
-                                        if (physicalSameCheck === 'No') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                              if (maritalStatus === 'Married' && preparingWhileDivorcing) {
+                                                if (field.id === 'sponsorPreviousMarriages') {
+                                                  return `Including ${sponsorFirstName}'s current marriage, how many times has ${sponsorFirstName} been married?`;
+                                                }
+                                                if (field.id === 'sponsorMarriageHistory') {
+                                                  return `Marriage Details (including [SponsorFirstName]'s current marriage)`;
+                                                }
+                                              }
 
-                                      if (field.id === 'sponsorAddressDuration') {
-                                        if (physicalSameCheck === 'Yes') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                              // Replace placeholder for other fields
+                                              return field.label.replace('[SponsorFirstName]', sponsorFirstName);
+                                            })()}
+                                            {field.required && <span className="text-red-500 ml-1">*</span>}
+                                            {field.hasInfo && field.id === 'sponsorInCareOf' && (
+                                              <button
+                                                type="button"
+                                                onClick={() => setShowInfoPanel(!showInfoPanel)}
+                                                className="ml-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-0.5 rounded border border-blue-300 transition-colors"
+                                              >
+                                                What's this?
+                                              </button>
+                                            )}
+                                          </span>
+                                        </label>
+                                      ) : null}
 
-                                      if (field.id === 'sponsorOccupation' || field.id === 'sponsorEmployer' || field.id === 'sponsorEmployerAddress') {
-                                        if (employmentStatus && (employmentStatus.includes('Employed') || employmentStatus === 'Self-Employed') && employmentStatus !== 'Unemployed or Not Employed') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                      {field.conditional ? (
+                                        (() => {
+                                          const hasCert = currentData['sponsorHasCertificate'] || '';
+                                          const physicalSameCheck = currentData['sponsorPhysicalSame'] || '';
+                                          const employmentStatus = currentData['sponsorEmploymentStatus'] || '';
 
-                                      // Handle marital status special cases
-                                      if (field.id === 'sponsorStatusDate') {
-                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-                                        // Only show for widowed (not divorced, since divorce date is captured in marriage history)
-                                        if (maritalStatus === 'Widowed') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                          if (field.id.includes('Cert')) {
+                                            if (hasCert === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
 
-                                      if (field.id === 'marriedEligibilityCheck') {
-                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-                                        if (maritalStatus === 'Married') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                          if (field.id === 'sponsorPhysicalAddress') {
+                                            if (physicalSameCheck === 'No') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
 
-                                      if (field.id === 'sponsorPreviousMarriages') {
-                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-                                        // Show for all statuses except Married (since married people are in different flow)
-                                        if (maritalStatus !== 'Married') {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                          if (field.id === 'sponsorAddressDuration') {
+                                            if (physicalSameCheck === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
 
-                                      if (field.id === 'sponsorMarriageHistory') {
-                                        const maritalStatus = currentData['sponsorMaritalStatus'] || '';
-                                        const previousMarriages = parseInt(currentData['sponsorPreviousMarriages']) || 0;
-                                        // Show marriage history for anyone with previous marriages (Single, Divorced, Widowed)
-                                        if (maritalStatus !== 'Married' && previousMarriages > 0) {
-                                          return renderField(field);
-                                        }
-                                        return null;
-                                      }
+                                          if (field.id === 'sponsorOccupation' || field.id === 'sponsorEmployer' || field.id === 'sponsorEmployerAddress') {
+                                            if (employmentStatus && (employmentStatus.includes('Employed') || employmentStatus === 'Self-Employed') && employmentStatus !== 'Unemployed or Not Employed') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
 
-                                      return renderField(field);
-                                    })()
-                                  ) : (
-                                    <div>
-                                      {renderField(field)}
-                                      {/* Show help text if available */}
-                                      {field.helpText && (
-                                        <p className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
-                                          💡 {field.helpText}
-                                        </p>
+                                          // Handle marital status special cases
+                                          if (field.id === 'sponsorStatusDate') {
+                                            // Don't show this field anymore - marriage end dates are captured in marriage history
+                                            return null;
+                                          }
+
+                                          if (field.id === 'marriedEligibilityCheck') {
+                                            const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                            if (maritalStatus === 'Married') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          if (field.id === 'sponsorPreviousMarriages') {
+                                            const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                            const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+                                            // Show for all statuses except Married (unless they're preparing while divorcing)
+                                            if (maritalStatus !== 'Married' || (maritalStatus === 'Married' && preparingWhileDivorcing)) {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          if (field.id === 'sponsorMarriageHistory') {
+                                            const maritalStatus = currentData['sponsorMaritalStatus'] || '';
+                                            const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
+                                            const previousMarriages = parseInt(currentData['sponsorPreviousMarriages']) || 0;
+                                            // Show marriage history for anyone with previous marriages (Single, Divorced, Widowed)
+                                            // OR for married people preparing while divorcing
+                                            if ((maritalStatus !== 'Married' && previousMarriages > 0) ||
+                                              (maritalStatus === 'Married' && preparingWhileDivorcing && previousMarriages > 0)) {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // Handle parent field visibility
+                                          if (field.id.includes('Parent1') || field.id.includes('Parent2')) {
+                                            const parentCountSelection = currentData['sponsorParentCount'] || '';
+                                            const parentCount = parseInt(parentCountSelection);
+
+                                            if (field.id.includes('Parent1')) {
+                                              if (parentCountSelection && parentCount >= 1) {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {/* Show help text for Parent 1 fields */}
+                                                    {field.helpText && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+
+                                            if (field.id.includes('Parent2')) {
+                                              if (parentCountSelection && parentCount >= 2) {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {/* Show help text for Parent 2 fields */}
+                                                    {field.helpText && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+                                          }
+
+                                          // Handle employment field visibility
+                                          if (field.id.includes('Employer1') || field.id.includes('Employer2') || field.id.includes('sponsorHasMoreEmployers') || field.id.includes('AddMoreEmployersButton') || field.id.includes('DynamicEmployers') || field.id.includes('NonEmployment') || field.id.includes('GapDetection')) {
+                                            const hasEmployment = currentData['sponsorHasEmployment'] === 'Yes';
+                                            const hasMoreEmployers = currentData['sponsorHasMoreEmployers'] === 'Yes';
+
+                                            // Show employment question and Employer 1 fields when has employment
+                                            if (field.id.includes('Employer1') || field.id === 'sponsorHasMoreEmployers' || field.id === 'sponsorGapDetection') {
+                                              if (hasEmployment) {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {field.helpText && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+
+                                            // Show Employer 2 fields, Add More button, and Dynamic Employers when has more employers
+                                            if (field.id.includes('Employer2') || field.id.includes('AddMoreEmployersButton') || field.id === 'sponsorDynamicEmployers') {
+                                              if (hasEmployment && hasMoreEmployers) {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {field.helpText && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+
+                                            // Show non-employment fields when has no employment
+                                            if (field.id.includes('NonEmployment')) {
+                                              if (!hasEmployment) {
+                                                // Show "Other" text field only when "Other" is selected
+                                                if (field.id === 'sponsorNonEmploymentOther') {
+                                                  if (currentData['sponsorNonEmploymentActivity'] === 'Other') {
+                                                    return (
+                                                      <div>
+                                                        {renderField(field)}
+                                                        {field.helpText && (
+                                                          <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                            <span>💡 </span>
+                                                            {field.helpText.split('\n').map((line, index) => (
+                                                              <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                                {line}
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    );
+                                                  }
+                                                  return null;
+                                                }
+
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {field.helpText && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+                                          }
+
+                                          return (
+                                            <div>
+                                              {renderField(field)}
+                                              {/* Show help text for conditional fields */}
+                                              {field.helpText && (
+                                                <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                  <span>💡 </span>
+                                                  {field.helpText.split('\n').map((line, index) => (
+                                                    <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                      {line}
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })()
+                                      ) : (
+                                        <div>
+                                          {renderField(field)}
+                                          {/* Show help text if available */}
+                                          {field.helpText && (
+                                            <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                              <span>💡 </span>
+                                              {field.helpText.split('\n').map((line, index) => (
+                                                <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                  {line}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
                                       )}
                                     </div>
-                                  )}
-                                </div>
-                                );
-                              })}
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="px-6 pb-6">
-                  <div className="space-y-6 mt-6">
-                    {section.fields.map((field) => (
-                      <div key={field.id}>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {field.label}
-                          {field.required && <span className="text-red-500 ml-1">*</span>}
-                        </label>
-                        {renderField(field)}
-                      </div>
-                    ))}
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
+                ) : (
+                  <div className="px-6 pb-6">
+                    <div className="space-y-6 mt-6">
+                      {section.fields.map((field) => (
+                        <div key={field.id}>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {field.label}
+                            {field.required && <span className="text-red-500 ml-1">*</span>}
+                          </label>
+                          {renderField(field)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </>
   );
 };
