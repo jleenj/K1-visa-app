@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronRight, ChevronDown, Check, Info, User, Users, FileText, Home, Phone, MapPin } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -412,50 +412,20 @@ const K1VisaQuestionnaire = () => {
     {
       id: '1.6-employment',
       title: '1.6 Employment & Work History',
+      description: '',
+      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Please provide your work details for the full 5 years before the date you plan to file this petition.\n\n• Employment: Include all jobs, even part-time or temporary positions\n• Education: Include all schools, training programs, or educational periods  \n• Unemployment: Include periods of job searching, between jobs, or not working\n• Other Periods: Include military service, medical leave, or other significant periods',
       icon: FileText,
-      description: 'Employment history for the last 5 years (I-129F Items 13-20)',
-      helpText: 'USCIS requires a complete 5-year history with no unexplained gaps. You must account for ALL periods - including employment, unemployment, education, family care, etc. Having gaps won\'t cause petition denial, but leaving them unexplained may trigger a Request for Evidence (RFE).',
       questionCount: 8,
       fields: [
-        { id: 'sponsorHasEmployment', label: 'Have you been employed in the last 5 years?', type: 'select', options: ['Yes', 'No'], required: true, helpText: 'This includes any job, self-employment, or business ownership in the past 5 years. If you answer "No," you\'ll need to explain what you were doing (e.g., "Student," "Homemaker," "Stay-at-home parent," "Unemployed," "Retired," etc.)' },
+        // Work history periods
+        { id: 'sponsorTimeline', label: '5-Year Work History', type: 'chronological-timeline', required: true },
 
-        // First Employer (always shown when has employment = Yes)
-        { id: 'sponsorEmployer1Header', type: 'section-header', label: 'Employer 1 (Current or Most Recent)', conditional: true },
-        { id: 'sponsorEmployer1Name', label: 'Company/Organization Name', type: 'text', required: true, conditional: true },
-        { id: 'sponsorEmployer1Address', label: 'Employer Address', type: 'address', required: true, conditional: true },
-        { id: 'sponsorEmployer1Occupation', label: 'Your Job Title/Occupation', type: 'text', required: true, conditional: true },
-        { id: 'sponsorEmployer1StartDate', label: 'Employment Start Date', type: 'date', required: true, conditional: true },
-        { id: 'sponsorEmployer1EndDate', label: 'Employment End Date', type: 'date-with-current-job', required: true, conditional: true, helpText: 'Select the end date or mark as current job' },
-
-        // Add more employers option
-        { id: 'sponsorHasMoreEmployers', label: 'Do you have other employers to add?', type: 'select', options: ['No', 'Yes'], required: false, conditional: true },
-
-        // Employer 2 (shown when has more employers = Yes)
-        { id: 'sponsorEmployer2Header', type: 'section-header', label: 'Employer 2', conditional: true },
-        { id: 'sponsorEmployer2Name', label: 'Company/Organization Name', type: 'text', required: true, conditional: true },
-        { id: 'sponsorEmployer2Address', label: 'Employer Address', type: 'address', required: true, conditional: true },
-        { id: 'sponsorEmployer2Occupation', label: 'Your Job Title/Occupation', type: 'text', required: true, conditional: true },
-        { id: 'sponsorEmployer2StartDate', label: 'Employment Start Date', type: 'date', required: true, conditional: true },
-        { id: 'sponsorEmployer2EndDate', label: 'Employment End Date', type: 'date', required: true, conditional: true },
-
-        // Add even more employers button
-        { id: 'sponsorAddMoreEmployersButton', label: 'Add Another Employer', type: 'add-employer-button', required: false, conditional: true },
-
-        // Dynamic employer fields (will be rendered when employerCount > 2)
-        { id: 'sponsorDynamicEmployers', label: 'Additional Employers', type: 'dynamic-employers', required: false, conditional: true },
-
-        // Non-employment periods (for those who answered No to employment)
-        { id: 'sponsorNonEmploymentHeader', type: 'section-header', label: 'Activity During the Last 5 Years', conditional: true },
-        { id: 'sponsorNonEmploymentActivity', label: 'What was your primary activity during this period?', type: 'select', options: ['Student', 'Homemaker', 'Stay-at-home parent', 'Unemployed', 'Retired', 'Disabled/Medical leave', 'Military service', 'Other'], required: true, conditional: true },
-        { id: 'sponsorNonEmploymentOther', label: 'Please specify other activity', type: 'text', required: true, conditional: true },
-        { id: 'sponsorNonEmploymentStartDate', label: 'Start Date of this activity', type: 'date', required: true, conditional: true },
-        { id: 'sponsorNonEmploymentEndDate', label: 'End Date of this activity', type: 'date-with-current-activity', required: true, conditional: true, helpText: 'Enter end date or mark as current activity' },
-
-        // Gap detection and explanation
-        { id: 'sponsorGapDetection', label: 'Employment History Gap Analysis', type: 'employment-gap-detector', required: false, conditional: true, helpText: 'We\'ll analyze your employment dates to identify any gaps that need explanation. Common reasons include: Student, Homemaker, Stay-at-home parent, Unemployed (job searching), Medical leave, Between jobs, Military service, Retired, or Other circumstances.' }
+        // Summary and gap check
+        { id: 'sponsorTimelineSummary', label: 'Work History Summary', type: 'timeline-summary', required: false }
       ]
     }
   ];
+
 
   // Financial sections are large, so I'm breaking them into subsections
   const sponsorFinancialSubsections = [
@@ -631,8 +601,78 @@ const K1VisaQuestionnaire = () => {
     return gaps;
   };
 
+  // Calculate timeline coverage for chronological timeline system
+  const calculateTimelineCoverage = (entries) => {
+    if (entries.length === 0) return { covered: 0, total: 5 * 365, gaps: [] };
+
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+
+    // Sort entries by end date (most recent first), treating null as current date
+    const sortedEntries = [...entries].sort((a, b) => {
+      const aEndDate = a.isCurrent ? new Date() : new Date(a.endDate || '1970-01-01');
+      const bEndDate = b.isCurrent ? new Date() : new Date(b.endDate || '1970-01-01');
+      return bEndDate - aEndDate;
+    });
+
+    let totalDaysCovered = 0;
+    let gaps = [];
+    let currentDate = new Date(); // Today
+
+    for (let i = 0; i < sortedEntries.length; i++) {
+      const entry = sortedEntries[i];
+      // For current activities (isCurrent=true), use today's date as end date
+      const entryEndDate = entry.isCurrent ? new Date() : new Date(entry.endDate);
+      const entryStartDate = new Date(entry.startDate);
+
+      // Skip if dates are invalid
+      if (isNaN(entryStartDate.getTime()) || (entry.endDate && isNaN(entryEndDate.getTime()))) {
+        continue;
+      }
+
+      // Check for gap before this entry (only if not current activity)
+      if (!entry.isCurrent && currentDate > entryEndDate) {
+        const gapDays = Math.floor((currentDate - entryEndDate) / (1000 * 60 * 60 * 24));
+        if (gapDays > 1) { // Allow 1-day tolerance
+          gaps.push({
+            startDate: entryEndDate.toISOString().split('T')[0],
+            endDate: currentDate.toISOString().split('T')[0],
+            days: gapDays
+          });
+        }
+      }
+
+      // Add covered days from this entry
+      const entryDays = Math.floor((entryEndDate - entryStartDate) / (1000 * 60 * 60 * 24));
+      totalDaysCovered += Math.max(0, entryDays);
+
+      // Update current date for next iteration (only if not current activity)
+      if (!entry.isCurrent) {
+        currentDate = entryStartDate;
+      } else {
+        // For current activities, set current date to start date so we check for gaps before it
+        currentDate = entryStartDate;
+      }
+    }
+
+    // Check for gap before 5-year mark
+    if (currentDate > fiveYearsAgo) {
+      const gapDays = Math.floor((currentDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+      if (gapDays > 0) {
+        gaps.push({
+          startDate: fiveYearsAgo.toISOString().split('T')[0],
+          endDate: currentDate.toISOString().split('T')[0],
+          days: gapDays
+        });
+      }
+    }
+
+    return { covered: totalDaysCovered, total: 5 * 365, gaps };
+  };
+
   const renderField = (field) => {
     const value = currentData[field.id] || '';
+
 
     switch (field.type) {
 
@@ -2485,10 +2525,7 @@ const K1VisaQuestionnaire = () => {
 
         return (
           <div className="space-y-4">
-            <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded p-3">
-              <p className="font-medium text-blue-800 mb-1">💼 Employment History Requirements</p>
-              <p>Provide your previous employment details to complete the <strong>5-year history requirement</strong>.</p>
-            </div>
+            {/* Legacy employment history text removed to prevent duplication with new timeline system */}
 
             {employmentHistoryValue.map((job, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -3406,15 +3443,15 @@ const K1VisaQuestionnaire = () => {
         );
 
       case 'dynamic-employers':
-        const employerCount = currentData['sponsorEmployerCount'] || 2;
-        console.log('Rendering dynamic-employers with count:', employerCount);
-        if (employerCount <= 2) {
+        const dynamicEmployerCount = currentData['sponsorEmployerCount'] || 2;
+        console.log('Rendering dynamic-employers with count:', dynamicEmployerCount);
+        if (dynamicEmployerCount <= 2) {
           return null; // No additional employers to show
         }
 
         return (
           <div>
-            {Array.from({ length: employerCount - 2 }, (_, i) => {
+            {Array.from({ length: dynamicEmployerCount - 2 }, (_, i) => {
               const employerNum = i + 3;
               return (
                 <div key={employerNum} className="mb-6">
@@ -3567,11 +3604,10 @@ const K1VisaQuestionnaire = () => {
                       value={currentData[`gapActivity_${index}`] || ''}
                       onChange={(e) => updateField(`gapActivity_${index}`, e.target.value)}
                     >
-                      <option value="">Select activity...</option>
+                      <option value="">Select type...</option>
                       <option value="Unemployed">Unemployed (job searching)</option>
                       <option value="Student">Student</option>
                       <option value="Homemaker">Homemaker</option>
-                      <option value="Stay-at-home parent">Stay-at-home parent</option>
                       <option value="Between jobs">Between jobs</option>
                       <option value="Medical leave">Medical leave</option>
                       <option value="Military service">Military service</option>
@@ -3596,6 +3632,636 @@ const K1VisaQuestionnaire = () => {
                 </div>
               </div>
             ))}
+          </div>
+        );
+
+      case 'info-panel':
+        return (
+          <div className="bg-blue-50 border-l-4 border-blue-300 pl-4 py-3 rounded mb-4">
+            <div className="flex items-start">
+              <div className="mr-3 mt-0.5">
+                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">i</span>
+                </div>
+              </div>
+              <div>
+                {field.label.split('\n').map((line, index) => (
+                  <p key={index} className={`text-blue-800 text-sm ${index === 0 ? 'font-medium' : ''} ${index > 0 ? 'mt-2' : ''}`}>
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'chronological-timeline':
+        const timelineEntries = currentData['sponsorTimelineEntries'] || [{}];
+
+
+        return (
+          <div>
+
+            {/* Work History Periods */}
+            <div className="space-y-4">
+              {timelineEntries.map((entry, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-white">
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="font-medium text-lg">
+                      {(() => {
+                        const typeMap = {
+                          employment: { icon: '💼', label: 'Job' },
+                          student: { icon: '📚', label: 'Education' },
+                          unemployment: { icon: '🔍', label: 'Unemployment Period' },
+                          homemaker: { icon: '🏠', label: 'Homemaker Period' },
+                          retired: { icon: '🌴', label: 'Retirement Period' },
+                          medical: { icon: '🏥', label: 'Medical Leave' },
+                          military: { icon: '🪖', label: 'Military Service' },
+                          other: { icon: '📝', label: 'Other Period' }
+                        };
+                        const entryInfo = entry.type && typeMap[entry.type] ? typeMap[entry.type] : { icon: '📝', label: 'Work Period' };
+                        return `${entryInfo.icon} ${entryInfo.label} ${index + 1}${index === 0 ? ' (Most Recent)' : ''}`;
+                      })()}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newEntries = timelineEntries.filter((_, i) => i !== index);
+                        updateField('sponsorTimelineEntries', newEntries);
+                      }}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Type</label>
+                      <select
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={entry.type || ''}
+                        onChange={(e) => {
+                          const newEntries = [...timelineEntries];
+                          newEntries[index] = { ...entry, type: e.target.value };
+                          updateField('sponsorTimelineEntries', newEntries);
+                        }}
+                      >
+                        <option value="">Select type...</option>
+                        <option value="employment">Employment</option>
+                        <option value="unemployment">Unemployed</option>
+                        <option value="student">Student</option>
+                        <option value="homemaker">Homemaker</option>
+                        <option value="retired">Retired</option>
+                        <option value="medical">Medical leave</option>
+                        <option value="military">Military service</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* USCIS Guidance Notes for each employment type */}
+                    {entry.type && (
+                      <div className="md:col-span-2 mb-4 p-3 bg-blue-50 border-l-4 border-blue-300 rounded">
+                        <div className="text-sm text-blue-800">
+                          {(() => {
+                            const guidance = {
+                              employment: {
+                                icon: '💼',
+                                title: 'Employment Period',
+                                content: 'USCIS uses this information to verify your work history and assess financial stability.'
+                              },
+                              student: {
+                                icon: '📚',
+                                title: 'Education Period',
+                                content: 'USCIS considers full-time education as valid employment history. Include any relevant degrees or certifications earned.'
+                              },
+                              unemployment: {
+                                icon: '🔍',
+                                title: 'Unemployment Period',
+                                content: 'In Description: Enter "Unemployed" if actively job searching, or "Unemployed - not seeking work" if not. If you had any contract/freelance work, select "Employment" type instead and choose "Contract".'
+                              },
+                              homemaker: {
+                                icon: '🏠',
+                                title: 'Homemaker Period',
+                                content: 'In Description: Enter "Homemaker" or "Stay-at-home parent". If you had any part-time or freelance work during this time, select "Employment" type instead.'
+                              },
+                              retired: {
+                                icon: '🌴',
+                                title: 'Retirement Period',
+                                content: 'In Description: Enter "Retired" or "Retired [former profession]" (e.g., "Retired Teacher"). If you had any part-time work during retirement, select "Employment" type instead.'
+                              },
+                              medical: {
+                                icon: '🏥',
+                                title: 'Medical Leave Period',
+                                content: 'In Description: Enter "Medical Leave" or "Disability Leave". You can mention if it was from a specific employer (e.g., "Medical leave from ABC Corp") but no medical details needed.'
+                              },
+                              military: {
+                                icon: '🪖',
+                                title: 'Military Service Period',
+                                content: 'USCIS may request additional military documentation (DD-214, etc.) to verify service dates and status.'
+                              },
+                              other: {
+                                icon: '📝',
+                                title: 'Other Activity Period',
+                                content: 'In Description: Be specific (e.g., "Volunteer work at Red Cross", "Caring for elderly parent", "Travel/sabbatical", "Starting own business"). If you received any payment, consider selecting "Employment" type instead.'
+                              }
+                            };
+
+                            const info = guidance[entry.type];
+                            return (
+                              <>
+                                <div className="font-medium flex items-center">
+                                  <span className="mr-2">{info.icon}</span>
+                                  {info.title}
+                                </div>
+                                <p className="mt-1">{info.content}</p>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Organization/Employer/School Name - Required for all types */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        {(() => {
+                          const labels = {
+                            employment: 'Company/Organization Name',
+                            student: 'School/Institution Name',
+                            military: 'Branch of Service',
+                            unemployment: 'Description',
+                            homemaker: 'Description',
+                            retired: 'Description',
+                            medical: 'Description',
+                            other: 'Description'
+                          };
+                          return labels[entry.type] || 'Description';
+                        })()}
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={entry.organization || ''}
+                        onChange={(e) => {
+                          const newEntries = [...timelineEntries];
+                          newEntries[index] = { ...entry, organization: e.target.value };
+                          updateField('sponsorTimelineEntries', newEntries);
+                        }}
+                        placeholder={(() => {
+                          const placeholders = {
+                            employment: 'ABC Company Inc.',
+                            student: 'University of ABC',
+                            military: 'U.S. Army',
+                            unemployment: 'Unemployed',
+                            homemaker: 'Homemaker',
+                            retired: 'Retired',
+                            medical: 'Medical Leave',
+                            other: 'Describe your activity'
+                          };
+                          return placeholders[entry.type] || 'Enter details';
+                        })()}
+                      />
+                    </div>
+
+                    {/* Job Title/Position - Required for employment, military, and student */}
+                    {(entry.type === 'employment' || entry.type === 'military' || entry.type === 'student') && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            {entry.type === 'employment' ? 'Job Title' :
+                              entry.type === 'military' ? 'Rank/Position' : 'Program/Degree'}
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={entry.jobTitle || ''}
+                            onChange={(e) => {
+                              const newEntries = [...timelineEntries];
+                              newEntries[index] = { ...entry, jobTitle: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                            placeholder={
+                              entry.type === 'employment' ? 'Software Engineer' :
+                                entry.type === 'military' ? 'Sergeant' : 'Bachelor of Science'
+                            }
+                          />
+                        </div>
+
+                        {/* Employment Status - Full-time/Part-time, Active Duty/Reserve */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            {entry.type === 'employment' ? 'Employment Type' :
+                              entry.type === 'military' ? 'Service Type' : 'Enrollment Status'}
+                          </label>
+                          <select
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={entry.employmentStatus || ''}
+                            onChange={(e) => {
+                              const newEntries = [...timelineEntries];
+                              newEntries[index] = { ...entry, employmentStatus: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                          >
+                            <option value="">Select...</option>
+                            {entry.type === 'employment' && (
+                              <>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Self-employed">Self-employed</option>
+                              </>
+                            )}
+                            {entry.type === 'military' && (
+                              <>
+                                <option value="Active Duty">Active Duty</option>
+                                <option value="Reserve">Reserve</option>
+                                <option value="National Guard">National Guard</option>
+                              </>
+                            )}
+                            {entry.type === 'student' && (
+                              <>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                              </>
+                            )}
+                          </select>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Address - Required for ALL types per USCIS Form I-129F */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium mb-1">
+                        Address {(() => {
+                          const addressLabels = {
+                            employment: '(Employer Address)',
+                            student: '(School Address)',
+                            unemployment: '(Your Residence During This Period)',
+                            homemaker: '(Your Residence During This Period)',
+                            retired: '(Your Residence During This Period)',
+                            medical: '(Your Residence During This Period)',
+                            military: '(Base/Unit Address)',
+                            other: '(Relevant Address for This Period)'
+                          };
+                          return addressLabels[entry.type] || '';
+                        })()}
+                      </label>
+
+                      {/* Smart address handling */}
+                      {(entry.type === 'homemaker' || entry.type === 'unemployment' ||
+                        entry.type === 'retired' || entry.type === 'medical') ? (
+                        <div className="space-y-2">
+                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                            💡 For {entry.type === 'homemaker' ? 'homemaker' : entry.type} periods, USCIS typically expects your home address during this time.
+                            We can pre-fill this with your current address, but please update if you lived elsewhere.
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Pre-fill with current address from earlier sections
+                              const newEntries = [...timelineEntries];
+                              // Get current address from sponsor's current address section
+                              const currentAddress = currentData['sponsorCurrentAddress'] || {};
+                              newEntries[index] = {
+                                ...entry,
+                                country: currentAddress.country || 'United States',
+                                streetAddress: currentAddress.street || '',
+                                unitType: currentAddress.unitType || '',
+                                unitNumber: currentAddress.unitNumber || '',
+                                city: currentAddress.city || '',
+                                state: currentAddress.state || '',
+                                zipCode: currentAddress.zipCode || ''
+                              };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                            className="mb-2 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                          >
+                            Use Current Home Address
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {/* Smart Country-Based Address System */}
+                      <div className="space-y-3">
+                        {/* Country Selection */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Country</label>
+                          <select
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={entry.country || ''}
+                            onChange={(e) => {
+                              const newEntries = [...timelineEntries];
+                              newEntries[index] = { ...entry, country: e.target.value, state: '', zipCode: '' };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                          >
+                            <option value="">Select country...</option>
+                            {phoneCountries.map(c => (
+                              <option key={c.code} value={c.name}>
+                                {c.flag} {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {entry.country && (
+                          <>
+                            {/* Street Address and Unit Details */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Street Address</label>
+                                <input
+                                  type="text"
+                                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                  value={entry.streetAddress || ''}
+                                  onChange={(e) => {
+                                    const newEntries = [...timelineEntries];
+                                    newEntries[index] = { ...entry, streetAddress: e.target.value };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  placeholder="123 Main Street"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Unit Details (Optional)</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <select
+                                    className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    value={entry.unitType || ''}
+                                    onChange={(e) => {
+                                      const newEntries = [...timelineEntries];
+                                      newEntries[index] = { ...entry, unitType: e.target.value };
+                                      updateField('sponsorTimelineEntries', newEntries);
+                                    }}
+                                  >
+                                    <option value="">Select type...</option>
+                                    <option value="Apartment">Apartment</option>
+                                    <option value="Suite">Suite</option>
+                                    <option value="Floor">Floor</option>
+                                  </select>
+                                  <input
+                                    type="text"
+                                    className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    value={entry.unitNumber || ''}
+                                    onChange={(e) => {
+                                      const newEntries = [...timelineEntries];
+                                      newEntries[index] = { ...entry, unitNumber: e.target.value };
+                                      updateField('sponsorTimelineEntries', newEntries);
+                                    }}
+                                    placeholder="Number/ID"
+                                    disabled={!entry.unitType}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* City and State/Province */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  {entry.country === 'United Kingdom' ? 'Town/City' : 'City'}
+                                </label>
+                                <input
+                                  type="text"
+                                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                  value={entry.city || ''}
+                                  onChange={(e) => {
+                                    const newEntries = [...timelineEntries];
+                                    newEntries[index] = { ...entry, city: e.target.value };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  placeholder={entry.country === 'United Kingdom' ? 'London' : 'City name'}
+                                />
+                              </div>
+
+                              <div>
+                                {(() => {
+                                  const countryFormat = addressFormats[entry.country] || addressFormats['United States'];
+                                  return (
+                                    <>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        {countryFormat.stateLabel || 'State/Province'}
+                                      </label>
+                                      {countryFormat.states ? (
+                                        <select
+                                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                          value={entry.state || ''}
+                                          onChange={(e) => {
+                                            const newEntries = [...timelineEntries];
+                                            newEntries[index] = { ...entry, state: e.target.value };
+                                            updateField('sponsorTimelineEntries', newEntries);
+                                          }}
+                                        >
+                                          <option value="">Select {countryFormat.stateLabel}...</option>
+                                          {countryFormat.states.map(stateOption => (
+                                            <option key={stateOption} value={stateOption}>{stateOption}</option>
+                                          ))}
+                                        </select>
+                                      ) : (
+                                        <input
+                                          type="text"
+                                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                          value={entry.state || ''}
+                                          onChange={(e) => {
+                                            const newEntries = [...timelineEntries];
+                                            newEntries[index] = { ...entry, state: e.target.value };
+                                            updateField('sponsorTimelineEntries', newEntries);
+                                          }}
+                                          placeholder={countryFormat.stateLabel || 'State/Province'}
+                                        />
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+
+                            {/* Postal Code */}
+                            <div>
+                              {(() => {
+                                const countryFormat = addressFormats[entry.country] || addressFormats['United States'];
+                                return (
+                                  <>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                                      {countryFormat.postalLabel || 'Postal Code'}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                      value={entry.zipCode || ''}
+                                      onChange={(e) => {
+                                        const newEntries = [...timelineEntries];
+                                        newEntries[index] = { ...entry, zipCode: e.target.value };
+                                        updateField('sponsorTimelineEntries', newEntries);
+                                      }}
+                                      placeholder={countryFormat.postalPlaceholder || 'Enter postal code'}
+                                    />
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Start Date</label>
+                      {/* All entries: User controls start date */}
+                      <input
+                        type="date"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={entry.startDate || ''}
+                        max={index === 0 ? new Date().toISOString().split('T')[0] : (timelineEntries[index - 1]?.startDate || new Date().toISOString().split('T')[0])}
+                        onChange={(e) => {
+                          const newEntries = [...timelineEntries];
+                          newEntries[index] = { ...entry, startDate: e.target.value };
+
+                          // Auto-update the end date of the next entry (Entry N+1) to match this start date
+                          if (newEntries[index + 1]) {
+                            newEntries[index + 1] = { ...newEntries[index + 1], endDate: e.target.value };
+                          }
+
+                          updateField('sponsorTimelineEntries', newEntries);
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">End Date</label>
+                      {index === 0 ? (
+                        // Entry 1: Always current (Present)
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="date"
+                            className="flex-1 p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
+                            value=""
+                            disabled={true}
+                            placeholder="Present (Current Activity)"
+                          />
+                        </div>
+                      ) : timelineEntries[index - 1]?.startDate ? (
+                        // Entry N+1: Auto-connected to Entry N's start date
+                        <div>
+                          <input
+                            type="date"
+                            className="flex-1 p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
+                            value={timelineEntries[index - 1].startDate}
+                            disabled={true}
+                            placeholder="Auto-connected"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            ↗️ Auto-connected to Entry {index}'s start date
+                          </p>
+                        </div>
+                      ) : (
+                        // Entry N+1: User can set end date if Entry N has no start date yet
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="date"
+                            className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={entry.endDate || ''}
+                            min={entry.startDate}
+                            max={timelineEntries[index - 1]?.startDate || new Date().toISOString().split('T')[0]}
+                            placeholder="End date"
+                            onChange={(e) => {
+                              const newEntries = [...timelineEntries];
+                              newEntries[index] = { ...entry, endDate: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-2 mt-2">
+                        {index === 0 ? (
+                          // Entry 1 (most recent) is always current
+                          <div className="flex items-center text-sm text-green-700">
+                            <input
+                              type="checkbox"
+                              className="mr-1"
+                              checked={true}
+                              disabled={true}
+                            />
+                            <span className="font-medium">Current (Most Recent)</span>
+                          </div>
+                        ) : (
+                          // Entry 2+ cannot be current
+                          <div className="text-sm text-gray-500 italic">
+                            Historical activity
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add New Entry Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const isFirstEntry = timelineEntries.length === 0;
+
+                  const newEntry = {
+                    type: '',
+                    organization: '',
+                    startDate: '', // User will set this
+                    endDate: isFirstEntry ? null : '', // First entry has null end date (current), others will auto-connect
+                    isCurrent: isFirstEntry // Only first entry is current
+                  };
+
+                  const newEntries = [...timelineEntries, newEntry];
+                  updateField('sponsorTimelineEntries', newEntries);
+                }}
+                className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+              >
+                + Add Work Period
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'timeline-summary':
+        const summaryEntries = currentData['sponsorTimelineEntries'] || [{}];
+
+        if (summaryEntries.length === 0 || (summaryEntries.length === 1 && !summaryEntries[0].type)) {
+          return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+              <p className="text-yellow-800">⚠️ Please add at least one work period to your history above.</p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="bg-white border rounded-lg p-4">
+            <h4 className="font-medium mb-4">📋 Your 5-Year Timeline Summary</h4>
+
+            <div className="space-y-3">
+              {summaryEntries
+                .filter(entry => entry.type) // Filter out empty entries
+                .sort((a, b) => {
+                  const aEndDate = a.isCurrent ? new Date() : new Date(a.endDate || '1970-01-01');
+                  const bEndDate = b.isCurrent ? new Date() : new Date(b.endDate || '1970-01-01');
+                  return bEndDate - aEndDate;
+                })
+                .map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                    <div>
+                      <span className="font-medium">
+                        {entry.type === 'employment' ? entry.organization : entry.type}
+                        {entry.isCurrent && <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Current</span>}
+                      </span>
+                      {entry.jobTitle && <span className="text-gray-600"> - {entry.jobTitle}</span>}
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {entry.startDate} → {entry.isCurrent ? 'Present' : (entry.endDate || 'Not specified')}
+                    </span>
+                  </div>
+                ))}
+            </div>
+
           </div>
         );
 
@@ -3779,6 +4445,7 @@ const K1VisaQuestionnaire = () => {
                       const isExpanded = expandedSubsections[subsectionKey];
                       const IconComponent = subsection.icon;
 
+
                       return (
                         <div key={subsection.id} className="border border-gray-200 rounded-lg overflow-hidden">
                           <div
@@ -3806,8 +4473,18 @@ const K1VisaQuestionnaire = () => {
 
                           {isExpanded && (
                             <div className="p-6 bg-white">
+                              {/* Subsection helpText */}
+                              {subsection.helpText && (
+                                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
+                                  {subsection.helpText.split('\n').map((line, index) => (
+                                    <p key={index} className={`text-blue-800 text-sm ${index === 0 ? 'font-medium' : ''} ${index > 0 ? 'mt-2' : ''}`}>
+                                      {line}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
                               <div className="space-y-6">
-                                {subsection.fields.map((field) => {
+                                {subsection.fields.map((field, fieldIndex) => {
                                   // Check if form should be grayed out for marital section
                                   const isMaritalSection = subsection.id === '1.4-marital';
                                   const maritalStatus = currentData['sponsorMaritalStatus'] || '';
@@ -3822,7 +4499,7 @@ const K1VisaQuestionnaire = () => {
                                     field.id !== 'marriedEligibilityCheck';
 
                                   return (
-                                    <div key={field.id} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
+                                    <div key={`${subsection.id}-${field.id}-${fieldIndex}`} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
                                       {!field.hideLabel && field.type !== 'section-header' ? (
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                           <span className="inline-flex items-center">
@@ -3951,7 +4628,7 @@ const K1VisaQuestionnaire = () => {
                                                   <div>
                                                     {renderField(field)}
                                                     {/* Show help text for Parent 1 fields */}
-                                                    {field.helpText && (
+                                                    {field.helpText && field.type !== 'info-panel' && (
                                                       <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                         <span>💡 </span>
                                                         {field.helpText.split('\n').map((line, index) => (
@@ -3973,7 +4650,7 @@ const K1VisaQuestionnaire = () => {
                                                   <div>
                                                     {renderField(field)}
                                                     {/* Show help text for Parent 2 fields */}
-                                                    {field.helpText && (
+                                                    {field.helpText && field.type !== 'info-panel' && (
                                                       <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                         <span>💡 </span>
                                                         {field.helpText.split('\n').map((line, index) => (
@@ -4001,7 +4678,7 @@ const K1VisaQuestionnaire = () => {
                                                 return (
                                                   <div>
                                                     {renderField(field)}
-                                                    {field.helpText && (
+                                                    {field.helpText && field.type !== 'info-panel' && (
                                                       <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                         <span>💡 </span>
                                                         {field.helpText.split('\n').map((line, index) => (
@@ -4023,7 +4700,7 @@ const K1VisaQuestionnaire = () => {
                                                 return (
                                                   <div>
                                                     {renderField(field)}
-                                                    {field.helpText && (
+                                                    {field.helpText && field.type !== 'info-panel' && (
                                                       <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                         <span>💡 </span>
                                                         {field.helpText.split('\n').map((line, index) => (
@@ -4048,7 +4725,7 @@ const K1VisaQuestionnaire = () => {
                                                     return (
                                                       <div>
                                                         {renderField(field)}
-                                                        {field.helpText && (
+                                                        {field.helpText && field.type !== 'info-panel' && (
                                                           <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                             <span>💡 </span>
                                                             {field.helpText.split('\n').map((line, index) => (
@@ -4067,7 +4744,7 @@ const K1VisaQuestionnaire = () => {
                                                 return (
                                                   <div>
                                                     {renderField(field)}
-                                                    {field.helpText && (
+                                                    {field.helpText && field.type !== 'info-panel' && (
                                                       <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                         <span>💡 </span>
                                                         {field.helpText.split('\n').map((line, index) => (
@@ -4088,7 +4765,7 @@ const K1VisaQuestionnaire = () => {
                                             <div>
                                               {renderField(field)}
                                               {/* Show help text for conditional fields */}
-                                              {field.helpText && (
+                                              {field.helpText && field.type !== 'info-panel' && (
                                                 <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                                   <span>💡 </span>
                                                   {field.helpText.split('\n').map((line, index) => (
@@ -4102,10 +4779,10 @@ const K1VisaQuestionnaire = () => {
                                           );
                                         })()
                                       ) : (
-                                        <div>
+                                        <div key={`${field.id}-${fieldIndex}`}>
                                           {renderField(field)}
                                           {/* Show help text if available */}
-                                          {field.helpText && (
+                                          {field.helpText && field.type !== 'info-panel' && (
                                             <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
                                               <span>💡 </span>
                                               {field.helpText.split('\n').map((line, index) => (
