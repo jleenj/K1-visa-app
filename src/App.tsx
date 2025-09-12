@@ -3670,14 +3670,14 @@ const K1VisaQuestionnaire = () => {
                     <h4 className="font-medium text-lg">
                       {(() => {
                         const typeMap = {
-                          employment: { icon: '💼', label: 'Job' },
-                          student: { icon: '📚', label: 'Education' },
-                          unemployment: { icon: '🔍', label: 'Unemployment Period' },
-                          homemaker: { icon: '🏠', label: 'Homemaker Period' },
-                          retired: { icon: '🌴', label: 'Retirement Period' },
-                          medical: { icon: '🏥', label: 'Medical Leave' },
-                          military: { icon: '🪖', label: 'Military Service' },
-                          other: { icon: '📝', label: 'Other Period' }
+                          'working': { icon: '💼', label: 'Working Period' },
+                          'in-education': { icon: '📚', label: 'Education Period' },
+                          'seeking-work': { icon: '🔍', label: 'Seeking Work Period' },
+                          'caregiving': { icon: '🏠', label: 'Caregiving Period' },
+                          'retired': { icon: '🌴', label: 'Retirement Period' },
+                          'unable-to-work': { icon: '🏥', label: 'Unable to Work Period' },
+                          'military': { icon: '🪖', label: 'Military Service Period' },
+                          'other': { icon: '📝', label: 'Other/Personal Time Period' }
                         };
                         const entryInfo = entry.type && typeMap[entry.type] ? typeMap[entry.type] : { icon: '📝', label: 'Work Period' };
                         return `${entryInfo.icon} ${entryInfo.label} ${index + 1}${index === 0 ? ' (Most Recent)' : ''}`;
@@ -3708,14 +3708,14 @@ const K1VisaQuestionnaire = () => {
                         }}
                       >
                         <option value="">Select type...</option>
-                        <option value="employment">Employment</option>
-                        <option value="unemployment">Unemployed</option>
-                        <option value="student">Student</option>
-                        <option value="homemaker">Homemaker</option>
+                        <option value="working">Working (employed)</option>
+                        <option value="seeking-work">Seeking Work (unemployed + actively searching)</option>
+                        <option value="in-education">In Education (full-time student)</option>
+                        <option value="caregiving">Caregiving (homemaker/family care)</option>
+                        <option value="unable-to-work">Unable to Work (medical/disability)</option>
+                        <option value="military">Military Service</option>
                         <option value="retired">Retired</option>
-                        <option value="medical">Medical leave</option>
-                        <option value="military">Military service</option>
-                        <option value="other">Other</option>
+                        <option value="other">Other/Personal Time</option>
                       </select>
                     </div>
 
@@ -3725,45 +3725,45 @@ const K1VisaQuestionnaire = () => {
                         <div className="text-sm text-blue-800">
                           {(() => {
                             const guidance = {
-                              employment: {
+                              'working': {
                                 icon: '💼',
-                                title: 'Employment Period',
-                                content: 'USCIS uses this information to verify your work history and assess financial stability.'
+                                title: 'Working Period',
+                                content: 'USCIS uses this information to verify your work history and assess financial stability. Include all employment, even part-time or temporary positions.'
                               },
-                              student: {
+                              'seeking-work': {
+                                icon: '🔍',
+                                title: 'Seeking Work Period',
+                                content: 'This covers periods when you were unemployed and actively job searching. In Description: Specify "Job searching" or "Between jobs". If you had any contract/freelance work, select "Working" type instead.'
+                              },
+                              'in-education': {
                                 icon: '📚',
                                 title: 'Education Period',
-                                content: 'USCIS considers full-time education as valid employment history. Include any relevant degrees or certifications earned.'
+                                content: 'USCIS considers full-time education as valid employment history. Include any relevant degrees or certifications earned. This is for students not seeking work.'
                               },
-                              unemployment: {
-                                icon: '🔍',
-                                title: 'Unemployment Period',
-                                content: 'In Description: Enter "Unemployed" if actively job searching, or "Unemployed - not seeking work" if not. If you had any contract/freelance work, select "Employment" type instead and choose "Contract".'
-                              },
-                              homemaker: {
+                              'caregiving': {
                                 icon: '🏠',
-                                title: 'Homemaker Period',
-                                content: 'In Description: Enter "Homemaker" or "Stay-at-home parent". If you had any part-time or freelance work during this time, select "Employment" type instead.'
+                                title: 'Caregiving Period',
+                                content: 'This covers homemaker, stay-at-home parent, or caring for family members. In Description: Enter "Homemaker", "Stay-at-home parent", or "Caring for [family member]".'
                               },
-                              retired: {
-                                icon: '🌴',
-                                title: 'Retirement Period',
-                                content: 'In Description: Enter "Retired" or "Retired [former profession]" (e.g., "Retired Teacher"). If you had any part-time work during retirement, select "Employment" type instead.'
-                              },
-                              medical: {
+                              'unable-to-work': {
                                 icon: '🏥',
-                                title: 'Medical Leave Period',
-                                content: 'In Description: Enter "Medical Leave" or "Disability Leave". You can mention if it was from a specific employer (e.g., "Medical leave from ABC Corp") but no medical details needed.'
+                                title: 'Unable to Work Period',
+                                content: 'This covers medical leave, disability, or other situations preventing work. In Description: Enter "Medical Leave" or "Disability". You can mention if it was from a specific employer but no medical details needed.'
                               },
-                              military: {
+                              'military': {
                                 icon: '🪖',
                                 title: 'Military Service Period',
                                 content: 'USCIS may request additional military documentation (DD-214, etc.) to verify service dates and status.'
                               },
-                              other: {
+                              'retired': {
+                                icon: '🌴',
+                                title: 'Retirement Period',
+                                content: 'In Description: Enter "Retired" or "Retired [former profession]" (e.g., "Retired Teacher"). If you had any part-time work during retirement, select "Working" type instead.'
+                              },
+                              'other': {
                                 icon: '📝',
-                                title: 'Other Activity Period',
-                                content: 'In Description: Be specific (e.g., "Volunteer work at Red Cross", "Caring for elderly parent", "Travel/sabbatical", "Starting own business"). If you received any payment, consider selecting "Employment" type instead.'
+                                title: 'Other/Personal Time Period',
+                                content: 'In Description: Be specific (e.g., "Volunteer work at Red Cross", "Travel/sabbatical", "Starting own business", "Personal time off"). If you received any payment, select "Working" type instead.'
                               }
                             };
 
@@ -3787,14 +3787,14 @@ const K1VisaQuestionnaire = () => {
                       <label className="block text-sm font-medium mb-1">
                         {(() => {
                           const labels = {
-                            employment: 'Company/Organization Name',
-                            student: 'School/Institution Name',
-                            military: 'Branch of Service',
-                            unemployment: 'Description',
-                            homemaker: 'Description',
-                            retired: 'Description',
-                            medical: 'Description',
-                            other: 'Description'
+                            'working': 'Company/Organization Name',
+                            'in-education': 'School/Institution Name',
+                            'military': 'Branch of Service',
+                            'seeking-work': 'Description',
+                            'caregiving': 'Description',
+                            'retired': 'Description',
+                            'unable-to-work': 'Description',
+                            'other': 'Description'
                           };
                           return labels[entry.type] || 'Description';
                         })()}
@@ -3810,26 +3810,26 @@ const K1VisaQuestionnaire = () => {
                         }}
                         placeholder={(() => {
                           const placeholders = {
-                            employment: 'ABC Company Inc.',
-                            student: 'University of ABC',
-                            military: 'U.S. Army',
-                            unemployment: 'Unemployed',
-                            homemaker: 'Homemaker',
-                            retired: 'Retired',
-                            medical: 'Medical Leave',
-                            other: 'Describe your activity'
+                            'working': 'ABC Company Inc.',
+                            'in-education': 'University of ABC',
+                            'military': 'U.S. Army',
+                            'seeking-work': 'Job searching',
+                            'caregiving': 'Homemaker',
+                            'retired': 'Retired',
+                            'unable-to-work': 'Medical Leave',
+                            'other': 'Describe your activity'
                           };
                           return placeholders[entry.type] || 'Enter details';
                         })()}
                       />
                     </div>
 
-                    {/* Job Title/Position - Required for employment, military, and student */}
-                    {(entry.type === 'employment' || entry.type === 'military' || entry.type === 'student') && (
+                    {/* Job Title/Position - Required for working, military, and education */}
+                    {(entry.type === 'working' || entry.type === 'military' || entry.type === 'in-education') && (
                       <>
                         <div>
                           <label className="block text-sm font-medium mb-1">
-                            {entry.type === 'employment' ? 'Job Title' :
+                            {entry.type === 'working' ? 'Job Title' :
                               entry.type === 'military' ? 'Rank/Position' : 'Program/Degree'}
                           </label>
                           <input
@@ -3842,7 +3842,7 @@ const K1VisaQuestionnaire = () => {
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
                             placeholder={
-                              entry.type === 'employment' ? 'Software Engineer' :
+                              entry.type === 'working' ? 'Software Engineer' :
                                 entry.type === 'military' ? 'Sergeant' : 'Bachelor of Science'
                             }
                           />
@@ -3851,7 +3851,7 @@ const K1VisaQuestionnaire = () => {
                         {/* Employment Status - Full-time/Part-time, Active Duty/Reserve */}
                         <div>
                           <label className="block text-sm font-medium mb-1">
-                            {entry.type === 'employment' ? 'Employment Type' :
+                            {entry.type === 'working' ? 'Employment Type' :
                               entry.type === 'military' ? 'Service Type' : 'Enrollment Status'}
                           </label>
                           <select
@@ -3864,7 +3864,7 @@ const K1VisaQuestionnaire = () => {
                             }}
                           >
                             <option value="">Select...</option>
-                            {entry.type === 'employment' && (
+                            {entry.type === 'working' && (
                               <>
                                 <option value="Full-time">Full-time</option>
                                 <option value="Part-time">Part-time</option>
@@ -3879,7 +3879,7 @@ const K1VisaQuestionnaire = () => {
                                 <option value="National Guard">National Guard</option>
                               </>
                             )}
-                            {entry.type === 'student' && (
+                            {entry.type === 'in-education' && (
                               <>
                                 <option value="Full-time">Full-time</option>
                                 <option value="Part-time">Part-time</option>
@@ -3895,25 +3895,25 @@ const K1VisaQuestionnaire = () => {
                       <label className="block text-sm font-medium mb-1">
                         Address {(() => {
                           const addressLabels = {
-                            employment: '(Employer Address)',
-                            student: '(School Address)',
-                            unemployment: '(Your Residence During This Period)',
-                            homemaker: '(Your Residence During This Period)',
-                            retired: '(Your Residence During This Period)',
-                            medical: '(Your Residence During This Period)',
-                            military: '(Base/Unit Address)',
-                            other: '(Relevant Address for This Period)'
+                            'working': '(Employer Address)',
+                            'in-education': '(School Address)',
+                            'seeking-work': '(Your Residence During This Period)',
+                            'caregiving': '(Your Residence During This Period)',
+                            'retired': '(Your Residence During This Period)',
+                            'unable-to-work': '(Your Residence During This Period)',
+                            'military': '(Base/Unit Address)',
+                            'other': '(Relevant Address for This Period)'
                           };
                           return addressLabels[entry.type] || '';
                         })()}
                       </label>
 
                       {/* Smart address handling */}
-                      {(entry.type === 'homemaker' || entry.type === 'unemployment' ||
-                        entry.type === 'retired' || entry.type === 'medical') ? (
+                      {(entry.type === 'caregiving' || entry.type === 'seeking-work' ||
+                        entry.type === 'retired' || entry.type === 'unable-to-work') ? (
                         <div className="space-y-2">
                           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                            💡 For {entry.type === 'homemaker' ? 'homemaker' : entry.type} periods, USCIS typically expects your home address during this time.
+                            💡 For {entry.type === 'caregiving' ? 'caregiving' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
                             We can pre-fill this with your current address, but please update if you lived elsewhere.
                           </div>
                           <button
@@ -4250,7 +4250,7 @@ const K1VisaQuestionnaire = () => {
                   <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                     <div>
                       <span className="font-medium">
-                        {entry.type === 'employment' ? entry.organization : entry.type}
+                        {entry.type === 'working' ? entry.organization : entry.type.replace('-', ' ')}
                         {entry.isCurrent && <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Current</span>}
                       </span>
                       {entry.jobTitle && <span className="text-gray-600"> - {entry.jobTitle}</span>}

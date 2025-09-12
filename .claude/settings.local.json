@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm start)",
       "WebSearch",
-      "WebFetch(domain:www.uscis.gov)"
+      "WebFetch(domain:www.uscis.gov)",
+      "WebFetch(domain:www.quora.com)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []
