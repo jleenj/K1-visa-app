@@ -140,7 +140,7 @@ const K1VisaQuestionnaire = () => {
     }
   };
 
-  const formatPostalCode = (value, country) => {
+  const formatPostalCode = (value: string, country: string) => {
     const format = addressFormats[country];
     if (!format) return value;
 
@@ -3669,17 +3669,11 @@ const K1VisaQuestionnaire = () => {
                   let parts = [];
                   
                   // Add professional context first
-                  if (circumstances?.includes('professional-experience') && professionalField && professionalField !== 'Other Professional Services') {
+                  if (professionalField && professionalField !== 'Other Professional Services') {
                     if (circumstances.includes('recent-separation')) {
                       parts.push(`Recently unemployed ${professionalField.toLowerCase()} professional`);
                     } else {
                       parts.push(`${professionalField} professional`);
-                    }
-                  } else if (circumstances?.includes('professional-experience')) {
-                    if (circumstances.includes('recent-separation')) {
-                      parts.push('Recently unemployed experienced professional');
-                    } else {
-                      parts.push('Experienced professional');
                     }
                   } else if (circumstances?.includes('recent-separation')) {
                     parts.push('Recently unemployed');
@@ -3703,11 +3697,11 @@ const K1VisaQuestionnaire = () => {
                   
                   // Skill development activities
                   if (circumstances?.includes('recent-training')) {
-                    skillDevelopmentActivities.push('recently completed relevant training');
+                    skillDevelopmentActivities.push('recently completed relevant training for next role');
                   }
                   
                   if (circumstances?.includes('pursuing-qualifications')) {
-                    skillDevelopmentActivities.push('pursuing additional qualifications for next role');
+                    skillDevelopmentActivities.push('pursuing additional qualifications');
                   }
                   
                   // Situational context
@@ -3715,15 +3709,31 @@ const K1VisaQuestionnaire = () => {
                     situationalContext.push('recently relocated');
                   }
                   
-                  // Build main sentence - start with situational context if present, then job search activities
-                  let description = parts[0];
+                  // Build main sentence with better flow for relocated circumstances
+                  let description;
                   
-                  // Add situational context at the beginning if present
-                  if (situationalContext.length > 0) {
-                    description += ` who ${situationalContext.join(' and ')},`;
+                  // Special handling for relocated circumstances
+                  if (circumstances?.includes('relocated')) {
+                    if (professionalField && professionalField !== 'Other Professional Services') {
+                      if (circumstances.includes('recent-separation')) {
+                        description = `Recently unemployed ${professionalField.toLowerCase()} professional actively seeking opportunities after recently relocating`;
+                      } else {
+                        description = `${professionalField} professional actively seeking opportunities after recently relocating`;
+                      }
+                    } else {
+                      if (circumstances.includes('recent-separation')) {
+                        description = 'Recently unemployed, actively seeking opportunities after recently relocating';
+                      } else {
+                        description = 'Actively seeking opportunities after recently relocating';
+                      }
+                    }
+                  } else {
+                    // Standard flow for non-relocated circumstances
+                    description = parts[0];
                   }
                   
-                  if (jobSearchActivities.length > 0) {
+                  // Add additional job search activities for non-relocated or when there are extra activities
+                  if (!circumstances?.includes('relocated') && jobSearchActivities.length > 0) {
                     if (jobSearchActivities.length === 1) {
                       description += ` ${jobSearchActivities[0]}`;
                     } else if (jobSearchActivities.length === 2) {
@@ -3732,18 +3742,40 @@ const K1VisaQuestionnaire = () => {
                       const lastActivity = jobSearchActivities.pop();
                       description += ` ${jobSearchActivities.join(', ')}, and ${lastActivity}`;
                     }
+                  } else if (circumstances?.includes('relocated') && jobSearchActivities.length > 1) {
+                    // For relocated, only add additional activities beyond the basic "actively seeking"
+                    const additionalActivities = jobSearchActivities.slice(1); // Remove "actively seeking opportunities"
+                    if (additionalActivities.length > 0) {
+                      if (additionalActivities.length === 1) {
+                        description += `, ${additionalActivities[0]}`;
+                      } else if (additionalActivities.length === 2) {
+                        description += `, ${additionalActivities[0]} and ${additionalActivities[1]}`;
+                      } else {
+                        const lastActivity = additionalActivities.pop();
+                        description += `, ${additionalActivities.join(', ')}, and ${lastActivity}`;
+                      }
+                    }
                   }
                   
                   // Add skill development as separate sentence if present
                   if (skillDevelopmentActivities.length > 0) {
+                    let skillSentence;
                     if (skillDevelopmentActivities.length === 1) {
-                      description += `. Also ${skillDevelopmentActivities[0]}`;
+                      skillSentence = skillDevelopmentActivities[0];
                     } else if (skillDevelopmentActivities.length === 2) {
-                      description += `. Also ${skillDevelopmentActivities[0]} and ${skillDevelopmentActivities[1]}`;
+                      skillSentence = `${skillDevelopmentActivities[0]} and ${skillDevelopmentActivities[1]}`;
                     } else {
                       const lastSkill = skillDevelopmentActivities.pop();
-                      description += `. Also ${skillDevelopmentActivities.join(', ')}, and ${lastSkill}`;
+                      skillSentence = `${skillDevelopmentActivities.join(', ')}, and ${lastSkill}`;
                     }
+                    
+                    // Add "for next role" context if not already present in any activity
+                    const hasForNextRole = skillDevelopmentActivities.some(activity => activity.includes('for next role'));
+                    if (!hasForNextRole) {
+                      skillSentence += ' for next role';
+                    }
+                    
+                    description += `. Also ${skillSentence}`;
                   }
                   
                   return description;
@@ -3771,6 +3803,18 @@ const K1VisaQuestionnaire = () => {
                   updateField('sponsorTimelineEntries', newEntries);
                 };
 
+                // Set default description for new seeking-work entries
+                if (entry.type === 'seeking-work' && !entry.organization && !entry.lastAutoGenerated) {
+                  const defaultDescription = "Unemployed actively seeking opportunities";
+                  const newEntries = [...timelineEntries];
+                  newEntries[index] = { 
+                    ...entry, 
+                    organization: defaultDescription,
+                    lastAutoGenerated: defaultDescription
+                  };
+                  updateField('sponsorTimelineEntries', newEntries);
+                }
+
                 return (
                 <div key={index} className="border rounded-lg p-4 bg-white">
                   <div className="flex justify-between items-start mb-3">
@@ -3780,7 +3824,7 @@ const K1VisaQuestionnaire = () => {
                           'working': { icon: '💼', label: 'Working Period' },
                           'in-education': { icon: '📚', label: 'Education Period' },
                           'seeking-work': { icon: '🔍', label: 'Seeking Work Period' },
-                          'caregiving': { icon: '🏠', label: 'Caregiving Period' },
+                          'homemaker': { icon: '🏠', label: 'Homemaker Period' },
                           'retired': { icon: '🌴', label: 'Retirement Period' },
                           'unable-to-work': { icon: '🏥', label: 'Unable to Work Period' },
                           'military': { icon: '🪖', label: 'Military Service Period' },
@@ -3803,14 +3847,50 @@ const K1VisaQuestionnaire = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-1">Type</label>
                       <select
                         className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                         value={entry.type || ''}
                         onChange={(e) => {
                           const newEntries = [...timelineEntries];
-                          newEntries[index] = { ...entry, type: e.target.value };
+                          const newType = e.target.value;
+                          
+                          // Clear organization field when changing types since it serves different purposes
+                          // (Company name vs Description vs School name, etc.)
+                          if (newType === 'seeking-work') {
+                            // Set default description for seeking-work
+                            const defaultDescription = "Unemployed actively seeking opportunities";
+                            newEntries[index] = { 
+                              ...entry, 
+                              type: newType,
+                              organization: defaultDescription,
+                              lastAutoGenerated: defaultDescription,
+                              favorableCircumstances: []
+                            };
+                          } else if (newType === 'homemaker') {
+                            // Auto-fill homemaker fields
+                            newEntries[index] = {
+                              ...entry,
+                              type: newType,
+                              organization: 'Homemaker',
+                              jobTitle: 'Homemaker',
+                              lastAutoGenerated: '',
+                              favorableCircumstances: []
+                            };
+                          } else {
+                            // Clear everything for other types
+                            newEntries[index] = {
+                              ...entry,
+                              type: newType,
+                              organization: '',
+                              jobTitle: '', // Clear job title when switching away from homemaker
+                              medicalLeaveType: '', // Clear medical leave type when switching types
+                              showMedicalHelp: false, // Clear help panel when switching types
+                              lastAutoGenerated: '',
+                              favorableCircumstances: []
+                            };
+                          }
                           updateField('sponsorTimelineEntries', newEntries);
                         }}
                       >
@@ -3818,7 +3898,7 @@ const K1VisaQuestionnaire = () => {
                         <option value="working">Working (employed or self-employed)</option>
                         <option value="seeking-work">Seeking Work (unemployed & actively searching)</option>
                         <option value="in-education">In Education (full-time or part-time)</option>
-                        <option value="caregiving">Caregiving (homemaker/family care)</option>
+                        <option value="homemaker">Homemaker</option>
                         <option value="unable-to-work">Unable to Work (medical/disability)</option>
                         <option value="military">Military Service</option>
                         <option value="retired">Retired</option>
@@ -3827,7 +3907,7 @@ const K1VisaQuestionnaire = () => {
                     </div>
 
                     {/* USCIS Guidance Notes for each employment type */}
-                    {entry.type && (
+                    {entry.type && entry.type !== 'seeking-work' && entry.type !== 'unable-to-work' && (
                       <div className="md:col-span-2 mb-4 p-3 bg-blue-50 border-l-4 border-blue-300 rounded">
                         <div className="text-sm text-blue-800">
                           {(() => {
@@ -3838,24 +3918,19 @@ const K1VisaQuestionnaire = () => {
                                 content: 'USCIS uses this information to verify your work history and assess financial stability. Include all employment, even part-time or temporary positions.'
                               },
                               'seeking-work': {
-                                icon: '🔍',
-                                title: 'Seeking Work Period',
-                                content: 'This covers periods when you were unemployed and actively job searching. Providing context about your professional background and favorable circumstances can help present your case more positively and may reduce the likelihood of USCIS requesting additional evidence. If you had any contract/freelance work, select "Working" type instead.'
+                                icon: '',
+                                title: '',
+                                content: ''
                               },
                               'in-education': {
                                 icon: '📚',
                                 title: 'Education Period',
                                 content: 'USCIS considers full-time education as valid employment history. Include any relevant degrees or certifications earned. This is for students not seeking work.'
                               },
-                              'caregiving': {
+                              'homemaker': {
                                 icon: '🏠',
-                                title: 'Caregiving Period',
-                                content: 'This covers homemaker, stay-at-home parent, or caring for family members. In Description: Enter "Homemaker", "Stay-at-home parent", or "Caring for [family member]".'
-                              },
-                              'unable-to-work': {
-                                icon: '🏥',
-                                title: 'Unable to Work Period',
-                                content: 'This covers medical leave, disability, or other situations preventing work. In Description: Enter "Medical Leave" or "Disability". You can mention if it was from a specific employer but no medical details needed.'
+                                title: 'Homemaker Period',
+                                content: 'For homemaker periods, USCIS forms typically require "Homemaker" as both the employer and occupation. Organization and job title will be auto-filled.'
                               },
                               'military': {
                                 icon: '🪖',
@@ -3875,6 +3950,7 @@ const K1VisaQuestionnaire = () => {
                             };
 
                             const info = guidance[entry.type];
+                            if (!info) return null; // No guidance for this type
                             return (
                               <>
                                 <div className="font-medium flex items-center">
@@ -3891,11 +3967,8 @@ const K1VisaQuestionnaire = () => {
 
                     {/* Additional Details for Seeking Work */}
                     {entry.type === 'seeking-work' && (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded mb-4">
-                        <h5 className="font-medium text-blue-900 mb-3">Auto-Generated Description Options</h5>
-                        <p className="text-sm text-blue-800 mb-4">
-                          Select any that apply to automatically generate your description below. You can always edit the description manually afterward:
-                        </p>
+                      <div className="md:col-span-2 p-4 bg-blue-50 border border-blue-200 rounded mb-4">
+                        <h5 className="font-medium text-blue-900 mb-3">Select any that apply to automatically generate your description below. You can always edit the description manually afterward:</h5>
                         
                         <div className="space-y-3">
                           {/* Recent Transition Context */}
@@ -3936,43 +4009,6 @@ const K1VisaQuestionnaire = () => {
                             </div>
                           </div>
 
-                          {/* Professional Qualifications */}
-                          <div className="space-y-2">
-                            <h6 className="font-medium text-sm text-blue-900">Professional Qualifications:</h6>
-                            <div className="pl-4 space-y-2">
-                              <label className="flex items-start space-x-2">
-                                <input
-                                  type="checkbox"
-                                  className="mt-1"
-                                  checked={entry.favorableCircumstances?.includes('professional-experience') || false}
-                                  onChange={(e) => {
-                                    const circumstances = entry.favorableCircumstances || [];
-                                    const newCircumstances = e.target.checked 
-                                      ? [...circumstances, 'professional-experience']
-                                      : circumstances.filter(c => c !== 'professional-experience');
-                                    updateDescriptionIfNeeded(newCircumstances);
-                                  }}
-                                />
-                                <span className="text-sm">Have relevant professional experience in specific field</span>
-                              </label>
-                              
-                              <label className="flex items-start space-x-2">
-                                <input
-                                  type="checkbox"
-                                  className="mt-1"
-                                  checked={entry.favorableCircumstances?.includes('recent-training') || false}
-                                  onChange={(e) => {
-                                    const circumstances = entry.favorableCircumstances || [];
-                                    const newCircumstances = e.target.checked 
-                                      ? [...circumstances, 'recent-training']
-                                      : circumstances.filter(c => c !== 'recent-training');
-                                    updateDescriptionIfNeeded(newCircumstances);
-                                  }}
-                                />
-                                <span className="text-sm">Recently completed job-relevant education/training (within last 6 months)</span>
-                              </label>
-                            </div>
-                          </div>
 
                           {/* Active Job Search Efforts */}
                           <div className="space-y-2">
@@ -4025,6 +4061,22 @@ const K1VisaQuestionnaire = () => {
                                 />
                                 <span className="text-sm">Pursuing additional qualifications while job searching</span>
                               </label>
+                              
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('recent-training') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'recent-training']
+                                      : circumstances.filter(c => c !== 'recent-training');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Recently completed job-relevant education/training (within last 6 months)</span>
+                              </label>
                             </div>
                           </div>
 
@@ -4067,23 +4119,23 @@ const K1VisaQuestionnaire = () => {
                       </div>
                     )}
 
-                    {/* Organization/Employer/School Name - Required for all types */}
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        {(() => {
-                          const labels = {
-                            'working': 'Company/Organization Name',
-                            'in-education': 'School/Institution Name',
-                            'military': 'Branch of Service',
-                            'seeking-work': 'Description (auto-fills or write your own)',
-                            'caregiving': 'Description',
-                            'retired': 'Description',
-                            'unable-to-work': 'Description',
-                            'other': 'Description'
-                          };
-                          return labels[entry.type] || 'Description';
-                        })()}
-                      </label>
+                    {/* Organization/Employer/School Name - Required for all types except homemaker */}
+                    {entry.type !== 'homemaker' && (
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          {(() => {
+                            const labels = {
+                              'working': 'Company/Organization Name',
+                              'in-education': 'School/Institution Name',
+                              'military': 'Branch of Service',
+                              'seeking-work': 'Description (auto-fills or write your own)',
+                              'retired': 'Description',
+                              'unable-to-work': 'Reason Unable to Work',
+                              'other': 'Description'
+                            };
+                            return labels[entry.type] || 'Description';
+                          })()}
+                        </label>
                       {entry.type === 'seeking-work' ? (
                         <div>
                           <textarea
@@ -4095,7 +4147,7 @@ const K1VisaQuestionnaire = () => {
                               newEntries[index] = { ...entry, organization: e.target.value };
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
-                            placeholder="Job searching"
+                            placeholder="Describe your employment situation"
                           />
                           
                           {/* Restore Auto-Generated Button - Show only when user has manually edited */}
@@ -4131,6 +4183,122 @@ const K1VisaQuestionnaire = () => {
                             return null;
                           })()}
                         </div>
+                      ) : entry.type === 'homemaker' ? (
+                        <input
+                          type="text"
+                          className="w-full p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
+                          value="Homemaker"
+                          disabled={true}
+                        />
+                      ) : entry.type === 'unable-to-work' ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <select
+                              className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={entry.medicalLeaveType || ''}
+                              onChange={(e) => {
+                                const newEntries = [...timelineEntries];
+                                newEntries[index] = {
+                                  ...entry,
+                                  medicalLeaveType: e.target.value,
+                                  organization: e.target.value === 'Other medical reason' ? '' : e.target.value
+                                };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                            >
+                              <option value="">Select reason...</option>
+                              <option value="Short-term medical leave">Short-term medical leave (under 12 months)</option>
+                              <option value="Long-term disability">Long-term disability (12+ months)</option>
+                              <option value="Caring for sick family member">Caring for sick family member</option>
+                              <option value="Work-related injury">Work-related injury</option>
+                              <option value="Other medical reason">Other medical reason</option>
+                            </select>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newEntries = [...timelineEntries];
+                                newEntries[index] = {
+                                  ...entry,
+                                  showMedicalHelp: !entry.showMedicalHelp
+                                };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
+                            >
+                              ℹ️ Click to learn more
+                            </button>
+                          </div>
+
+                          {/* Collapsible help panel */}
+                          {entry.showMedicalHelp && (
+                            <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                              <div className="flex justify-between items-start mb-3">
+                                <h4 className="font-medium text-blue-800">Understanding "Unable to Work" Categories</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newEntries = [...timelineEntries];
+                                    newEntries[index] = {
+                                      ...entry,
+                                      showMedicalHelp: false
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-lg leading-none"
+                                >
+                                  ×
+                                </button>
+                              </div>
+
+                              <div className="space-y-3 text-blue-700">
+                                <div>
+                                  <strong>Short-term medical leave (under 12 months):</strong>
+                                  <p>Covers temporary illnesses, surgeries, recovery periods that last less than a year.</p>
+                                </div>
+
+                                <div>
+                                  <strong>Long-term disability (12+ months):</strong>
+                                  <p>Covers chronic conditions, permanent disabilities that last 12 months or longer.</p>
+                                </div>
+
+                                <div>
+                                  <strong>Caring for sick family member:</strong>
+                                  <p>Taking time off to care for a seriously ill spouse, child, or parent.</p>
+                                </div>
+
+                                <div>
+                                  <strong>Work-related injury:</strong>
+                                  <p>Injuries or illnesses that happened at work or because of your job.</p>
+                                </div>
+
+                                <div>
+                                  <strong>Other medical reason:</strong>
+                                  <p>For situations not covered by the categories above. You'll be asked to provide a brief description.</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {entry.medicalLeaveType === 'Other medical reason' && (
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Please specify:
+                              </label>
+                              <input
+                                type="text"
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                value={entry.organization || ''}
+                                onChange={(e) => {
+                                  const newEntries = [...timelineEntries];
+                                  newEntries[index] = { ...entry, organization: e.target.value };
+                                  updateField('sponsorTimelineEntries', newEntries);
+                                }}
+                                placeholder="Brief description without medical details"
+                              />
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <input
                           type="text"
@@ -4146,19 +4314,20 @@ const K1VisaQuestionnaire = () => {
                               'working': 'ABC Company Inc.',
                               'in-education': 'University of ABC',
                               'military': 'U.S. Army',
-                              'caregiving': 'Homemaker',
+                              'homemaker': 'Homemaker',
                               'retired': 'Retired',
-                              'unable-to-work': 'Medical Leave',
+                              'unable-to-work': 'Select reason above',
                               'other': 'Describe your activity'
                             };
                             return placeholders[entry.type] || 'Enter details';
                           })()}
                         />
                       )}
-                      
-                    </div>
 
-                    {/* Job Title/Position - Required for working, military, and education */}
+                      </div>
+                    )}
+
+                    {/* Job Title/Position - Required for working, military, and education only */}
                     {(entry.type === 'working' || entry.type === 'military' || entry.type === 'in-education') && (
                       <>
                         <div>
@@ -4166,28 +4335,55 @@ const K1VisaQuestionnaire = () => {
                             {entry.type === 'working' ? 'Job Title' :
                               entry.type === 'military' ? 'Rank/Position' : 'Program/Degree'}
                           </label>
-                          <input
-                            type="text"
-                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                            value={entry.jobTitle || ''}
-                            onChange={(e) => {
-                              const newEntries = [...timelineEntries];
-                              newEntries[index] = { ...entry, jobTitle: e.target.value };
-                              updateField('sponsorTimelineEntries', newEntries);
-                            }}
-                            placeholder={
-                              entry.type === 'working' ? 'Software Engineer' :
-                                entry.type === 'military' ? 'Sergeant' : 'Bachelor of Science'
-                            }
-                          />
+                          {entry.type === 'in-education' ? (
+                            <div>
+                              <select
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                value={entry.jobTitle || ''}
+                                onChange={(e) => {
+                                  const newEntries = [...timelineEntries];
+                                  newEntries[index] = { ...entry, jobTitle: e.target.value };
+                                  updateField('sponsorTimelineEntries', newEntries);
+                                }}
+                              >
+                                <option value="">Select program type...</option>
+                                <option value="High School Program">High School Program</option>
+                                <option value="Certificate/Vocational Program">Certificate/Vocational Program</option>
+                                <option value="Associate Degree Program">Associate Degree Program</option>
+                                <option value="Bachelor's Degree Program">Bachelor's Degree Program</option>
+                                <option value="Master's Degree Program">Master's Degree Program</option>
+                                <option value="Doctoral Degree Program">Doctoral Degree Program</option>
+                                <option value="Professional Degree Program (J.D., M.D., etc.)">Professional Degree Program (J.D., M.D., etc.)</option>
+                                <option value="Other">Other</option>
+                              </select>
+                              <p className="text-xs text-gray-600 mt-1">
+                                <strong>Other includes:</strong> GED preparation classes, adult education programs, language/ESL courses, continuing education, professional development courses, online certification programs, or any educational activities not listed above.
+                              </p>
+                            </div>
+                          ) : (
+                            <input
+                              type="text"
+                              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={entry.jobTitle || ''}
+                              onChange={(e) => {
+                                const newEntries = [...timelineEntries];
+                                newEntries[index] = { ...entry, jobTitle: e.target.value };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              placeholder={
+                                entry.type === 'working' ? 'Software Engineer' : 'Sergeant'
+                              }
+                            />
+                          )}
                         </div>
 
-                        {/* Employment Status - Full-time/Part-time, Active Duty/Reserve */}
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            {entry.type === 'working' ? 'Employment Type' :
-                              entry.type === 'military' ? 'Service Type' : 'Enrollment Status'}
-                          </label>
+                        {/* Employment Status - Full-time/Part-time, Active Duty/Reserve - Not needed for homemaker */}
+                        {entry.type !== 'homemaker' && (
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              {entry.type === 'working' ? 'Employment Type' :
+                                entry.type === 'military' ? 'Service Type' : 'Enrollment Status'}
+                            </label>
                           <select
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                             value={entry.employmentStatus || ''}
@@ -4219,8 +4415,9 @@ const K1VisaQuestionnaire = () => {
                                 <option value="Part-time">Part-time</option>
                               </>
                             )}
-                          </select>
-                        </div>
+                            </select>
+                          </div>
+                        )}
                       </>
                     )}
 
@@ -4232,7 +4429,7 @@ const K1VisaQuestionnaire = () => {
                             'working': '(Employer Address)',
                             'in-education': '(School Address)',
                             'seeking-work': '(Your Residence During This Period)',
-                            'caregiving': '(Your Residence During This Period)',
+                            'homemaker': '(Your Residence During This Period)',
                             'retired': '(Your Residence During This Period)',
                             'unable-to-work': '(Your Residence During This Period)',
                             'military': '(Base/Unit Address)',
@@ -4243,11 +4440,11 @@ const K1VisaQuestionnaire = () => {
                       </label>
 
                       {/* Smart address handling */}
-                      {(entry.type === 'caregiving' || entry.type === 'seeking-work' ||
+                      {(entry.type === 'homemaker' || entry.type === 'seeking-work' ||
                         entry.type === 'retired' || entry.type === 'unable-to-work') ? (
                         <div className="space-y-2">
                           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                            💡 For {entry.type === 'caregiving' ? 'caregiving' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
+                            💡 For {entry.type === 'homemaker' ? 'homemaker' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
                             We can pre-fill this with your current address, but please update if you lived elsewhere.
                           </div>
                           <button
