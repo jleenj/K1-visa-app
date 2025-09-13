@@ -378,7 +378,6 @@ const K1VisaQuestionnaire = () => {
       title: '1.5 Family Background',
       icon: Users,
       description: 'Information about your parents',
-      helpText: 'We\'re asking about your legal parents here (if you were adopted, that means your adoptive parents). We understand that gathering parent information can sometimes be challenging, but it\'s worth taking time to collect what you can. Try reaching out to family members, checking old records, or contacting adoption agencies if applicable. "Unknown" is completely acceptable when information truly isn\'t available after you\'ve made a reasonable effort - just know that USCIS may ask you to explain how you tried to find the information.',
       questionCount: 17,
       fields: [
         { id: 'sponsorParentCount', label: 'How many parents do you have/have you had?', type: 'select', options: ['0', '1', '2'], required: true, helpText: '• "2" - Most people will select this since they have at least some information about both parents\n\n• "1" - Choose this if you know about one parent but the other is truly unknown despite your best efforts to find out\n\n• "0" - This is quite rare and would be for situations like institutional care where no parent information exists at all' },
@@ -413,7 +412,7 @@ const K1VisaQuestionnaire = () => {
       id: '1.6-employment',
       title: '1.6 Employment & Work History',
       description: '',
-      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Please provide your work details for the full 5 years before the date you plan to file this petition.\n\n• Employment: Include all jobs, even part-time or temporary positions\n• Education: Include all schools, training programs, or educational periods  \n• Unemployment: Include periods of job searching, between jobs, or not working\n• Other Periods: Include military service, medical leave, or other significant periods',
+      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Please provide your work details for the full 5 years before the date you plan to file this petition.',
       icon: FileText,
       questionCount: 8,
       fields: [
@@ -3664,7 +3663,115 @@ const K1VisaQuestionnaire = () => {
 
             {/* Work History Periods */}
             <div className="space-y-4">
-              {timelineEntries.map((entry, index) => (
+              {timelineEntries.map((entry, index) => {
+                // Description generation function
+                const generateDescription = (circumstances, professionalField) => {
+                  let parts = [];
+                  
+                  // Add professional context first
+                  if (circumstances?.includes('professional-experience') && professionalField && professionalField !== 'Other Professional Services') {
+                    if (circumstances.includes('recent-separation')) {
+                      parts.push(`Recently unemployed ${professionalField.toLowerCase()} professional`);
+                    } else {
+                      parts.push(`${professionalField} professional`);
+                    }
+                  } else if (circumstances?.includes('professional-experience')) {
+                    if (circumstances.includes('recent-separation')) {
+                      parts.push('Recently unemployed experienced professional');
+                    } else {
+                      parts.push('Experienced professional');
+                    }
+                  } else if (circumstances?.includes('recent-separation')) {
+                    parts.push('Recently unemployed');
+                  } else {
+                    parts.push('Unemployed');
+                  }
+                  
+                  // Separate different types of activities
+                  const jobSearchActivities = ['actively seeking opportunities'];
+                  const skillDevelopmentActivities = [];
+                  const situationalContext = [];
+                  
+                  // Job search activities
+                  if (circumstances?.includes('working-with-recruiters')) {
+                    jobSearchActivities.push('working with recruiters');
+                  }
+                  
+                  if (circumstances?.includes('professional-networking')) {
+                    jobSearchActivities.push('networking professionally');
+                  }
+                  
+                  // Skill development activities
+                  if (circumstances?.includes('recent-training')) {
+                    skillDevelopmentActivities.push('recently completed relevant training');
+                  }
+                  
+                  if (circumstances?.includes('pursuing-qualifications')) {
+                    skillDevelopmentActivities.push('pursuing additional qualifications for next role');
+                  }
+                  
+                  // Situational context
+                  if (circumstances?.includes('relocated')) {
+                    situationalContext.push('recently relocated');
+                  }
+                  
+                  // Build main sentence - start with situational context if present, then job search activities
+                  let description = parts[0];
+                  
+                  // Add situational context at the beginning if present
+                  if (situationalContext.length > 0) {
+                    description += ` who ${situationalContext.join(' and ')},`;
+                  }
+                  
+                  if (jobSearchActivities.length > 0) {
+                    if (jobSearchActivities.length === 1) {
+                      description += ` ${jobSearchActivities[0]}`;
+                    } else if (jobSearchActivities.length === 2) {
+                      description += ` ${jobSearchActivities[0]} and ${jobSearchActivities[1]}`;
+                    } else {
+                      const lastActivity = jobSearchActivities.pop();
+                      description += ` ${jobSearchActivities.join(', ')}, and ${lastActivity}`;
+                    }
+                  }
+                  
+                  // Add skill development as separate sentence if present
+                  if (skillDevelopmentActivities.length > 0) {
+                    if (skillDevelopmentActivities.length === 1) {
+                      description += `. Also ${skillDevelopmentActivities[0]}`;
+                    } else if (skillDevelopmentActivities.length === 2) {
+                      description += `. Also ${skillDevelopmentActivities[0]} and ${skillDevelopmentActivities[1]}`;
+                    } else {
+                      const lastSkill = skillDevelopmentActivities.pop();
+                      description += `. Also ${skillDevelopmentActivities.join(', ')}, and ${lastSkill}`;
+                    }
+                  }
+                  
+                  return description;
+                };
+
+                // Auto-update description helper
+                const updateDescriptionIfNeeded = (newCircumstances, newProfessionalField) => {
+                  if (entry.type !== 'seeking-work') return;
+
+                  const newGeneratedDescription = generateDescription(newCircumstances || entry.favorableCircumstances, newProfessionalField || entry.professionalField);
+                  const currentDescription = entry.organization || '';
+                  const lastAutoGenerated = entry.lastAutoGenerated || '';
+
+                  // Only update if user hasn't manually edited OR field is empty
+                  const shouldUpdate = currentDescription === lastAutoGenerated || currentDescription === '';
+                  
+                  const newEntries = [...timelineEntries];
+                  newEntries[index] = { 
+                    ...entry, 
+                    organization: shouldUpdate ? newGeneratedDescription : entry.organization,
+                    lastAutoGenerated: newGeneratedDescription,
+                    favorableCircumstances: newCircumstances || entry.favorableCircumstances,
+                    professionalField: newProfessionalField !== undefined ? newProfessionalField : entry.professionalField
+                  };
+                  updateField('sponsorTimelineEntries', newEntries);
+                };
+
+                return (
                 <div key={index} className="border rounded-lg p-4 bg-white">
                   <div className="flex justify-between items-start mb-3">
                     <h4 className="font-medium text-lg">
@@ -3708,9 +3815,9 @@ const K1VisaQuestionnaire = () => {
                         }}
                       >
                         <option value="">Select type...</option>
-                        <option value="working">Working (employed)</option>
-                        <option value="seeking-work">Seeking Work (unemployed + actively searching)</option>
-                        <option value="in-education">In Education (full-time student)</option>
+                        <option value="working">Working (employed or self-employed)</option>
+                        <option value="seeking-work">Seeking Work (unemployed & actively searching)</option>
+                        <option value="in-education">In Education (full-time or part-time)</option>
                         <option value="caregiving">Caregiving (homemaker/family care)</option>
                         <option value="unable-to-work">Unable to Work (medical/disability)</option>
                         <option value="military">Military Service</option>
@@ -3733,7 +3840,7 @@ const K1VisaQuestionnaire = () => {
                               'seeking-work': {
                                 icon: '🔍',
                                 title: 'Seeking Work Period',
-                                content: 'This covers periods when you were unemployed and actively job searching. In Description: Specify "Job searching" or "Between jobs". If you had any contract/freelance work, select "Working" type instead.'
+                                content: 'This covers periods when you were unemployed and actively job searching. Providing context about your professional background and favorable circumstances can help present your case more positively and may reduce the likelihood of USCIS requesting additional evidence. If you had any contract/freelance work, select "Working" type instead.'
                               },
                               'in-education': {
                                 icon: '📚',
@@ -3782,6 +3889,184 @@ const K1VisaQuestionnaire = () => {
                       </div>
                     )}
 
+                    {/* Additional Details for Seeking Work */}
+                    {entry.type === 'seeking-work' && (
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded mb-4">
+                        <h5 className="font-medium text-blue-900 mb-3">Auto-Generated Description Options</h5>
+                        <p className="text-sm text-blue-800 mb-4">
+                          Select any that apply to automatically generate your description below. You can always edit the description manually afterward:
+                        </p>
+                        
+                        <div className="space-y-3">
+                          {/* Recent Transition Context */}
+                          <div className="space-y-2">
+                            <h6 className="font-medium text-sm text-blue-900">Recent Transition Context:</h6>
+                            <div className="pl-4 space-y-2">
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('recent-separation') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'recent-separation']
+                                      : circumstances.filter(c => c !== 'recent-separation');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Recently left previous position (within last 6 months)</span>
+                              </label>
+                              
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('relocated') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'relocated']
+                                      : circumstances.filter(c => c !== 'relocated');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Recently relocated (actively seeking work in new area)</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Professional Qualifications */}
+                          <div className="space-y-2">
+                            <h6 className="font-medium text-sm text-blue-900">Professional Qualifications:</h6>
+                            <div className="pl-4 space-y-2">
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('professional-experience') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'professional-experience']
+                                      : circumstances.filter(c => c !== 'professional-experience');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Have relevant professional experience in specific field</span>
+                              </label>
+                              
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('recent-training') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'recent-training']
+                                      : circumstances.filter(c => c !== 'recent-training');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Recently completed job-relevant education/training (within last 6 months)</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Active Job Search Efforts */}
+                          <div className="space-y-2">
+                            <h6 className="font-medium text-sm text-blue-900">Active Job Search Efforts:</h6>
+                            <div className="pl-4 space-y-2">
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('working-with-recruiters') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'working-with-recruiters']
+                                      : circumstances.filter(c => c !== 'working-with-recruiters');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Working with recruiters/placement agencies</span>
+                              </label>
+                              
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('professional-networking') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'professional-networking']
+                                      : circumstances.filter(c => c !== 'professional-networking');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Networking actively in professional circles</span>
+                              </label>
+                              
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="checkbox"
+                                  className="mt-1"
+                                  checked={entry.favorableCircumstances?.includes('pursuing-qualifications') || false}
+                                  onChange={(e) => {
+                                    const circumstances = entry.favorableCircumstances || [];
+                                    const newCircumstances = e.target.checked 
+                                      ? [...circumstances, 'pursuing-qualifications']
+                                      : circumstances.filter(c => c !== 'pursuing-qualifications');
+                                    updateDescriptionIfNeeded(newCircumstances);
+                                  }}
+                                />
+                                <span className="text-sm">Pursuing additional qualifications while job searching</span>
+                              </label>
+                            </div>
+                          </div>
+
+
+                          {/* Professional Field Dropdown */}
+                          <div className="space-y-2">
+                            <label className="block">
+                              <span className="font-medium text-sm text-blue-900">Professional Field (Optional):</span>
+                              <select
+                                className="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                value={entry.professionalField || ''}
+                                onChange={(e) => {
+                                  updateDescriptionIfNeeded(entry.favorableCircumstances, e.target.value);
+                                }}
+                              >
+                                <option value="">Select your professional field...</option>
+                                <option value="Accounting & Finance">Accounting & Finance</option>
+                                <option value="Architecture & Engineering">Architecture & Engineering</option>
+                                <option value="Arts & Entertainment">Arts & Entertainment</option>
+                                <option value="Business & Management">Business & Management</option>
+                                <option value="Computer & IT">Computer & IT</option>
+                                <option value="Construction & Trades">Construction & Trades</option>
+                                <option value="Education & Training">Education & Training</option>
+                                <option value="Healthcare & Medical">Healthcare & Medical</option>
+                                <option value="Legal">Legal</option>
+                                <option value="Manufacturing & Production">Manufacturing & Production</option>
+                                <option value="Marketing & Sales">Marketing & Sales</option>
+                                <option value="Media & Communications">Media & Communications</option>
+                                <option value="Non-Profit & Government">Non-Profit & Government</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Retail & Customer Service">Retail & Customer Service</option>
+                                <option value="Science & Research">Science & Research</option>
+                                <option value="Transportation & Logistics">Transportation & Logistics</option>
+                                <option value="Other Professional Services">Other Professional Services</option>
+                              </select>
+                              <span className="text-xs text-blue-700 mt-1 block">This helps generate better descriptions (e.g., "Marketing & Sales professional seeking opportunities")</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Organization/Employer/School Name - Required for all types */}
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -3790,7 +4075,7 @@ const K1VisaQuestionnaire = () => {
                             'working': 'Company/Organization Name',
                             'in-education': 'School/Institution Name',
                             'military': 'Branch of Service',
-                            'seeking-work': 'Description',
+                            'seeking-work': 'Description (auto-fills or write your own)',
                             'caregiving': 'Description',
                             'retired': 'Description',
                             'unable-to-work': 'Description',
@@ -3799,29 +4084,78 @@ const K1VisaQuestionnaire = () => {
                           return labels[entry.type] || 'Description';
                         })()}
                       </label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        value={entry.organization || ''}
-                        onChange={(e) => {
-                          const newEntries = [...timelineEntries];
-                          newEntries[index] = { ...entry, organization: e.target.value };
-                          updateField('sponsorTimelineEntries', newEntries);
-                        }}
-                        placeholder={(() => {
-                          const placeholders = {
-                            'working': 'ABC Company Inc.',
-                            'in-education': 'University of ABC',
-                            'military': 'U.S. Army',
-                            'seeking-work': 'Job searching',
-                            'caregiving': 'Homemaker',
-                            'retired': 'Retired',
-                            'unable-to-work': 'Medical Leave',
-                            'other': 'Describe your activity'
-                          };
-                          return placeholders[entry.type] || 'Enter details';
-                        })()}
-                      />
+                      {entry.type === 'seeking-work' ? (
+                        <div>
+                          <textarea
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                            value={entry.organization || ''}
+                            onChange={(e) => {
+                              const newEntries = [...timelineEntries];
+                              newEntries[index] = { ...entry, organization: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                            placeholder="Job searching"
+                          />
+                          
+                          {/* Restore Auto-Generated Button - Show only when user has manually edited */}
+                          {(() => {
+                            const currentDescription = entry.organization || '';
+                            const lastAutoGenerated = entry.lastAutoGenerated || '';
+                            const hasManualEdit = currentDescription !== lastAutoGenerated && currentDescription !== '' && lastAutoGenerated !== '';
+                            
+                            if (hasManualEdit) {
+                              return (
+                                <div className="mt-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newEntries = [...timelineEntries];
+                                      newEntries[index] = { 
+                                        ...entry, 
+                                        organization: lastAutoGenerated 
+                                      };
+                                      updateField('sponsorTimelineEntries', newEntries);
+                                    }}
+                                    className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1"
+                                  >
+                                    <span>↺</span>
+                                    <span>Use auto-generated description</span>
+                                  </button>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Auto-generated: "{lastAutoGenerated}"
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={entry.organization || ''}
+                          onChange={(e) => {
+                            const newEntries = [...timelineEntries];
+                            newEntries[index] = { ...entry, organization: e.target.value };
+                            updateField('sponsorTimelineEntries', newEntries);
+                          }}
+                          placeholder={(() => {
+                            const placeholders = {
+                              'working': 'ABC Company Inc.',
+                              'in-education': 'University of ABC',
+                              'military': 'U.S. Army',
+                              'caregiving': 'Homemaker',
+                              'retired': 'Retired',
+                              'unable-to-work': 'Medical Leave',
+                              'other': 'Describe your activity'
+                            };
+                            return placeholders[entry.type] || 'Enter details';
+                          })()}
+                        />
+                      )}
+                      
                     </div>
 
                     {/* Job Title/Position - Required for working, military, and education */}
@@ -4194,9 +4528,11 @@ const K1VisaQuestionnaire = () => {
                         )}
                       </div>
                     </div>
+
                   </div>
                 </div>
-              ))}
+                );
+              })}
 
               {/* Add New Entry Button */}
               <button
