@@ -140,7 +140,7 @@ const K1VisaQuestionnaire = () => {
     }
   };
 
-  const formatPostalCode = (value: string, country: string) => {
+  const formatPostalCode = (value, country) => {
     const format = addressFormats[country];
     if (!format) return value;
 
@@ -332,7 +332,7 @@ const K1VisaQuestionnaire = () => {
         { id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['No', 'Yes'], required: true },
 
         // Physical Address (conditional)
-        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address', required: true, conditional: true },
+        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, conditional: true },
 
         // Move-in date (shows for mailing address if same, physical if different)
         { id: 'sponsorMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
@@ -412,7 +412,7 @@ const K1VisaQuestionnaire = () => {
       id: '1.6-employment',
       title: '1.6 Employment & Work History',
       description: '',
-      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Please provide your work details for the full 5 years before the date you plan to file this petition.',
+      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Overlapping periods are perfectly acceptable for situations like part-time work alongside full-time employment, consulting while employed, or transitional periods between jobs.',
       icon: FileText,
       questionCount: 8,
       fields: [
@@ -600,73 +600,93 @@ const K1VisaQuestionnaire = () => {
     return gaps;
   };
 
-  // Calculate timeline coverage for chronological timeline system
+  // Calculate timeline coverage with support for overlapping periods
   const calculateTimelineCoverage = (entries) => {
     if (entries.length === 0) return { covered: 0, total: 5 * 365, gaps: [] };
 
+    // Normalize dates to midnight to avoid timezone/time issues in day calculations
     const fiveYearsAgo = new Date();
     fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    fiveYearsAgo.setHours(0, 0, 0, 0); // Set to midnight
 
-    // Sort entries by end date (most recent first), treating null as current date
-    const sortedEntries = [...entries].sort((a, b) => {
-      const aEndDate = a.isCurrent ? new Date() : new Date(a.endDate || '1970-01-01');
-      const bEndDate = b.isCurrent ? new Date() : new Date(b.endDate || '1970-01-01');
-      return bEndDate - aEndDate;
-    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to midnight
 
-    let totalDaysCovered = 0;
-    let gaps = [];
-    let currentDate = new Date(); // Today
+    // Create a day-by-day coverage map
+    const totalDays = Math.ceil((today - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+    const coverage = new Array(totalDays).fill(false);
 
-    for (let i = 0; i < sortedEntries.length; i++) {
-      const entry = sortedEntries[i];
-      // For current activities (isCurrent=true), use today's date as end date
-      const entryEndDate = entry.isCurrent ? new Date() : new Date(entry.endDate);
-      const entryStartDate = new Date(entry.startDate);
+    // Mark covered days for each entry
+    entries.forEach(entry => {
+      if (!entry.startDate) return;
+
+      // Create dates in local timezone to avoid UTC/timezone shift issues
+      const startParts = entry.startDate.split('-');
+      const entryStartDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+
+      let entryEndDate;
+      if (entry.isCurrent || !entry.endDate) {
+        entryEndDate = today;
+      } else {
+        const endParts = entry.endDate.split('-');
+        entryEndDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+      }
 
       // Skip if dates are invalid
-      if (isNaN(entryStartDate.getTime()) || (entry.endDate && isNaN(entryEndDate.getTime()))) {
-        continue;
+      if (isNaN(entryStartDate.getTime()) || isNaN(entryEndDate.getTime())) {
+        return;
       }
 
-      // Check for gap before this entry (only if not current activity)
-      if (!entry.isCurrent && currentDate > entryEndDate) {
-        const gapDays = Math.floor((currentDate - entryEndDate) / (1000 * 60 * 60 * 24));
-        if (gapDays > 1) { // Allow 1-day tolerance
-          gaps.push({
-            startDate: entryEndDate.toISOString().split('T')[0],
-            endDate: currentDate.toISOString().split('T')[0],
-            days: gapDays
-          });
+      // Mark each day covered by this entry
+      const startDayIndex = Math.floor((entryStartDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+      const endDayIndex = Math.floor((entryEndDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+
+      for (let dayIndex = Math.max(0, startDayIndex); dayIndex <= Math.min(totalDays - 1, endDayIndex); dayIndex++) {
+        coverage[dayIndex] = true;
+      }
+    });
+
+    // Find gaps (consecutive uncovered days)
+    const gaps = [];
+    let gapStart = null;
+
+    for (let dayIndex = 0; dayIndex < totalDays; dayIndex++) {
+      if (!coverage[dayIndex]) {
+        if (gapStart === null) {
+          gapStart = dayIndex;
+        }
+      } else {
+        if (gapStart !== null) {
+          // End of a gap
+          const gapDays = dayIndex - gapStart;
+          // Only include gaps that are actually meaningful
+          if (gapDays > 0) {
+            const gapStartDate = new Date(fiveYearsAgo.getTime() + gapStart * 24 * 60 * 60 * 1000);
+            const gapEndDate = new Date(fiveYearsAgo.getTime() + (dayIndex - 1) * 24 * 60 * 60 * 1000);
+            gaps.push({
+              startDate: gapStartDate.toISOString().split('T')[0],
+              endDate: gapEndDate.toISOString().split('T')[0],
+              days: gapDays
+            });
+          }
+          gapStart = null;
         }
       }
-
-      // Add covered days from this entry
-      const entryDays = Math.floor((entryEndDate - entryStartDate) / (1000 * 60 * 60 * 24));
-      totalDaysCovered += Math.max(0, entryDays);
-
-      // Update current date for next iteration (only if not current activity)
-      if (!entry.isCurrent) {
-        currentDate = entryStartDate;
-      } else {
-        // For current activities, set current date to start date so we check for gaps before it
-        currentDate = entryStartDate;
-      }
     }
 
-    // Check for gap before 5-year mark
-    if (currentDate > fiveYearsAgo) {
-      const gapDays = Math.floor((currentDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
-      if (gapDays > 0) {
-        gaps.push({
-          startDate: fiveYearsAgo.toISOString().split('T')[0],
-          endDate: currentDate.toISOString().split('T')[0],
-          days: gapDays
-        });
-      }
+    // Handle gap extending to the end
+    if (gapStart !== null) {
+      const gapDays = totalDays - gapStart;
+      const gapStartDate = new Date(fiveYearsAgo.getTime() + gapStart * 24 * 60 * 60 * 1000);
+      gaps.push({
+        startDate: gapStartDate.toISOString().split('T')[0],
+        endDate: today.toISOString().split('T')[0],
+        days: gapDays
+      });
     }
 
-    return { covered: totalDaysCovered, total: 5 * 365, gaps };
+    const coveredDays = coverage.filter(day => day).length;
+    return { covered: coveredDays, total: totalDays, gaps };
   };
 
   const renderField = (field) => {
@@ -1815,6 +1835,8 @@ const K1VisaQuestionnaire = () => {
         const mailingAddrValue = currentData[field.id] || {};
         const {
           street: mailingStreet = '',
+          unitType: mailingUnitType = '',
+          unitNumber: mailingUnitNumber = '',
           city: mailingCity = '',
           state: mailingState = '',
           zipCode: mailingZipCode = '',
@@ -1881,6 +1903,35 @@ const K1VisaQuestionnaire = () => {
                     onChange={(e) => updateField(field.id, { ...mailingAddrValue, street: e.target.value })}
                     placeholder="Street Number and Name"
                   />
+                </div>
+
+                {/* Unit Details */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Unit Details (Optional)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                      value={mailingUnitType}
+                      onChange={(e) => updateField(field.id, { ...mailingAddrValue, unitType: e.target.value, unitNumber: e.target.value ? mailingUnitNumber : '' })}
+                    >
+                      <option value="">Select type...</option>
+                      <option value="Apartment">Apartment</option>
+                      <option value="Suite">Suite</option>
+                      <option value="Floor">Floor</option>
+                      <option value="Unit">Unit</option>
+                      <option value="Room">Room</option>
+                    </select>
+                    <input
+                      type="text"
+                      className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!mailingUnitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                      value={mailingUnitNumber}
+                      onChange={(e) => updateField(field.id, { ...mailingAddrValue, unitNumber: e.target.value })}
+                      placeholder="Number/ID"
+                      disabled={!mailingUnitType}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -1954,7 +2005,7 @@ const K1VisaQuestionnaire = () => {
 
       case 'address':
         const mainAddressValue = currentData[field.id] || {};
-        const { street: mainStreet = '', city: mainCity = '', state: mainState = '', zipCode: mainZipCode = '', country: mainCountry = '', inCareOf: mainInCareOf = '' } = mainAddressValue;
+        const { street: mainStreet = '', unitType: mainUnitType = '', unitNumber: mainUnitNumber = '', city: mainCity = '', state: mainState = '', zipCode: mainZipCode = '', country: mainCountry = '', inCareOf: mainInCareOf = '' } = mainAddressValue;
         const mainCountryFormat = addressFormats[mainCountry] || addressFormats['United States'];
 
         // Check if this is a required mailing address
@@ -2024,6 +2075,35 @@ const K1VisaQuestionnaire = () => {
                     onChange={(e) => updateField(field.id, { ...mainAddressValue, street: e.target.value })}
                     placeholder="Street Number and Name"
                   />
+                </div>
+
+                {/* Unit Details */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Unit Details (Optional)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                      value={mainUnitType}
+                      onChange={(e) => updateField(field.id, { ...mainAddressValue, unitType: e.target.value, unitNumber: e.target.value ? mainUnitNumber : '' })}
+                    >
+                      <option value="">Select type...</option>
+                      <option value="Apartment">Apartment</option>
+                      <option value="Suite">Suite</option>
+                      <option value="Floor">Floor</option>
+                      <option value="Unit">Unit</option>
+                      <option value="Room">Room</option>
+                    </select>
+                    <input
+                      type="text"
+                      className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!mainUnitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                      value={mainUnitNumber}
+                      onChange={(e) => updateField(field.id, { ...mainAddressValue, unitNumber: e.target.value })}
+                      placeholder="Number/ID"
+                      disabled={!mainUnitType}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -3574,63 +3654,48 @@ const K1VisaQuestionnaire = () => {
         );
 
       case 'employment-gap-detector':
-        // This will analyze employment dates and show gap explanations
-        const employmentGaps = detectEmploymentGaps(currentData);
+        // Use timeline-based gap detection that supports overlapping periods
+        const timelineEntries = currentData['sponsorTimelineEntries'] || [];
+        const timelineCoverage = calculateTimelineCoverage(timelineEntries);
 
-        if (employmentGaps.length === 0) {
+        if (timelineCoverage.gaps.length === 0) {
           return (
             <div className="bg-green-50 border-l-4 border-green-300 pl-3 py-3 rounded">
-              <span className="text-green-600">✅ No gaps detected in your employment history</span>
+              <span className="text-green-600">✅ Complete 5-year timeline coverage ({timelineCoverage.covered} days covered)</span>
+              {timelineEntries.filter(entry => entry.type).length > 1 && (
+                <div className="text-sm text-green-700 mt-1">
+                  📅 Including overlapping employment periods (this is perfectly acceptable)
+                </div>
+              )}
             </div>
           );
         }
 
         return (
           <div>
-            <div className="bg-amber-50 border-l-4 border-amber-300 pl-3 py-3 rounded mb-4">
-              <span className="text-amber-800 font-medium">⚠️ We found {employmentGaps.length} gap(s) in your employment history that need explanation:</span>
+            <div className="bg-red-50 border-l-4 border-red-300 pl-3 py-3 rounded mb-4">
+              <span className="text-red-800 font-medium">❌ {timelineCoverage.gaps.length} gap(s) detected in your 5-year employment history</span>
+              <div className="text-sm text-red-700 mt-1">
+                You must account for every day in the past 5 years. Please add employment periods, education, or other activities to fill these gaps.
+              </div>
             </div>
-            {employmentGaps.map((gap, index) => (
-              <div key={index} className="mb-4 p-4 border rounded">
-                <h5 className="font-medium mb-2">Gap #{index + 1}: {gap.startDate} to {gap.endDate}</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      What were you doing during this period?
-                    </label>
-                    <select
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={currentData[`gapActivity_${index}`] || ''}
-                      onChange={(e) => updateField(`gapActivity_${index}`, e.target.value)}
-                    >
-                      <option value="">Select type...</option>
-                      <option value="Unemployed">Unemployed (job searching)</option>
-                      <option value="Student">Student</option>
-                      <option value="Homemaker">Homemaker</option>
-                      <option value="Between jobs">Between jobs</option>
-                      <option value="Medical leave">Medical leave</option>
-                      <option value="Military service">Military service</option>
-                      <option value="Retired">Retired</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  {currentData[`gapActivity_${index}`] === 'Other' && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Please specify:
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                        value={currentData[`gapExplanation_${index}`] || ''}
-                        onChange={(e) => updateField(`gapExplanation_${index}`, e.target.value)}
-                        placeholder="Explain your activity during this period"
-                      />
-                    </div>
-                  )}
+            {timelineCoverage.gaps.map((gap, index) => (
+              <div key={index} className="mb-4 p-4 border border-red-200 rounded bg-red-50">
+                <h5 className="font-medium text-red-800 mb-2">
+                  Gap #{index + 1}: {gap.days === 1 ? gap.startDate : `${gap.startDate} to ${gap.endDate}`} ({gap.days} day{gap.days !== 1 ? 's' : ''})
+                </h5>
+                <div className="text-sm text-red-700">
+                  <p className="mb-2">⚠️ This period needs to be covered by adding a work entry above.</p>
+                  <p>You can use any employment type: Working, Student, Homemaker, Military, Retired, Unable to Work, or Other/Personal Time.</p>
                 </div>
               </div>
             ))}
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Tip:</strong> You can have overlapping employment periods (e.g., part-time consulting while employed full-time).
+                Just add multiple work entries that cover the same time period.
+              </p>
+            </div>
           </div>
         );
 
@@ -3655,7 +3720,7 @@ const K1VisaQuestionnaire = () => {
         );
 
       case 'chronological-timeline':
-        const timelineEntries = currentData['sponsorTimelineEntries'] || [{}];
+        const chronologicalEntries = currentData['sponsorTimelineEntries'] || [{}];
 
 
         return (
@@ -3663,7 +3728,7 @@ const K1VisaQuestionnaire = () => {
 
             {/* Work History Periods */}
             <div className="space-y-4">
-              {timelineEntries.map((entry, index) => {
+              {chronologicalEntries.map((entry, index) => {
                 // Description generation function
                 const generateDescription = (circumstances, professionalField) => {
                   let parts = [];
@@ -3792,7 +3857,7 @@ const K1VisaQuestionnaire = () => {
                   // Only update if user hasn't manually edited OR field is empty
                   const shouldUpdate = currentDescription === lastAutoGenerated || currentDescription === '';
                   
-                  const newEntries = [...timelineEntries];
+                  const newEntries = [...chronologicalEntries];
                   newEntries[index] = { 
                     ...entry, 
                     organization: shouldUpdate ? newGeneratedDescription : entry.organization,
@@ -3806,7 +3871,7 @@ const K1VisaQuestionnaire = () => {
                 // Set default description for new seeking-work entries
                 if (entry.type === 'seeking-work' && !entry.organization && !entry.lastAutoGenerated) {
                   const defaultDescription = "Unemployed actively seeking opportunities";
-                  const newEntries = [...timelineEntries];
+                  const newEntries = [...chronologicalEntries];
                   newEntries[index] = { 
                     ...entry, 
                     organization: defaultDescription,
@@ -3837,7 +3902,7 @@ const K1VisaQuestionnaire = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        const newEntries = timelineEntries.filter((_, i) => i !== index);
+                        const newEntries = chronologicalEntries.filter((_, i) => i !== index);
                         updateField('sponsorTimelineEntries', newEntries);
                       }}
                       className="text-red-600 hover:text-red-800 text-sm"
@@ -3853,7 +3918,7 @@ const K1VisaQuestionnaire = () => {
                         className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                         value={entry.type || ''}
                         onChange={(e) => {
-                          const newEntries = [...timelineEntries];
+                          const newEntries = [...chronologicalEntries];
                           const newType = e.target.value;
                           
                           // Clear organization field when changing types since it serves different purposes
@@ -3868,25 +3933,14 @@ const K1VisaQuestionnaire = () => {
                               lastAutoGenerated: defaultDescription,
                               favorableCircumstances: []
                             };
-                          } else if (newType === 'homemaker') {
-                            // Auto-fill homemaker fields
-                            newEntries[index] = {
-                              ...entry,
-                              type: newType,
-                              organization: 'Homemaker',
-                              jobTitle: 'Homemaker',
-                              lastAutoGenerated: '',
-                              favorableCircumstances: []
-                            };
                           } else {
                             // Clear everything for other types
                             newEntries[index] = {
                               ...entry,
                               type: newType,
                               organization: '',
-                              jobTitle: '', // Clear job title when switching away from homemaker
-                              medicalLeaveType: '', // Clear medical leave type when switching types
-                              showMedicalHelp: false, // Clear help panel when switching types
+                              showRetiredHelp: false, // Clear retired help panel when switching types
+                              showOtherHelp: false, // Clear other help panel when switching types
                               lastAutoGenerated: '',
                               favorableCircumstances: []
                             };
@@ -3907,7 +3961,7 @@ const K1VisaQuestionnaire = () => {
                     </div>
 
                     {/* USCIS Guidance Notes for each employment type */}
-                    {entry.type && entry.type !== 'seeking-work' && entry.type !== 'unable-to-work' && (
+                    {entry.type && entry.type !== 'seeking-work' && entry.type !== 'unable-to-work' && entry.type !== 'military' && entry.type !== 'homemaker' && (
                       <div className="md:col-span-2 mb-4 p-3 bg-blue-50 border-l-4 border-blue-300 rounded">
                         <div className="text-sm text-blue-800">
                           {(() => {
@@ -3927,15 +3981,10 @@ const K1VisaQuestionnaire = () => {
                                 title: 'Education Period',
                                 content: 'USCIS considers full-time education as valid employment history. Include any relevant degrees or certifications earned. This is for students not seeking work.'
                               },
-                              'homemaker': {
-                                icon: '🏠',
-                                title: 'Homemaker Period',
-                                content: 'For homemaker periods, USCIS forms typically require "Homemaker" as both the employer and occupation. Organization and job title will be auto-filled.'
-                              },
-                              'military': {
-                                icon: '🪖',
-                                title: 'Military Service Period',
-                                content: 'USCIS may request additional military documentation (DD-214, etc.) to verify service dates and status.'
+                              'unable-to-work': {
+                                icon: '🏥',
+                                title: 'Unable to Work Period',
+                                content: 'This covers medical leave, disability, or other situations preventing work. In Description: Enter "Medical Leave" or "Disability". You can mention if it was from a specific employer but no medical details needed.'
                               },
                               'retired': {
                                 icon: '🌴',
@@ -3949,8 +3998,7 @@ const K1VisaQuestionnaire = () => {
                               }
                             };
 
-                            const info = guidance[entry.type];
-                            if (!info) return null; // No guidance for this type
+                            const info = guidance[entry.type] || { icon: '📝', title: 'Work Period', content: 'Please provide details about this period.' };
                             return (
                               <>
                                 <div className="font-medium flex items-center">
@@ -4119,23 +4167,128 @@ const K1VisaQuestionnaire = () => {
                       </div>
                     )}
 
-                    {/* Organization/Employer/School Name - Required for all types except homemaker */}
-                    {entry.type !== 'homemaker' && (
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          {(() => {
-                            const labels = {
-                              'working': 'Company/Organization Name',
-                              'in-education': 'School/Institution Name',
-                              'military': 'Branch of Service',
-                              'seeking-work': 'Description (auto-fills or write your own)',
-                              'retired': 'Description',
-                              'unable-to-work': 'Reason Unable to Work',
-                              'other': 'Description'
-                            };
-                            return labels[entry.type] || 'Description';
-                          })()}
-                        </label>
+                    {/* Additional Details for Unable to Work */}
+                    {entry.type === 'unable-to-work' && (
+                      <div className="md:col-span-2 p-4 bg-red-50 border border-red-200 rounded mb-4">
+                        <h5 className="font-medium text-red-900 mb-3">Select the type that best describes your situation:</h5>
+
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <div className="space-y-2">
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="radio"
+                                  name={`unable-work-type-${index}`}
+                                  checked={entry.unableToWorkType === 'medical-leave'}
+                                  onChange={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    const autoGenerated = "Temporary medical leave from employment";
+                                    newEntries[index] = {
+                                      ...entry,
+                                      unableToWorkType: 'medical-leave',
+                                      organization: autoGenerated,
+                                      lastAutoGenerated: autoGenerated
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="mt-0.5"
+                                />
+                                <span className="text-sm">
+                                  <strong>Medical leave</strong> - Temporary leave due to personal health issues
+                                </span>
+                              </label>
+
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="radio"
+                                  name={`unable-work-type-${index}`}
+                                  checked={entry.unableToWorkType === 'disability'}
+                                  onChange={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    const autoGenerated = "Unable to work due to disability";
+                                    newEntries[index] = {
+                                      ...entry,
+                                      unableToWorkType: 'disability',
+                                      organization: autoGenerated,
+                                      lastAutoGenerated: autoGenerated
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="mt-0.5"
+                                />
+                                <span className="text-sm">
+                                  <strong>Disability</strong> - Long-term or permanent disability affecting ability to work
+                                </span>
+                              </label>
+
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="radio"
+                                  name={`unable-work-type-${index}`}
+                                  checked={entry.unableToWorkType === 'family-caregiving'}
+                                  onChange={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    const autoGenerated = "Providing care for family member";
+                                    newEntries[index] = {
+                                      ...entry,
+                                      unableToWorkType: 'family-caregiving',
+                                      organization: autoGenerated,
+                                      lastAutoGenerated: autoGenerated
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="mt-0.5"
+                                />
+                                <span className="text-sm">
+                                  <strong>Family caregiving</strong> - Unable to work due to caring for family member
+                                </span>
+                              </label>
+
+                              <label className="flex items-start space-x-2">
+                                <input
+                                  type="radio"
+                                  name={`unable-work-type-${index}`}
+                                  checked={entry.unableToWorkType === 'other-health'}
+                                  onChange={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    const autoGenerated = "Unable to work due to health-related circumstances";
+                                    newEntries[index] = {
+                                      ...entry,
+                                      unableToWorkType: 'other-health',
+                                      organization: autoGenerated,
+                                      lastAutoGenerated: autoGenerated
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="mt-0.5"
+                                />
+                                <span className="text-sm">
+                                  <strong>Other health reasons</strong> - Other health-related reasons preventing work
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Organization/Employer/School Name - Required for all types */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        {(() => {
+                          const labels = {
+                            'working': 'Company/Organization Name',
+                            'in-education': 'School/Institution Name',
+                            'military': 'Branch of Service',
+                            'seeking-work': 'Description (auto-fills or write your own)',
+                            'caregiving': 'Description',
+                            'retired': 'Description',
+                            'unable-to-work': 'Description',
+                            'other': 'Description'
+                          };
+                          return labels[entry.type] || 'Description';
+                        })()}
+                      </label>
                       {entry.type === 'seeking-work' ? (
                         <div>
                           <textarea
@@ -4143,7 +4296,7 @@ const K1VisaQuestionnaire = () => {
                             rows={3}
                             value={entry.organization || ''}
                             onChange={(e) => {
-                              const newEntries = [...timelineEntries];
+                              const newEntries = [...chronologicalEntries];
                               newEntries[index] = { ...entry, organization: e.target.value };
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
@@ -4162,7 +4315,7 @@ const K1VisaQuestionnaire = () => {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const newEntries = [...timelineEntries];
+                                      const newEntries = [...chronologicalEntries];
                                       newEntries[index] = { 
                                         ...entry, 
                                         organization: lastAutoGenerated 
@@ -4183,65 +4336,115 @@ const K1VisaQuestionnaire = () => {
                             return null;
                           })()}
                         </div>
-                      ) : entry.type === 'homemaker' ? (
-                        <input
-                          type="text"
-                          className="w-full p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
-                          value="Homemaker"
-                          disabled={true}
-                        />
                       ) : entry.type === 'unable-to-work' ? (
+                        <div>
+                          <textarea
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            rows={2}
+                            value={entry.organization || ''}
+                            onChange={(e) => {
+                              const newEntries = [...chronologicalEntries];
+                              newEntries[index] = { ...entry, organization: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                            placeholder="Edit this description or write your own"
+                          />
+
+                          <p className="text-xs text-gray-600 mt-1">
+                            ✏️ You can edit this auto-generated description to add more specific details
+                          </p>
+
+                          {/* Helpful elaboration guidance based on selected type */}
+                          {entry.unableToWorkType && (
+                            <div className="mt-2 p-2 bg-blue-50 border-l-4 border-blue-300 text-xs text-blue-800">
+                              {(() => {
+                                const guidance = {
+                                  'medical-leave': '💡 Consider adding: duration (short-term/long-term), general nature (surgery recovery, treatment), whether from specific employer',
+                                  'disability': '💡 Consider adding: whether temporary or permanent, if receiving benefits, general impact on work capacity',
+                                  'family-caregiving': '💡 Consider adding: relationship (parent, spouse, child), whether full-time caregiving, approximate duration',
+                                  'other-health': '💡 Be specific but avoid unnecessary medical details (e.g., "Recovery from surgery", "Treatment for chronic condition")'
+                                };
+                                return guidance[entry.unableToWorkType] || '';
+                              })()}
+                            </div>
+                          )}
+
+                          {/* Restore Auto-Generated Button - Show only when user has manually edited */}
+                          {(() => {
+                            const currentDescription = entry.organization || '';
+                            const lastAutoGenerated = entry.lastAutoGenerated || '';
+                            const hasManualEdit = currentDescription !== lastAutoGenerated && currentDescription !== '' && lastAutoGenerated !== '';
+
+                            if (hasManualEdit) {
+                              return (
+                                <div className="mt-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newEntries = [...chronologicalEntries];
+                                      newEntries[index] = {
+                                        ...entry,
+                                        organization: lastAutoGenerated
+                                      };
+                                      updateField('sponsorTimelineEntries', newEntries);
+                                    }}
+                                    className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1"
+                                  >
+                                    <span>↺</span>
+                                    <span>Use auto-generated description</span>
+                                  </button>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Auto-generated: "{lastAutoGenerated}"
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                      ) : entry.type === 'retired' ? (
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
-                            <select
+                            <input
+                              type="text"
                               className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                              value={entry.medicalLeaveType || ''}
+                              value={entry.organization || ''}
                               onChange={(e) => {
-                                const newEntries = [...timelineEntries];
-                                newEntries[index] = {
-                                  ...entry,
-                                  medicalLeaveType: e.target.value,
-                                  organization: e.target.value === 'Other medical reason' ? '' : e.target.value
-                                };
+                                const newEntries = [...chronologicalEntries];
+                                newEntries[index] = { ...entry, organization: e.target.value };
                                 updateField('sponsorTimelineEntries', newEntries);
                               }}
-                            >
-                              <option value="">Select reason...</option>
-                              <option value="Short-term medical leave">Short-term medical leave (under 12 months)</option>
-                              <option value="Long-term disability">Long-term disability (12+ months)</option>
-                              <option value="Caring for sick family member">Caring for sick family member</option>
-                              <option value="Work-related injury">Work-related injury</option>
-                              <option value="Other medical reason">Other medical reason</option>
-                            </select>
+                              placeholder="e.g., Retired Teacher with 30 years of service"
+                            />
 
                             <button
                               type="button"
                               onClick={() => {
-                                const newEntries = [...timelineEntries];
+                                const newEntries = [...chronologicalEntries];
                                 newEntries[index] = {
                                   ...entry,
-                                  showMedicalHelp: !entry.showMedicalHelp
+                                  showRetiredHelp: !entry.showRetiredHelp
                                 };
                                 updateField('sponsorTimelineEntries', newEntries);
                               }}
                               className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
                             >
-                              ℹ️ Click to learn more
+                              ℹ️ How to write a good description
                             </button>
                           </div>
 
                           {/* Collapsible help panel */}
-                          {entry.showMedicalHelp && (
+                          {entry.showRetiredHelp && (
                             <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
                               <div className="flex justify-between items-start mb-3">
-                                <h4 className="font-medium text-blue-800">Understanding "Unable to Work" Categories</h4>
+                                <h4 className="font-medium text-blue-800">Writing Strong Retirement Descriptions</h4>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const newEntries = [...timelineEntries];
+                                    const newEntries = [...chronologicalEntries];
                                     newEntries[index] = {
                                       ...entry,
-                                      showMedicalHelp: false
+                                      showRetiredHelp: false
                                     };
                                     updateField('sponsorTimelineEntries', newEntries);
                                   }}
@@ -4251,51 +4454,222 @@ const K1VisaQuestionnaire = () => {
                                 </button>
                               </div>
 
-                              <div className="space-y-3 text-blue-700">
+                              <div className="space-y-4 text-blue-700">
                                 <div>
-                                  <strong>Short-term medical leave (under 12 months):</strong>
-                                  <p>Covers temporary illnesses, surgeries, recovery periods that last less than a year.</p>
+                                  <h5 className="font-medium text-blue-800 mb-2">✅ What to Include:</h5>
+                                  <ul className="space-y-1 text-sm ml-4">
+                                    <li>• <strong>Previous profession:</strong> "Retired Teacher", "Retired Engineer"</li>
+                                    <li>• <strong>Years of service:</strong> "30 years of service", "Career spanning 1985-2020"</li>
+                                    <li>• <strong>Income sources:</strong> "Receiving pension and Social Security"</li>
+                                    <li>• <strong>Stability indicators:</strong> "Homeowner", "Financially stable"</li>
+                                  </ul>
                                 </div>
 
                                 <div>
-                                  <strong>Long-term disability (12+ months):</strong>
-                                  <p>Covers chronic conditions, permanent disabilities that last 12 months or longer.</p>
+                                  <h5 className="font-medium text-blue-800 mb-2">💪 Strong Examples:</h5>
+                                  <div className="bg-green-50 border border-green-200 rounded p-3 text-sm">
+                                    <p><strong>Excellent:</strong> "Retired federal employee (1985-2020) with full pension and Social Security benefits"</p>
+                                    <p><strong>Good:</strong> "Retired high school teacher after 32 years. Receiving state pension."</p>
+                                    <p><strong>Basic:</strong> "Retired nurse with Social Security and 401k"</p>
+                                  </div>
                                 </div>
 
                                 <div>
-                                  <strong>Caring for sick family member:</strong>
-                                  <p>Taking time off to care for a seriously ill spouse, child, or parent.</p>
+                                  <h5 className="font-medium text-blue-800 mb-2">❌ What to Avoid:</h5>
+                                  <ul className="space-y-1 text-sm ml-4">
+                                    <li>• Health problems or medical reasons for retirement</li>
+                                    <li>• Financial struggles or insufficient income</li>
+                                    <li>• Vague statements like just "Retired"</li>
+                                    <li>• Recent job loss described as retirement</li>
+                                  </ul>
                                 </div>
 
-                                <div>
-                                  <strong>Work-related injury:</strong>
-                                  <p>Injuries or illnesses that happened at work or because of your job.</p>
-                                </div>
-
-                                <div>
-                                  <strong>Other medical reason:</strong>
-                                  <p>For situations not covered by the categories above. You'll be asked to provide a brief description.</p>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                                  <p className="text-sm"><strong>💡 Pro Tip:</strong> Strong retirement descriptions show financial stability and professional history, which helps demonstrate your ability to support your fiancé(e).</p>
                                 </div>
                               </div>
                             </div>
                           )}
+                        </div>
+                      ) : entry.type === 'other' ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={entry.organization || ''}
+                              onChange={(e) => {
+                                const newEntries = [...chronologicalEntries];
+                                newEntries[index] = { ...entry, organization: e.target.value };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              placeholder="e.g., Weekend volunteer at local food bank"
+                            />
 
-                          {entry.medicalLeaveType === 'Other medical reason' && (
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
-                                Please specify:
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                                value={entry.organization || ''}
-                                onChange={(e) => {
-                                  const newEntries = [...timelineEntries];
-                                  newEntries[index] = { ...entry, organization: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
-                                }}
-                                placeholder="Brief description without medical details"
-                              />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newEntries = [...chronologicalEntries];
+                                newEntries[index] = {
+                                  ...entry,
+                                  showOtherHelp: !entry.showOtherHelp
+                                };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
+                            >
+                              ℹ️ How to write a good description
+                            </button>
+                          </div>
+
+                          {/* Collapsible help panel */}
+                          {entry.showOtherHelp && (
+                            <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                              <div className="flex justify-between items-start mb-3">
+                                <h4 className="font-medium text-blue-800">Writing Strong "Other/Personal Time" Descriptions</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    newEntries[index] = {
+                                      ...entry,
+                                      showOtherHelp: false
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-lg leading-none"
+                                >
+                                  ×
+                                </button>
+                              </div>
+
+                              <div className="space-y-4 text-blue-700">
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">What Makes a Strong Description:</h5>
+                                  <p className="text-sm mb-3">Clear, specific, and shows legitimate use of your time</p>
+                                  <h5 className="font-medium text-blue-800 mb-2">Writing Approach:</h5>
+                                  <ul className="space-y-1 text-sm ml-4">
+                                    <li><strong>✏️ BE DIRECT:</strong> Be direct and factual - include enough detail to paint a clear picture</li>
+                                    <li><strong>💡 ADD CONTEXT:</strong> Include location or circumstances that explain the situation</li>
+                                    <li><strong>⚠️ AVOID VAGUENESS:</strong> Generic descriptions don't give enough information about what you were actually doing</li>
+                                  </ul>
+                                </div>
+
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">Before/After Examples:</h5>
+                                  <div className="space-y-3 text-sm">
+                                    <div className="bg-red-50 border border-red-200 rounded p-3">
+                                      <p><strong>❌ WEAK:</strong> "Taking a break from work to focus on myself and spend time with family"</p>
+                                    </div>
+                                    <div className="bg-green-50 border border-green-200 rounded p-3">
+                                      <p><strong>✅ STRONG:</strong> "Extended stay in Colombia to care for elderly grandmother and handle family affairs"</p>
+                                    </div>
+                                    <p className="text-xs text-blue-600"><strong>Why the difference?</strong> The weak version uses vague phrases like "focus on myself" and "spend time with family" that don't explain what you were actually doing, while the strong version gives specific context about caregiving and location.</p>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">Quick Quality Checklist:</h5>
+                                  <ul className="space-y-1 text-sm ml-4">
+                                    <li>✅ Specific activity or situation</li>
+                                    <li>✅ Location or context included</li>
+                                    <li>✅ Legitimate reason or purpose (if applicable)</li>
+                                  </ul>
+                                </div>
+
+
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">Examples That Work:</h5>
+                                  <div className="bg-green-50 border border-green-200 rounded p-3 text-sm space-y-1">
+                                    <p><strong>Travel:</strong> "Cultural immersion trip through Southeast Asia to study languages and local customs"</p>
+                                    <p><strong>Family:</strong> "Primary caregiver for aging parent recovering from major surgery"</p>
+                                    <p><strong>Transition:</strong> "Relocation period between countries while handling immigration paperwork"</p>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : entry.type === 'homemaker' ? (
+                        <div></div>
+                      ) : entry.type === 'military' ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={entry.organization || ''}
+                              onChange={(e) => {
+                                const newEntries = [...chronologicalEntries];
+                                newEntries[index] = { ...entry, organization: e.target.value };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              placeholder="e.g., U.S. Army, Royal Navy, German Armed Forces, U.S. Air Force Reserve"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newEntries = [...chronologicalEntries];
+                                newEntries[index] = {
+                                  ...entry,
+                                  showMilitaryHelp: !entry.showMilitaryHelp
+                                };
+                                updateField('sponsorTimelineEntries', newEntries);
+                              }}
+                              className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
+                            >
+                              ℹ️ Examples
+                            </button>
+                          </div>
+
+                          {/* Collapsible help panel */}
+                          {entry.showMilitaryHelp && (
+                            <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                              <div className="flex justify-between items-start mb-3">
+                                <h4 className="font-medium text-blue-800">Military Service Examples</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newEntries = [...chronologicalEntries];
+                                    newEntries[index] = {
+                                      ...entry,
+                                      showMilitaryHelp: false
+                                    };
+                                    updateField('sponsorTimelineEntries', newEntries);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-xs"
+                                >
+                                  ✕ Close
+                                </button>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">U.S. Military Examples:</h5>
+                                  <div className="bg-green-50 border border-green-200 rounded p-3 text-sm space-y-1">
+                                    <p><strong>U.S. Army</strong> (for active duty service)</p>
+                                    <p><strong>U.S. Navy Reserve</strong> (for reserve service)</p>
+                                    <p><strong>Air National Guard</strong> (for National Guard service)</p>
+                                    <p><strong>U.S. Marine Corps</strong> (for Marine service)</p>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h5 className="font-medium text-blue-800 mb-2">International Examples:</h5>
+                                  <div className="bg-green-50 border border-green-200 rounded p-3 text-sm space-y-1">
+                                    <p><strong>Royal Navy</strong> (United Kingdom)</p>
+                                    <p><strong>German Armed Forces</strong> (Germany)</p>
+                                    <p><strong>Israeli Defense Forces</strong> (Israel)</p>
+                                    <p><strong>Royal Canadian Army</strong> (Canada)</p>
+                                  </div>
+                                </div>
+
+                                <div className="text-xs text-blue-600">
+                                  <strong>💡 Tip:</strong> Include the branch name and country.
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -4305,7 +4679,7 @@ const K1VisaQuestionnaire = () => {
                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                           value={entry.organization || ''}
                           onChange={(e) => {
-                            const newEntries = [...timelineEntries];
+                            const newEntries = [...chronologicalEntries];
                             newEntries[index] = { ...entry, organization: e.target.value };
                             updateField('sponsorTimelineEntries', newEntries);
                           }}
@@ -4314,20 +4688,19 @@ const K1VisaQuestionnaire = () => {
                               'working': 'ABC Company Inc.',
                               'in-education': 'University of ABC',
                               'military': 'U.S. Army',
-                              'homemaker': 'Homemaker',
+                              'caregiving': 'Homemaker',
                               'retired': 'Retired',
-                              'unable-to-work': 'Select reason above',
+                              'unable-to-work': 'Medical Leave',
                               'other': 'Describe your activity'
                             };
                             return placeholders[entry.type] || 'Enter details';
                           })()}
                         />
                       )}
+                      
+                    </div>
 
-                      </div>
-                    )}
-
-                    {/* Job Title/Position - Required for working, military, and education only */}
+                    {/* Job Title/Position - Required for working, military, and education */}
                     {(entry.type === 'working' || entry.type === 'military' || entry.type === 'in-education') && (
                       <>
                         <div>
@@ -4341,7 +4714,7 @@ const K1VisaQuestionnaire = () => {
                                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                 value={entry.jobTitle || ''}
                                 onChange={(e) => {
-                                  const newEntries = [...timelineEntries];
+                                  const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, jobTitle: e.target.value };
                                   updateField('sponsorTimelineEntries', newEntries);
                                 }}
@@ -4366,7 +4739,7 @@ const K1VisaQuestionnaire = () => {
                               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                               value={entry.jobTitle || ''}
                               onChange={(e) => {
-                                const newEntries = [...timelineEntries];
+                                const newEntries = [...chronologicalEntries];
                                 newEntries[index] = { ...entry, jobTitle: e.target.value };
                                 updateField('sponsorTimelineEntries', newEntries);
                               }}
@@ -4377,46 +4750,48 @@ const K1VisaQuestionnaire = () => {
                           )}
                         </div>
 
-                        {/* Employment Status - Full-time/Part-time, Active Duty/Reserve - Not needed for homemaker */}
-                        {entry.type !== 'homemaker' && (
-                          <div>
-                            <label className="block text-sm font-medium mb-1">
-                              {entry.type === 'working' ? 'Employment Type' :
-                                entry.type === 'military' ? 'Service Type' : 'Enrollment Status'}
-                            </label>
+                        {/* Employment Status - Full-time/Part-time (not for military, homemaker, or unable-to-work) */}
+                        {entry.type === 'working' && (
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Employment Type
+                          </label>
                           <select
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                             value={entry.employmentStatus || ''}
                             onChange={(e) => {
-                              const newEntries = [...timelineEntries];
+                              const newEntries = [...chronologicalEntries];
                               newEntries[index] = { ...entry, employmentStatus: e.target.value };
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
                           >
                             <option value="">Select...</option>
-                            {entry.type === 'working' && (
-                              <>
-                                <option value="Full-time">Full-time</option>
-                                <option value="Part-time">Part-time</option>
-                                <option value="Contract">Contract</option>
-                                <option value="Self-employed">Self-employed</option>
-                              </>
-                            )}
-                            {entry.type === 'military' && (
-                              <>
-                                <option value="Active Duty">Active Duty</option>
-                                <option value="Reserve">Reserve</option>
-                                <option value="National Guard">National Guard</option>
-                              </>
-                            )}
-                            {entry.type === 'in-education' && (
-                              <>
-                                <option value="Full-time">Full-time</option>
-                                <option value="Part-time">Part-time</option>
-                              </>
-                            )}
-                            </select>
-                          </div>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Self-employed">Self-employed</option>
+                          </select>
+                        </div>
+                        )}
+                        {entry.type === 'in-education' && (
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Enrollment Status
+                          </label>
+                          <select
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={entry.employmentStatus || ''}
+                            onChange={(e) => {
+                              const newEntries = [...chronologicalEntries];
+                              newEntries[index] = { ...entry, employmentStatus: e.target.value };
+                              updateField('sponsorTimelineEntries', newEntries);
+                            }}
+                          >
+                            <option value="">Select...</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                          </select>
+                        </div>
                         )}
                       </>
                     )}
@@ -4429,7 +4804,7 @@ const K1VisaQuestionnaire = () => {
                             'working': '(Employer Address)',
                             'in-education': '(School Address)',
                             'seeking-work': '(Your Residence During This Period)',
-                            'homemaker': '(Your Residence During This Period)',
+                            'caregiving': '(Your Residence During This Period)',
                             'retired': '(Your Residence During This Period)',
                             'unable-to-work': '(Your Residence During This Period)',
                             'military': '(Base/Unit Address)',
@@ -4440,18 +4815,18 @@ const K1VisaQuestionnaire = () => {
                       </label>
 
                       {/* Smart address handling */}
-                      {(entry.type === 'homemaker' || entry.type === 'seeking-work' ||
+                      {(entry.type === 'caregiving' || entry.type === 'seeking-work' ||
                         entry.type === 'retired' || entry.type === 'unable-to-work') ? (
                         <div className="space-y-2">
                           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                            💡 For {entry.type === 'homemaker' ? 'homemaker' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
+                            💡 For {entry.type === 'caregiving' ? 'caregiving' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
                             We can pre-fill this with your current address, but please update if you lived elsewhere.
                           </div>
                           <button
                             type="button"
                             onClick={() => {
                               // Pre-fill with current address from earlier sections
-                              const newEntries = [...timelineEntries];
+                              const newEntries = [...chronologicalEntries];
                               // Get current address from sponsor's current address section
                               const currentAddress = currentData['sponsorCurrentAddress'] || {};
                               newEntries[index] = {
@@ -4482,7 +4857,7 @@ const K1VisaQuestionnaire = () => {
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                             value={entry.country || ''}
                             onChange={(e) => {
-                              const newEntries = [...timelineEntries];
+                              const newEntries = [...chronologicalEntries];
                               newEntries[index] = { ...entry, country: e.target.value, state: '', zipCode: '' };
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
@@ -4507,7 +4882,7 @@ const K1VisaQuestionnaire = () => {
                                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                   value={entry.streetAddress || ''}
                                   onChange={(e) => {
-                                    const newEntries = [...timelineEntries];
+                                    const newEntries = [...chronologicalEntries];
                                     newEntries[index] = { ...entry, streetAddress: e.target.value };
                                     updateField('sponsorTimelineEntries', newEntries);
                                   }}
@@ -4522,7 +4897,7 @@ const K1VisaQuestionnaire = () => {
                                     className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                     value={entry.unitType || ''}
                                     onChange={(e) => {
-                                      const newEntries = [...timelineEntries];
+                                      const newEntries = [...chronologicalEntries];
                                       newEntries[index] = { ...entry, unitType: e.target.value };
                                       updateField('sponsorTimelineEntries', newEntries);
                                     }}
@@ -4537,7 +4912,7 @@ const K1VisaQuestionnaire = () => {
                                     className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                     value={entry.unitNumber || ''}
                                     onChange={(e) => {
-                                      const newEntries = [...timelineEntries];
+                                      const newEntries = [...chronologicalEntries];
                                       newEntries[index] = { ...entry, unitNumber: e.target.value };
                                       updateField('sponsorTimelineEntries', newEntries);
                                     }}
@@ -4559,7 +4934,7 @@ const K1VisaQuestionnaire = () => {
                                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                   value={entry.city || ''}
                                   onChange={(e) => {
-                                    const newEntries = [...timelineEntries];
+                                    const newEntries = [...chronologicalEntries];
                                     newEntries[index] = { ...entry, city: e.target.value };
                                     updateField('sponsorTimelineEntries', newEntries);
                                   }}
@@ -4580,7 +4955,7 @@ const K1VisaQuestionnaire = () => {
                                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                           value={entry.state || ''}
                                           onChange={(e) => {
-                                            const newEntries = [...timelineEntries];
+                                            const newEntries = [...chronologicalEntries];
                                             newEntries[index] = { ...entry, state: e.target.value };
                                             updateField('sponsorTimelineEntries', newEntries);
                                           }}
@@ -4596,7 +4971,7 @@ const K1VisaQuestionnaire = () => {
                                           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                           value={entry.state || ''}
                                           onChange={(e) => {
-                                            const newEntries = [...timelineEntries];
+                                            const newEntries = [...chronologicalEntries];
                                             newEntries[index] = { ...entry, state: e.target.value };
                                             updateField('sponsorTimelineEntries', newEntries);
                                           }}
@@ -4623,12 +4998,20 @@ const K1VisaQuestionnaire = () => {
                                       className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                                       value={entry.zipCode || ''}
                                       onChange={(e) => {
-                                        const newEntries = [...timelineEntries];
-                                        newEntries[index] = { ...entry, zipCode: e.target.value };
+                                        const formatted = formatPostalCode(e.target.value, entry.country);
+                                        const newEntries = [...chronologicalEntries];
+                                        newEntries[index] = { ...entry, zipCode: formatted };
                                         updateField('sponsorTimelineEntries', newEntries);
                                       }}
                                       placeholder={countryFormat.postalPlaceholder || 'Enter postal code'}
                                     />
+
+                                    {/* ZIP Code validation */}
+                                    {entry.zipCode && !countryFormat.postalFormat.test(entry.zipCode) && (
+                                      <div className="text-sm text-orange-600 flex items-center mt-1">
+                                        <span>Please enter a valid {countryFormat.postalLabel.toLowerCase()} for {entry.country}</span>
+                                      </div>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -4645,9 +5028,9 @@ const K1VisaQuestionnaire = () => {
                         type="date"
                         className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                         value={entry.startDate || ''}
-                        max={index === 0 ? new Date().toISOString().split('T')[0] : (timelineEntries[index - 1]?.startDate || new Date().toISOString().split('T')[0])}
+                        max={index === 0 ? new Date().toISOString().split('T')[0] : (chronologicalEntries[index - 1]?.startDate || new Date().toISOString().split('T')[0])}
                         onChange={(e) => {
-                          const newEntries = [...timelineEntries];
+                          const newEntries = [...chronologicalEntries];
                           newEntries[index] = { ...entry, startDate: e.target.value };
 
                           // Auto-update the end date of the next entry (Entry N+1) to match this start date
@@ -4662,43 +5045,29 @@ const K1VisaQuestionnaire = () => {
 
                     <div>
                       <label className="block text-sm font-medium mb-1">End Date</label>
-                      {index === 0 ? (
-                        // Entry 1: Always current (Present)
+                      {(entry.isCurrent || index === 0) ? (
+                        // Current Activity: Show "Present" and make field read-only
                         <div className="flex items-center space-x-2">
                           <input
-                            type="date"
+                            type="text"
                             className="flex-1 p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
-                            value=""
+                            value="Present"
                             disabled={true}
                             placeholder="Present (Current Activity)"
                           />
                         </div>
-                      ) : timelineEntries[index - 1]?.startDate ? (
-                        // Entry N+1: Auto-connected to Entry N's start date
-                        <div>
-                          <input
-                            type="date"
-                            className="flex-1 p-2 border rounded bg-gray-100 focus:ring-2 focus:ring-blue-500"
-                            value={timelineEntries[index - 1].startDate}
-                            disabled={true}
-                            placeholder="Auto-connected"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            ↗️ Auto-connected to Entry {index}'s start date
-                          </p>
-                        </div>
                       ) : (
-                        // Entry N+1: User can set end date if Entry N has no start date yet
+                        // Allow user to set any end date (supports overlapping periods)
                         <div className="flex items-center space-x-2">
                           <input
                             type="date"
                             className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
                             value={entry.endDate || ''}
                             min={entry.startDate}
-                            max={timelineEntries[index - 1]?.startDate || new Date().toISOString().split('T')[0]}
+                            max={new Date().toISOString().split('T')[0]}
                             placeholder="End date"
                             onChange={(e) => {
-                              const newEntries = [...timelineEntries];
+                              const newEntries = [...chronologicalEntries];
                               newEntries[index] = { ...entry, endDate: e.target.value };
                               updateField('sponsorTimelineEntries', newEntries);
                             }}
@@ -4735,7 +5104,7 @@ const K1VisaQuestionnaire = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const isFirstEntry = timelineEntries.length === 0;
+                  const isFirstEntry = chronologicalEntries.length === 0;
 
                   const newEntry = {
                     type: '',
@@ -4745,7 +5114,7 @@ const K1VisaQuestionnaire = () => {
                     isCurrent: isFirstEntry // Only first entry is current
                   };
 
-                  const newEntries = [...timelineEntries, newEntry];
+                  const newEntries = [...chronologicalEntries, newEntry];
                   updateField('sponsorTimelineEntries', newEntries);
                 }}
                 className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
@@ -4767,32 +5136,101 @@ const K1VisaQuestionnaire = () => {
           );
         }
 
+        // Get timeline coverage for display
+        const summaryCoverage = calculateTimelineCoverage(summaryEntries.filter(entry => entry.type));
+
+        // Helper function to get display name for employment types
+        const getDisplayName = (entry) => {
+          if (entry.type === 'working') {
+            return entry.organization || 'Employment';
+          }
+
+          const typeDisplayNames = {
+            'homemaker': 'Homemaker',
+            'student': 'Student',
+            'retired': 'Retired',
+            'military': 'Military Service',
+            'unable-to-work': 'Unable to Work',
+            'other': 'Personal Time'
+          };
+
+          return typeDisplayNames[entry.type] || entry.type.replace('-', ' ');
+        };
+
         return (
           <div className="bg-white border rounded-lg p-4">
             <h4 className="font-medium mb-4">📋 Your 5-Year Timeline Summary</h4>
+
+            {/* Coverage status */}
+            <div className="mb-4 p-3 rounded border">
+              {summaryCoverage.gaps.length === 0 ? (
+                <div className="text-green-600 text-sm">
+                  ✅ Complete coverage
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-red-600 text-sm">
+                    ❌ Coverage incomplete: {summaryCoverage.gaps.length} gap(s) detected
+                  </div>
+                  <div className="ml-4 space-y-1">
+                    {summaryCoverage.gaps.map((gap, index) => (
+                      <div key={index} className="text-red-700 text-xs bg-red-50 px-2 py-1 rounded">
+                        📅 Gap {index + 1}: {gap.days === 1 ? gap.startDate : `${gap.startDate} to ${gap.endDate}`} ({gap.days} day{gap.days !== 1 ? 's' : ''})
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-gray-600 text-xs">
+                    💡 Add work periods, education, or other activities to cover these gaps
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="space-y-3">
               {summaryEntries
                 .filter(entry => entry.type) // Filter out empty entries
                 .sort((a, b) => {
-                  const aEndDate = a.isCurrent ? new Date() : new Date(a.endDate || '1970-01-01');
-                  const bEndDate = b.isCurrent ? new Date() : new Date(b.endDate || '1970-01-01');
-                  return bEndDate - aEndDate;
+                  // Current jobs (no end date) come first
+                  const aIsCurrent = a.isCurrent || !a.endDate;
+                  const bIsCurrent = b.isCurrent || !b.endDate;
+
+                  if (aIsCurrent && !bIsCurrent) return -1;
+                  if (!aIsCurrent && bIsCurrent) return 1;
+
+                  // For jobs of same type (both current or both historical), sort by start date descending
+                  const aStartDate = new Date(a.startDate || '1970-01-01');
+                  const bStartDate = new Date(b.startDate || '1970-01-01');
+                  return bStartDate - aStartDate;
                 })
-                .map((entry, index) => (
-                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                    <div>
-                      <span className="font-medium">
-                        {entry.type === 'working' ? entry.organization : entry.type.replace('-', ' ')}
-                        {entry.isCurrent && <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Current</span>}
+                .map((entry, index) => {
+                  // Check if this entry overlaps with others
+                  const hasOverlaps = summaryEntries.filter(otherEntry => {
+                    if (otherEntry === entry || !otherEntry.type) return false;
+
+                    const entryStart = new Date(entry.startDate);
+                    const entryEnd = (entry.isCurrent || !entry.endDate) ? new Date() : new Date(entry.endDate);
+                    const otherStart = new Date(otherEntry.startDate);
+                    const otherEnd = (otherEntry.isCurrent || !otherEntry.endDate) ? new Date() : new Date(otherEntry.endDate);
+
+                    return entryStart <= otherEnd && entryEnd >= otherStart;
+                  }).length > 0;
+
+                  return (
+                    <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                      <div>
+                        <span className="font-medium">
+                          {getDisplayName(entry)}
+                          {(entry.isCurrent || !entry.endDate) && <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Current</span>}
+                          {hasOverlaps && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Overlapping</span>}
+                        </span>
+                        {entry.jobTitle && <span className="text-gray-600"> - {entry.jobTitle}</span>}
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {entry.startDate} → {(entry.isCurrent || !entry.endDate) ? 'Present' : (entry.endDate || 'Not specified')}
                       </span>
-                      {entry.jobTitle && <span className="text-gray-600"> - {entry.jobTitle}</span>}
                     </div>
-                    <span className="text-sm text-gray-500">
-                      {entry.startDate} → {entry.isCurrent ? 'Present' : (entry.endDate || 'Not specified')}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
 
           </div>
@@ -5101,6 +5539,14 @@ const K1VisaQuestionnaire = () => {
 
                                           if (field.id === 'sponsorAddressDuration') {
                                             if (physicalSameCheck === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          if (field.id === 'sponsorCurrentAddress') {
+                                            const mailingDifferent = currentData['sponsorMailingDifferent'] || '';
+                                            if (mailingDifferent === 'Yes') {
                                               return renderField(field);
                                             }
                                             return null;
