@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, Check, Info, User, Users, FileText, Home, Ph
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import Section1_7 from './components/sections/Section1_7';
 
 // Yup schema for marriage history validation
 const marriageHistorySchema = yup.object().shape({
@@ -430,15 +431,12 @@ const K1VisaQuestionnaire = () => {
   const sponsorFinancialSubsections = [
     {
       id: '1.7-financial-income',
-      title: '1.7 Financial Information - Income',
+      title: '1.7 Financial Information',
       icon: FileText,
-      description: 'Current income and tax information',
-      questionCount: 15,
+      description: 'Income, assets, and contributions to beneficiary',
+      questionCount: 20,
       fields: [
-        // This section would have income fields
-        { id: 'sponsorCurrentlyEmployed', label: 'Are you currently employed?', type: 'select', options: ['Yes', 'No'], required: true },
-        { id: 'sponsorActiveDuty', label: 'Are you currently on active duty in U.S. Armed Forces?', type: 'select', options: ['No', 'Yes'], required: true },
-        // Add more income fields here...
+        { id: 'section1_7_component', type: 'section1_7_component' }
       ]
     }
     // Add more financial subsections here...
@@ -2348,7 +2346,7 @@ const K1VisaQuestionnaire = () => {
                   const formatted = formatPhoneByCountry(e.target.value, selectedPhoneCountry);
                   updateField(field.id, { ...intlPhoneValue, number: formatted });
                 }}
-                placeholder={phoneCountries.find(c => c.code === selectedPhoneCountry)?.format.replace(/X/g, '0')}
+                placeholder={phoneCountries.find(c => c.code === selectedPhoneCountry)?.format?.replace(/X/g, '0') || 'Phone number'}
               />
             </div>
             {showPhoneError && (
@@ -4819,7 +4817,7 @@ const K1VisaQuestionnaire = () => {
                         entry.type === 'retired' || entry.type === 'unable-to-work') ? (
                         <div className="space-y-2">
                           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                            💡 For {entry.type === 'caregiving' ? 'caregiving' : entry.type.replace('-', ' ')} periods, USCIS typically expects your home address during this time.
+                            💡 For {entry.type === 'caregiving' ? 'caregiving' : (entry.type || '').replace('-', ' ')} periods, USCIS typically expects your home address during this time.
                             We can pre-fill this with your current address, but please update if you lived elsewhere.
                           </div>
                           <button
@@ -5154,7 +5152,7 @@ const K1VisaQuestionnaire = () => {
             'other': 'Personal Time'
           };
 
-          return typeDisplayNames[entry.type] || entry.type.replace('-', ' ');
+          return typeDisplayNames[entry.type] || (entry.type || '').replace('-', ' ');
         };
 
         return (
@@ -5234,6 +5232,14 @@ const K1VisaQuestionnaire = () => {
             </div>
 
           </div>
+        );
+
+      case 'section1_7_component':
+        return (
+          <Section1_7
+            currentData={currentData}
+            updateField={updateField}
+          />
         );
 
       default:
@@ -5501,7 +5507,7 @@ const K1VisaQuestionnaire = () => {
                                               }
 
                                               // Replace placeholder for other fields
-                                              return field.label.replace('[SponsorFirstName]', sponsorFirstName);
+                                              return (field.label || '').replace('[SponsorFirstName]', sponsorFirstName);
                                             })()}
                                             {field.required && <span className="text-red-500 ml-1">*</span>}
                                             {field.hasInfo && field.id === 'sponsorInCareOf' && (
