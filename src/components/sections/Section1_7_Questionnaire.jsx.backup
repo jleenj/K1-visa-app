@@ -1,0 +1,371 @@
+import React from 'react';
+import { CheckCircle, HelpCircle } from 'lucide-react';
+
+// This file contains all the questionnaire step components for Section 1.7
+// These are used when user chooses "Guided" mode
+
+export const QuestionnaireSteps = ({
+  questionnaireData,
+  updateQuestionnaireData,
+  goToStep,
+  handleNoneOfAboveToggle,
+  mostRecentEmployment,
+  MINIMUM_INCOME_REQUIRED,
+  calculateGap,
+  setShowAgiHelp,
+  setShowSalaryAgiHelp
+}) => {
+
+  // Q1: Did you file taxes?
+  const renderQ1 = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Did you file federal income taxes for 2024 or 2023?
+        </h3>
+      </div>
+
+      <div className="space-y-3">
+        <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          <input
+            type="radio"
+            name="filedTaxes"
+            value="yes"
+            checked={questionnaireData.filedTaxes === 'yes'}
+            onChange={(e) => {
+              updateQuestionnaireData('filedTaxes', e.target.value);
+              goToStep('q2');
+            }}
+            className="h-4 w-4 text-blue-600"
+          />
+          <span className="text-sm font-medium text-gray-900">Yes</span>
+        </label>
+
+        <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          <input
+            type="radio"
+            name="filedTaxes"
+            value="no"
+            checked={questionnaireData.filedTaxes === 'no'}
+            onChange={(e) => {
+              updateQuestionnaireData('filedTaxes', e.target.value);
+              goToStep('q7');
+            }}
+            className="h-4 w-4 text-blue-600"
+          />
+          <span className="text-sm font-medium text-gray-900">No</span>
+        </label>
+      </div>
+    </div>
+  );
+
+  // Q2: Which tax documents do you have?
+  const renderQ2 = () => {
+    const toggleDocument = (docType) => {
+      const current = questionnaireData.availableDocs || [];
+      const updated = current.includes(docType)
+        ? current.filter(d => d !== docType)
+        : [...current, docType];
+      updateQuestionnaireData('availableDocs', updated);
+    };
+
+    const handleContinue = () => {
+      const docs = questionnaireData.availableDocs || [];
+
+      if (docs.includes('transcript-2024')) {
+        goToStep('q3-2024');
+      } else if (docs.includes('transcript-2023')) {
+        goToStep('q3-2023');
+      } else if (docs.includes('w2-2024') || docs.includes('w2-2023')) {
+        goToStep('q4');
+      } else if (docs.includes('self-employed-2024') || docs.includes('self-employed-2023')) {
+        goToStep('q5');
+      }
+    };
+
+    const canContinue = (questionnaireData.availableDocs || []).length > 0;
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Which tax documents do you have?
+          </h3>
+          <p className="text-sm text-gray-600">Select all that apply</p>
+        </div>
+
+        <div className="space-y-3">
+          {[
+            { id: 'transcript-2024', label: 'IRS Tax Transcript from 2024' },
+            { id: 'transcript-2023', label: 'IRS Tax Transcript from 2023' },
+            { id: 'w2-2024', label: 'W-2(s) from 2024 (with or without filed return)' },
+            { id: 'w2-2023', label: 'W-2(s) from 2023 (with or without filed return)' },
+            { id: 'self-employed-2024', label: 'Schedule C/1099 income (self-employed) from 2024' },
+            { id: 'self-employed-2023', label: 'Schedule C/1099 income (self-employed) from 2023' },
+          ].map(doc => (
+            <label
+              key={doc.id}
+              className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={(questionnaireData.availableDocs || []).includes(doc.id)}
+                onChange={() => toggleDocument(doc.id)}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <span className="text-sm font-medium text-gray-900">{doc.label}</span>
+            </label>
+          ))}
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <HelpCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-blue-900">What's the difference?</p>
+              <p className="text-sm text-blue-800 mt-1">
+                A tax transcript is an official IRS document and provides the strongest proof. Form 1040 with W-2s is also accepted.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleContinue}
+          disabled={!canContinue}
+          className={`w-full py-3 px-4 rounded-lg font-medium ${
+            canContinue
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Continue
+        </button>
+      </div>
+    );
+  };
+
+  // Q3-2024: Tax Transcript 2024 - AGI entry
+  const renderQ3_2024 = () => {
+    const handleAgiSubmit = () => {
+      const agi = parseFloat(questionnaireData.agi2024 || 0);
+
+      if (agi >= MINIMUM_INCOME_REQUIRED) {
+        goToStep('endpoint-a1');
+      } else {
+        goToStep('q3a-2024');
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            What is your Adjusted Gross Income (AGI) from your 2024 tax return?
+          </h3>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setShowAgiHelp(true)}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium mb-3"
+          >
+            Where to find your AGI
+          </button>
+
+          <div className="relative">
+            <span className="absolute left-3 top-3 text-gray-500">$</span>
+            <input
+              type="number"
+              value={questionnaireData.agi2024 || ''}
+              onChange={(e) => updateQuestionnaireData('agi2024', e.target.value)}
+              className="pl-8 w-full border border-gray-300 rounded-lg px-4 py-3 text-base"
+              placeholder="0"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleAgiSubmit}
+          disabled={!questionnaireData.agi2024}
+          className={`w-full py-3 px-4 rounded-lg font-medium ${
+            questionnaireData.agi2024
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Continue
+        </button>
+      </div>
+    );
+  };
+
+  // ENDPOINT A1: 2024 Transcript + Meets Requirement
+  const renderEndpointA1 = () => (
+    <div className="space-y-6">
+      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+        <div className="flex items-start">
+          <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="ml-3">
+            <h3 className="text-lg font-semibold text-green-900">Great!</h3>
+            <p className="text-sm text-green-800 mt-1">
+              Your 2024 income of ${parseFloat(questionnaireData.agi2024 || 0).toLocaleString()} meets the ${MINIMUM_INCOME_REQUIRED.toLocaleString()} requirement.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 className="text-base font-semibold text-blue-900 mb-3">We recommend uploading:</h4>
+        <ul className="space-y-3">
+          <li className="flex items-start">
+            <span className="text-blue-600 mr-2">•</span>
+            <div>
+              <p className="text-sm font-medium text-blue-900">IRS Tax Transcript (2024)</p>
+              <p className="text-sm text-blue-800">Primary proof - official IRS verification of 2024 income</p>
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="text-blue-600 mr-2">•</span>
+            <div>
+              <p className="text-sm font-medium text-blue-900">Form 1040 (2024)</p>
+              <p className="text-sm text-blue-800">Helpful to include alongside transcript</p>
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="text-blue-600 mr-2">•</span>
+            <div>
+              <p className="text-sm font-medium text-blue-900">Employment verification letter</p>
+              <p className="text-sm text-blue-800">Must show date/nature of employment, salary paid, temporary/permanent status</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <button
+        onClick={() => goToStep('document-upload')}
+        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700"
+      >
+        Proceed to Document Upload
+      </button>
+    </div>
+  );
+
+  // Q7: No taxes filed - Social Security question
+  const renderQ7 = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Do you receive Social Security retirement or disability benefits?
+        </h3>
+      </div>
+
+      <div className="space-y-3">
+        <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          <input
+            type="radio"
+            name="receivesSocialSecurity"
+            value="yes"
+            checked={questionnaireData.receivesSocialSecurity === 'yes'}
+            onChange={(e) => {
+              updateQuestionnaireData('receivesSocialSecurity', e.target.value);
+              goToStep('q8');
+            }}
+            className="h-4 w-4 text-blue-600"
+          />
+          <span className="text-sm font-medium text-gray-900">Yes</span>
+        </label>
+
+        <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+          <input
+            type="radio"
+            name="receivesSocialSecurity"
+            value="no"
+            checked={questionnaireData.receivesSocialSecurity === 'no'}
+            onChange={(e) => {
+              updateQuestionnaireData('receivesSocialSecurity', e.target.value);
+              goToStep('q8');
+            }}
+            className="h-4 w-4 text-blue-600"
+          />
+          <span className="text-sm font-medium text-gray-900">No</span>
+        </label>
+      </div>
+    </div>
+  );
+
+  // Q8: Employment check (routes based on Section 1.6 data)
+  const renderQ8 = () => {
+    const employmentType = mostRecentEmployment?.type || '';
+
+    if (employmentType === 'Self-employed') {
+      goToStep('endpoint-e1-self-employed');
+      return null;
+    }
+
+    if (employmentType.includes('Employed')) {
+      goToStep('q9-employed');
+      return null;
+    }
+
+    // Unemployed or no employment info
+    goToStep('endpoint-e1-unemployed');
+    return null;
+  };
+
+  // Q9-Employed: Salary question
+  const renderQ9Employed = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          What is your current annual salary (gross, before taxes)?
+        </h3>
+      </div>
+
+      <div className="relative">
+        <span className="absolute left-3 top-3 text-gray-500">$</span>
+        <input
+          type="number"
+          value={questionnaireData.currentSalary || ''}
+          onChange={(e) => updateQuestionnaireData('currentSalary', e.target.value)}
+          className="pl-8 w-full border border-gray-300 rounded-lg px-4 py-3 text-base"
+          placeholder="0"
+        />
+      </div>
+
+      <button
+        onClick={() => {
+          const salary = parseFloat(questionnaireData.currentSalary || 0);
+          if (salary >= MINIMUM_INCOME_REQUIRED) {
+            goToStep('endpoint-e2-meets');
+          } else {
+            goToStep('endpoint-e2-below');
+          }
+        }}
+        disabled={!questionnaireData.currentSalary}
+        className={`w-full py-3 px-4 rounded-lg font-medium ${
+          questionnaireData.currentSalary
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        }`}
+      >
+        Continue
+      </button>
+    </div>
+  );
+
+  // Render the appropriate step
+  const steps = {
+    'q1': renderQ1,
+    'q2': renderQ2,
+    'q3-2024': renderQ3_2024,
+    'endpoint-a1': renderEndpointA1,
+    'q7': renderQ7,
+    'q8': renderQ8,
+    'q9-employed': renderQ9Employed,
+  };
+
+  return steps;
+};
+
+export default QuestionnaireSteps;

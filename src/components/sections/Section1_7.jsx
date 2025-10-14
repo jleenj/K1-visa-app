@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Plus, Trash2, Info, AlertCircle, DollarSign, HelpCircle, X } from 'lucide-react';
+import { Upload, Plus, Trash2, Info, AlertCircle, DollarSign, HelpCircle, X, CheckCircle, ArrowLeft } from 'lucide-react';
+import { QuestionnaireSteps } from './Section1_7_Questionnaire';
 
-const Section1_7 = ({ currentData = {}, updateField }) => {
+const Section1_7 = ({ currentData = {}, updateField, mostRecentEmployment = {} }) => {
+  // Questionnaire state
+  const [questionnaireMode, setQuestionnaireMode] = useState(currentData.incomeProofMode || null);
+  const [questionnaireStep, setQuestionnaireStep] = useState(currentData.incomeProofStep || 'mode-selection');
+  const [questionnaireData, setQuestionnaireData] = useState(currentData.incomeProofQuestionnaire || {});
+  const [questionnaireHistory, setQuestionnaireHistory] = useState(currentData.incomeProofHistory || []);
+  const [showAgiHelp, setShowAgiHelp] = useState(false);
+  const [showSalaryAgiHelp, setShowSalaryAgiHelp] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // Existing document upload state
   const [incomeMethod, setIncomeMethod] = useState(currentData.incomeMethod || 'transcript');
   const [assets, setAssets] = useState(currentData.assets || []);
   const [incomeSources, setIncomeSources] = useState(currentData.incomeSources || []);
@@ -9,6 +20,8 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showIncomeGuide, setShowIncomeGuide] = useState(false);
+
+  const MINIMUM_INCOME_REQUIRED = currentData.minimumIncomeRequired || 30000;
   // Calculate current and available tax years dynamically
   const getCurrentTaxYear = () => {
     const currentDate = new Date();
@@ -104,6 +117,104 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     const rate = exchangeRates[fromCurrency];
     if (!rate) return amount;
     return amount / rate;
+  };
+
+  // Questionnaire helper functions
+  const updateQuestionnaireData = (field, value) => {
+    const updated = { ...questionnaireData, [field]: value };
+    setQuestionnaireData(updated);
+    updateField('incomeProofQuestionnaire', updated);
+  };
+
+  const setMode = (mode) => {
+    setQuestionnaireMode(mode);
+    updateField('incomeProofMode', mode);
+
+    if (mode === 'guided') {
+      setQuestionnaireStep('q1');
+      updateField('incomeProofStep', 'q1');
+      setQuestionnaireHistory(['q1']);
+      updateField('incomeProofHistory', ['q1']);
+    } else {
+      setQuestionnaireStep('document-upload');
+      updateField('incomeProofStep', 'document-upload');
+      setQuestionnaireHistory([]);
+      updateField('incomeProofHistory', []);
+    }
+  };
+
+  const goToStep = (step) => {
+    // Add current step to history before moving forward
+    const newHistory = [...questionnaireHistory, step];
+    setQuestionnaireHistory(newHistory);
+    updateField('incomeProofHistory', newHistory);
+
+    setQuestionnaireStep(step);
+    updateField('incomeProofStep', step);
+  };
+
+  const goBackOneStep = () => {
+    if (questionnaireHistory.length > 1) {
+      // Remove current step and go to previous
+      const newHistory = [...questionnaireHistory];
+      newHistory.pop(); // Remove current
+      const previousStep = newHistory[newHistory.length - 1];
+
+      setQuestionnaireHistory(newHistory);
+      updateField('incomeProofHistory', newHistory);
+      setQuestionnaireStep(previousStep);
+      updateField('incomeProofStep', previousStep);
+    } else {
+      // If at first question, go back to mode selection
+      resetToModeSelection();
+    }
+  };
+
+  const resetToModeSelection = () => {
+    setQuestionnaireMode(null);
+    setQuestionnaireStep('mode-selection');
+    setQuestionnaireHistory([]);
+    updateField('incomeProofMode', null);
+    updateField('incomeProofStep', 'mode-selection');
+    updateField('incomeProofHistory', []);
+  };
+
+  const resetQuestionnaireWithConfirm = () => {
+    if (showResetConfirm) {
+      // User confirmed - reset questionnaire data but stay in guided mode
+      setQuestionnaireStep('q1');
+      setQuestionnaireHistory(['q1']);
+      setQuestionnaireData({});
+      updateField('incomeProofStep', 'q1');
+      updateField('incomeProofHistory', ['q1']);
+      updateField('incomeProofQuestionnaire', {});
+      setShowResetConfirm(false);
+    } else {
+      // Show confirmation
+      setShowResetConfirm(true);
+    }
+  };
+
+  const calculateGap = (agi) => {
+    return MINIMUM_INCOME_REQUIRED - parseFloat(agi || 0);
+  };
+
+  const handleNoneOfAboveToggle = (currentArray, itemId, stateField) => {
+    const current = currentArray || [];
+
+    if (itemId === 'none') {
+      if (current.includes('none')) {
+        updateQuestionnaireData(stateField, []);
+      } else {
+        updateQuestionnaireData(stateField, ['none']);
+      }
+    } else {
+      const withoutNone = current.filter(d => d !== 'none');
+      const updated = withoutNone.includes(itemId)
+        ? withoutNone.filter(d => d !== itemId)
+        : [...withoutNone, itemId];
+      updateQuestionnaireData(stateField, updated);
+    }
   };
 
   const assetTypes = [
@@ -567,8 +678,225 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     }
   };
 
+  // QUESTIONNAIRE RENDER FUNCTIONS
+
+  // AGI Help Panel
+  const AgiHelpPanel = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Where to Find Your AGI</h3>
+          <button
+            onClick={() => setShowAgiHelp(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ×
+          </button>
+        </div>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            Your Adjusted Gross Income (AGI) is located on <strong>Line 11</strong> of your Form 1040.
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-900">
+              <strong>If you have an IRS Tax Transcript:</strong> Look for "Adjusted Gross Income" in the transcript.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Salary vs AGI Help Panel
+  const SalaryAgiHelpPanel = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Salary vs. AGI: What's the Difference?</h3>
+          <button
+            onClick={() => setShowSalaryAgiHelp(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ×
+          </button>
+        </div>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            Your employment letter shows your <strong>gross salary</strong> (before any deductions).
+            Your AGI (Adjusted Gross Income) is typically lower.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Get questionnaire step render functions
+  const questionnaireSteps = QuestionnaireSteps({
+    questionnaireData,
+    updateQuestionnaireData,
+    goToStep,
+    handleNoneOfAboveToggle,
+    mostRecentEmployment,
+    MINIMUM_INCOME_REQUIRED,
+    calculateGap,
+    setShowAgiHelp,
+    setShowSalaryAgiHelp
+  });
+
+  const renderModeSelection = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          How would you like to provide proof of income?
+        </h3>
+        <p className="text-sm text-gray-600">
+          We'll help you gather the right documents for your situation.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <button
+          onClick={() => setMode('guided')}
+          className="w-full text-left border-2 border-blue-300 rounded-lg p-6 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <CheckCircle className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-3">
+              <p className="text-base font-medium text-gray-900">
+                Guide me through the process (Recommended)
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                We'll ask a few questions to recommend the strongest combination of documents for your situation.
+              </p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setMode('manual')}
+          className="w-full text-left border-2 border-gray-300 rounded-lg p-6 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <Info className="h-6 w-6 text-gray-600" />
+            </div>
+            <div className="ml-3">
+              <p className="text-base font-medium text-gray-900">
+                I'll upload documents manually
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                Choose this if you have a complex situation or prefer to handle it yourself.
+              </p>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="relative space-y-8">
+      {/* Help Panels */}
+      {showAgiHelp && <AgiHelpPanel />}
+      {showSalaryAgiHelp && <SalaryAgiHelpPanel />}
+
+      {/* Show mode selection if no mode chosen yet */}
+      {questionnaireMode === null && (
+        <div className="space-y-6">
+          <div className="border-b border-gray-200 pb-4">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Section 1.7: Financial Information - Income Proof
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              We'll help you gather the right documents to prove your income meets USCIS requirements.
+            </p>
+          </div>
+          {renderModeSelection()}
+        </div>
+      )}
+
+      {/* Show questionnaire steps when in guided mode (but not at document-upload step) */}
+      {questionnaireMode === 'guided' && questionnaireStep !== 'document-upload' && (
+        <div className="space-y-6">
+          <div className="border-b border-gray-200 pb-4">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Section 1.7: Financial Information - Income Proof
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              We'll help you gather the right documents to prove your income meets USCIS requirements.
+            </p>
+          </div>
+
+          {/* Top navigation - Return to mode selection */}
+          <button
+            onClick={resetToModeSelection}
+            className="text-sm text-gray-500 hover:text-gray-700 underline"
+          >
+            ← Return to mode selection
+          </button>
+
+          {/* Render current questionnaire step */}
+          {questionnaireSteps[questionnaireStep] && questionnaireSteps[questionnaireStep]()}
+          {!questionnaireSteps[questionnaireStep] && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-900">
+                Step "{questionnaireStep}" is not yet implemented. This will be added soon.
+              </p>
+              <button
+                onClick={() => goToStep('document-upload')}
+                className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Skip to document upload →
+              </button>
+            </div>
+          )}
+
+          {/* Bottom navigation - Back and Start over */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div className="flex items-center space-x-6">
+              {questionnaireHistory.length > 1 && (
+                <button
+                  onClick={goBackOneStep}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </button>
+              )}
+
+              {!showResetConfirm ? (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="text-sm text-gray-500 hover:text-red-600 underline"
+                >
+                  Start this section over
+                </button>
+              ) : (
+                <div className="flex items-center space-x-3 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2">
+                  <p className="text-xs text-yellow-900">
+                    Reset all answers in Section 1.7? (Other sections are safe)
+                  </p>
+                  <button
+                    onClick={resetQuestionnaireWithConfirm}
+                    className="text-xs font-medium text-red-600 hover:text-red-700"
+                  >
+                    Yes, reset
+                  </button>
+                  <button
+                    onClick={() => setShowResetConfirm(false)}
+                    className="text-xs font-medium text-gray-600 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Income Guide Side Panel */}
       {showIncomeGuide && (
         <div className="fixed inset-0 z-50 flex">
@@ -681,9 +1009,21 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         </div>
       )}
 
-      {/* Part 1: Annual Income */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900">Part 1: Annual Income</h3>
+      {/* Show existing document upload interface when manual mode or reached document-upload step */}
+      {(questionnaireMode === 'manual' || questionnaireStep === 'document-upload') && (
+        <>
+          {/* Back button - always show when in document upload section */}
+          <button
+            onClick={resetToModeSelection}
+            className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            {questionnaireMode === 'guided' ? 'Start over' : 'Back to mode selection'}
+          </button>
+
+          {/* Part 1: Annual Income */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900">Part 1: Annual Income</h3>
 
         <div className="space-y-4">
           <label className="text-sm font-medium text-gray-700">
@@ -1440,12 +1780,30 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
 
       {/* Part 3: Specific Contributions */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900">Part 3: Specific Contributions to Beneficiary</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Part 3: Additional Support Beyond Income</h3>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="flex items-start">
+            <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-blue-900">Why we're asking this</p>
+              <p className="text-sm text-blue-800 mt-1">
+                Beyond proving your income meets requirements, USCIS wants to know what other ways you'll help support your fiancé(e)
+                when they arrive. Mentioning things like providing housing or helping with job searches can strengthen your application
+                by showing your commitment and reducing their immediate financial needs.
+              </p>
+              <p className="text-sm text-blue-700 mt-2 italic">
+                Note: This doesn't reduce the income requirement - you still need to meet 100% of the poverty guidelines.
+                This is just additional context that can make your case stronger.
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              In addition to financial support, do you intend to provide specific contributions to cover the beneficiary's basic living needs?
+              Will you be providing any of the following types of support when your fiancé(e) arrives?
             </label>
             <div className="space-y-2">
               <label className="flex items-center space-x-2">
@@ -1460,7 +1818,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   }}
                   className="h-4 w-4 text-blue-600"
                 />
-                <span className="text-sm text-gray-700">Yes</span>
+                <span className="text-sm text-gray-700">Yes, I'll be providing non-financial support</span>
               </label>
               <label className="flex items-center space-x-2">
                 <input
@@ -1474,156 +1832,54 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   }}
                   className="h-4 w-4 text-blue-600"
                 />
-                <span className="text-sm text-gray-700">No</span>
+                <span className="text-sm text-gray-700">No, just financial support</span>
               </label>
             </div>
           </div>
 
           {providesContributions && (
-            <div className="space-y-6 border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900">Describe the specific contributions you will provide:</h4>
-
-              {/* Housing */}
-              <div className="space-y-4">
-                <label className="flex items-start space-x-3">
-                  <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">Provide housing/accommodation</span>
-                    <div className="mt-3 space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Address where beneficiary will reside
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                          placeholder="Full address"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Housing arrangement
-                        </label>
-                        <select className="w-full border border-gray-300 rounded-md px-3 py-2">
-                          <option value="">Select arrangement</option>
-                          <option value="own-home">My own home</option>
-                          <option value="rental-property">Rental property I own</option>
-                          <option value="help-secure">Help secure rental</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Supporting documentation
-                        </label>
-                        <div className="text-xs text-gray-600 mb-2">
-                          Acceptable: Property deed, mortgage statements, lease agreement, property tax records
-                        </div>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <Upload className="mx-auto h-6 w-6 text-gray-400" />
-                          <p className="mt-1 text-sm text-gray-600">Upload housing documentation</p>
-                          <input type="file" className="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </label>
+            <div className="space-y-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="bg-white border border-gray-200 rounded-lg p-3">
+                <p className="text-sm text-gray-700">
+                  <strong>What to include:</strong> Think about practical ways you'll help - will they live with you? Can you help them
+                  find work? Will you assist with English classes or healthcare enrollment? Be specific but honest.
+                </p>
               </div>
 
-              {/* Employment */}
-              <div className="space-y-4">
-                <label className="flex items-start space-x-3">
-                  <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">Help secure employment opportunities</span>
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description of assistance
-                      </label>
-                      <textarea
-                        className="w-full border border-gray-300 rounded-md px-3 py-2"
-                        rows={3}
-                        placeholder="Describe how you will help with employment..."
-                      />
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Describe the support you'll provide
                 </label>
+                <p className="text-xs text-gray-600 mb-3">
+                  Examples: "I will provide free housing in my home", "I will help them find employment through my professional network",
+                  "I will help them enroll in ESL classes at the community college", "I will help them apply for health insurance"
+                </p>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  rows={5}
+                  placeholder="Describe how you'll support your fiancé(e) beyond financial help..."
+                />
               </div>
 
-              {/* Education */}
-              <div className="space-y-4">
-                <label className="flex items-start space-x-3">
-                  <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">Help with school enrollment</span>
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Type of education assistance
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="ESL classes, university enrollment, etc."
-                      />
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  If you're providing housing, where will they live?
                 </label>
-              </div>
-
-              {/* Benefits */}
-              <div className="space-y-4">
-                <label className="flex items-start space-x-3">
-                  <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">Help enrolling in eligible benefits</span>
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description of benefit assistance
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Healthcare enrollment, social services, etc."
-                      />
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              {/* Other */}
-              <div className="space-y-4">
-                <label className="flex items-start space-x-3">
-                  <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">Other specific contributions</span>
-                    <div className="mt-3 space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Description
-                        </label>
-                        <textarea
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                          rows={3}
-                          placeholder="Describe other contributions..."
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Supporting documentation (if applicable)
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <Upload className="mx-auto h-6 w-6 text-gray-400" />
-                          <p className="mt-1 text-sm text-gray-600">Upload relevant documentation</p>
-                          <input type="file" className="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </label>
+                <p className="text-xs text-gray-600 mb-2">
+                  Only required if you mentioned providing housing above
+                </p>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  placeholder="Full address (street, city, state, zip)"
+                />
               </div>
             </div>
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

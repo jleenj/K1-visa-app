@@ -6,7 +6,9 @@
       "WebFetch(domain:www.uscis.gov)",
       "WebFetch(domain:www.quora.com)",
       "Bash(npm run dev:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git checkout:*)",
+      "Bash(timeout 5 npm start)"
     ],
     "deny": [],
     "ask": []
