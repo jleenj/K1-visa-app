@@ -1,0 +1,223 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#1a1a1a','primaryBorderColor':'#2196f3','lineColor':'#424242','secondaryColor':'#fff3e0','tertiaryColor':'#f1f8e9','fontSize':'20px'}, 'flowchart': {'htmlLabels': true, 'curve': 'basis', 'padding': 20, 'nodeSpacing': 100, 'rankSpacing': 100}}}%%
+
+flowchart TD
+    Start([Section 1.7: Income Proof Questionnaire]) --> ModeSelect{Choose Mode}
+
+    ModeSelect -->|Manual| DocUpload[Document Upload Interface]
+    ModeSelect -->|Guided| Q1{Filed federal taxes<br/>for 2024 or 2023?}
+
+    %% FILED TAXES - YES BRANCH
+    Q1 -->|Yes| Q2[Which tax documents<br/>do you have?]
+    Q2 --> Q2_Check{Document Type}
+
+    %% ============================================
+    %% 2024 TRANSCRIPT ROUTE (FULLY IMPLEMENTED)
+    %% ============================================
+    Q2_Check -->|2024 Tax Transcript| Q3_2024[Enter your 2024 AGI<br/>from Form 1040 Line 11]
+    Q3_2024 --> AGI_Check_2024{AGI ≥ $30,000?}
+
+    AGI_Check_2024 -->|Yes - Meets| A1[/"⭐ ENDPOINT A1<br/>2024 Transcript - Strong Case<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Employment letter<br/>• Bank statements"/]
+
+    AGI_Check_2024 -->|No - Below| Q3a_2024{Has your income<br/>improved since<br/>filing 2024 taxes?}
+
+    Q3a_2024 -->|Yes| Q3b_2024{Will your 2025 AGI<br/>be ≥ $30,000?}
+
+    Q3b_2024 -->|Yes| Q3c_2024{Can you get<br/>employment letter?}
+
+    Q3c_2024 -->|Yes| Q3e_2024{Position type?}
+    Q3e_2024 -->|Permanent| A4[/"⭐ ENDPOINT A4<br/>2024 - Permanent Position<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Employment letter<br/>• Pay stubs 1-3 months<br/>• Bank statements"/]
+
+    Q3e_2024 -->|Temporary| A5[/"⚠️ ENDPOINT A5<br/>2024 - Temporary Position<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Employment letter<br/>• Pay stubs<br/>• Bank statements"/]
+
+    Q3c_2024 -->|No| A3[/"⚠️ ENDPOINT A3<br/>2024 - No Employment Letter<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>---<br/>💡 Get employment letter"/]
+
+    Q3b_2024 -->|No - Still Below| Q3d_2024[Select supplementary<br/>documents]
+    Q3d_2024 --> A6[/"⚠️ ENDPOINT A6<br/>2024 - Income Still Below<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Supplementary docs<br/>• Will need assets"/]
+
+    Q3a_2024 -->|No| Q3b_same[Select supplementary<br/>documents]
+    Q3b_same --> A2[/"💰 ENDPOINT A2<br/>2024 - Use Assets<br/>---<br/>Gap: $30k - AGI<br/>Need: Gap × 3 in assets<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2024<br/>• Form 1040 2024<br/>• All W-2s from 2024<br/>• Supplementary docs<br/>• Asset documentation"/]
+
+    %% ============================================
+    %% 2023 TRANSCRIPT ROUTE (FULLY IMPLEMENTED)
+    %% ============================================
+    Q2_Check -->|2023 Tax Transcript| Q3_2023[Enter your 2023 AGI<br/>from Form 1040 Line 11<br/>⚠️ 2023 data is older]
+    Q3_2023 --> AGI_Check_2023{AGI ≥ $30,000?}
+
+    AGI_Check_2023 -->|Yes - Meets| A1_2023[/"⭐ ENDPOINT A1-2023<br/>2023 Transcript - Strong<br/>---<br/>⚠️ Include recent 2024/2025 docs<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Employment letter recent<br/>• Pay stubs recent 1-3 mo<br/>• Bank statements"/]
+
+    AGI_Check_2023 -->|No - Below| Q3a_2023{Has your income<br/>improved since<br/>filing 2023 taxes?}
+
+    Q3a_2023 -->|Yes| Q3b_2023{Will your 2025 AGI<br/>be ≥ $30,000?}
+
+    Q3b_2023 -->|Yes| Q3c_2023{Can you get<br/>employment letter?}
+
+    Q3c_2023 -->|Yes| Q3e_2023{Position type?}
+    Q3e_2023 -->|Permanent| A4_2023[/"⭐ ENDPOINT A4-2023<br/>2023 - Permanent Position<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Employment letter recent<br/>• Pay stubs recent 1-3 mo<br/>• Bank statements"/]
+
+    Q3e_2023 -->|Temporary| A5_2023[/"⚠️ ENDPOINT A5-2023<br/>2023 - Temporary Position<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Employment letter recent<br/>• Pay stubs recent<br/>• Bank statements"/]
+
+    Q3c_2023 -->|No| A3_2023[/"⚠️ ENDPOINT A3-2023<br/>2023 - No Employment Letter<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Pay stubs recent 1-3 mo<br/>• Bank statements<br/>---<br/>💡 Get employment letter"/]
+
+    Q3b_2023 -->|No - Still Below| Q3d_2023[Select supplementary<br/>documents]
+    Q3d_2023 --> A6_2023[/"⚠️ ENDPOINT A6-2023<br/>2023 - Income Still Below<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Supplementary docs<br/>• Will need assets"/]
+
+    Q3a_2023 -->|No| Q3b_2023_same[Select supplementary<br/>documents]
+    Q3b_2023_same --> A2_2023[/"💰 ENDPOINT A2-2023<br/>2023 - Use Assets<br/>---<br/>Gap: $30k - AGI<br/>Need: Gap × 3 in assets<br/>---<br/>Upload:<br/>• IRS Tax Transcript 2023<br/>• Form 1040 2023<br/>• All W-2s from 2023<br/>• Supplementary docs<br/>• Asset documentation"/]
+
+    %% ============================================
+    %% W-2 ROUTE (FULLY IMPLEMENTED)
+    %% ============================================
+    Q2_Check -->|W-2 Only| Q4{Did you file taxes<br/>using these W-2s?}
+
+    %% W-2 Route - FILED TAXES
+    Q4 -->|Yes - Filed| Q4a{Do you have<br/>your Form 1040?}
+
+    Q4a -->|Yes| Q4a_input[Enter your AGI<br/>from Form 1040 Line 11<br/>Not W-2 Box 1 wages]
+    Q4a_input --> Q4_AGI_Check{AGI ≥ $30,000?}
+
+    Q4_AGI_Check -->|Yes| W1[/"⭐ ENDPOINT W1<br/>W-2 + 1040 - Meets Income<br/>---<br/>⚠️ Should get tax transcript<br/>for stronger evidence<br/>---<br/>Upload:<br/>• Form 1040<br/>• All W-2s from year<br/>• Employment letter<br/>• Pay stubs 1-3 months<br/>• Bank statements"/]
+
+    Q4_AGI_Check -->|No| Q4_improve{Has income improved<br/>since filing?}
+
+    Q4_improve -->|Yes| Q4_improve_yes{Can provide recent<br/>pay stubs showing<br/>increased income?}
+
+    Q4_improve_yes -->|Yes| W3[/"⚠️ ENDPOINT W3<br/>W-2 - Income Improved<br/>---<br/>Upload:<br/>• Form 1040<br/>• All W-2s from year<br/>• Employment letter current<br/>• Pay stubs 1-3 mo increased<br/>• Bank statements"/]
+
+    Q4_improve_yes -->|No| W2[/"💰 ENDPOINT W2<br/>W-2 - Income Below<br/>---<br/>Gap: $30k - AGI<br/>Need: Gap × 3 in assets<br/>---<br/>Upload:<br/>• Form 1040<br/>• All W-2s from year<br/>• Pay stubs if available<br/>• Bank statements<br/>• Asset documentation"/]
+
+    Q4_improve -->|No| W2
+
+    Q4a -->|No| Q4a_alt[Get your AGI from:<br/>1. IRS online account<br/>2. Tax software login<br/>3. Tax preparer<br/>4. Request transcript<br/>---<br/>Skip to manual for now]
+    Q4a_alt --> DocUpload
+
+    %% W-2 Route - NO TAXES FILED
+    Q4 -->|No - Not Filed| Q4b[How many W-2s<br/>do you have?<br/>⚠️ Should file taxes]
+    Q4b --> Q4c[Enter total wages<br/>from Box 1 of<br/>all W-2s combined]
+    Q4c --> Q4d{Is this from current<br/>employer from Section 1.6?}
+
+    Q4d -->|Yes - Same| Q4e{Can you get<br/>employment letter?}
+
+    Q4e -->|Yes| Q4_W2_Check{W-2 Wages ≥ $30,000?}
+    Q4_W2_Check -->|Yes| W4[/"⚠️ ENDPOINT W4<br/>W-2 Only - No Filing - Meets<br/>---<br/>⚠️ Should file taxes first<br/>---<br/>Upload:<br/>• All W-2s<br/>• Employment letter<br/>• Pay stubs 1-3 months<br/>• Bank statements"/]
+
+    Q4_W2_Check -->|No| W5[/"💰 ENDPOINT W5<br/>W-2 - Below Threshold<br/>---<br/>⚠️ Should file taxes<br/>Will need assets<br/>---<br/>Upload:<br/>• All W-2s<br/>• Employment letter current<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>• Asset documentation"/]
+
+    Q4e -->|No| W6[/"⚠️ ENDPOINT W6<br/>W-2 - Weakest Case<br/>---<br/>⚠️ Critical Actions:<br/>1. File tax return<br/>2. Get employment letter<br/>---<br/>Upload:<br/>• All W-2s<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>• Asset documentation"/]
+
+    Q4d -->|No - Different| Q4f{Has income changed<br/>since W-2 period?}
+    Q4f -->|Yes| W5
+    Q4f -->|No| W6
+
+    %% ============================================
+    %% SELF-EMPLOYED ROUTE (FULLY IMPLEMENTED)
+    %% ============================================
+    Q2_Check -->|Self-Employed<br/>Schedule C/1099| Q5{Did you file taxes<br/>including self-employment<br/>income?}
+
+    %% Self-Employed - FILED TAXES
+    Q5 -->|Yes - Filed| Q5a[Enter your AGI<br/>from Form 1040 Line 11<br/>Not Schedule C net profit]
+    Q5a --> Q5b{AGI ≥ $30,000?}
+
+    Q5b -->|Yes - Meets| Q5c{Has income been<br/>consistent for<br/>past 12 months?}
+
+    Q5c -->|Yes - Consistent| SE1[/"⭐ ENDPOINT SE-1<br/>Self-Employed - Strong<br/>---<br/>Upload:<br/>• Form 1040<br/>• IRS Tax Transcript<br/>• Schedule C or 1099s<br/>• Bank statements 12 mo<br/>  showing regular deposits<br/>• Personal bank statements"/]
+
+    Q5c -->|No - Fluctuates| SE2[/"⚠️ ENDPOINT SE-2<br/>Self-Employed - Inconsistent<br/>---<br/>Need to show stability<br/>---<br/>Upload:<br/>• Form 1040<br/>• IRS Tax Transcript<br/>• Schedule C or 1099s<br/>• Bank statements 12 mo<br/>• Explanation letter<br/>  business cycle"/]
+
+    Q5b -->|No - Below| Q5d{Has income increased<br/>since filing?}
+
+    Q5d -->|Yes| Q5e{Can provide bank<br/>statements showing<br/>increased deposits?}
+
+    Q5e -->|Yes| SE3[/"⚠️ ENDPOINT SE-3<br/>Self-Employed - Improved<br/>---<br/>Upload:<br/>• Form 1040<br/>• IRS Tax Transcript<br/>• Schedule C or 1099s<br/>• Bank statements 12 mo<br/>  showing increase<br/>• Brief explanation"/]
+
+    Q5e -->|No| SE4[/"💰 ENDPOINT SE-4<br/>Self-Employed - Weak Proof<br/>---<br/>Gap: $30k - AGI<br/>Will need assets<br/>---<br/>Upload:<br/>• Form 1040<br/>• IRS Tax Transcript<br/>• Schedule C or 1099s<br/>• Bank statements<br/>• Asset documentation"/]
+
+    Q5d -->|No| SE5[/"💰 ENDPOINT SE-5<br/>Self-Employed - Below<br/>---<br/>Gap: $30k - AGI<br/>Need: Gap × 3 in assets<br/>---<br/>Upload:<br/>• Form 1040<br/>• IRS Tax Transcript<br/>• Schedule C or 1099s<br/>• Bank statements 12 mo<br/>• Asset documentation"/]
+
+    %% Self-Employed - NO TAXES FILED
+    Q5 -->|No - Not Filed| Q5f{Earned $400+ from<br/>self-employment<br/>in past year?}
+
+    Q5f -->|Yes - Should File| SE_Critical[/"🚨 CRITICAL ISSUE<br/>---<br/>$400+ self-employment<br/>REQUIRES tax filing<br/>---<br/>We strongly recommend:<br/>1. File tax return immediately<br/>2. Consider joint sponsor<br/>3. Consult immigration attorney<br/>---<br/>Proceeding significantly<br/>weakens I-134<br/>---<br/>Contact customer support"/]
+    SE_Critical --> DocUpload
+
+    Q5f -->|No - Under $400| Q7
+
+    %% ============================================
+    %% NO TAXES FILED BRANCH (EXISTING)
+    %% ============================================
+    Q1 -->|No| Q7{Do you receive<br/>Social Security<br/>benefits?}
+
+    Q7 -->|Yes or No| Q8[Check employment<br/>status from Section 1.6]
+    Q8 --> Emp_Check{Employment Status}
+
+    Emp_Check -->|Self-Employed| E1_SE[/"⚠️ ENDPOINT E1-SE<br/>Self-Employed, No Taxes<br/>---<br/>⚠️ Very difficult to prove<br/>Strongly recommend filing<br/>---<br/>Upload:<br/>• Bank statements 12 mo<br/>• 1099 forms if any<br/>• Asset documentation"/]
+
+    Emp_Check -->|Unemployed| E1_UE[/"⚠️ ENDPOINT E1-UE<br/>Unemployed, No Taxes<br/>---<br/>Need substantial assets or<br/>consider joint sponsor<br/>---<br/>Upload:<br/>• SSA-1099 if applicable<br/>• Asset documentation"/]
+
+    Emp_Check -->|Employed| Q9[Enter current<br/>annual salary]
+    Q9 --> Salary_Check{Salary ≥ $30,000?}
+
+    Salary_Check -->|Yes| Q10{Can you get<br/>employment letter?}
+
+    Q10 -->|Yes| Q11{Position type?}
+    Q11 -->|Permanent| E4[/"⭐ ENDPOINT E4<br/>Permanent, Meets Salary<br/>---<br/>Upload:<br/>• Employment letter<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>• SSA-1099 if applicable"/]
+
+    Q11 -->|Temporary| E5[/"⚠️ ENDPOINT E5<br/>Temporary, Meets Salary<br/>---<br/>Upload:<br/>• Employment letter<br/>  must show end date<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>• SSA-1099 if applicable"/]
+
+    Q10 -->|No| E3[/"⚠️ ENDPOINT E3<br/>No Employment Letter<br/>---<br/>Upload:<br/>• Pay stubs 1-3 months<br/>• Bank statements<br/>• SSA-1099 if applicable<br/>---<br/>💡 Get employment letter"/]
+
+    Salary_Check -->|No| E2[/"💰 ENDPOINT E2<br/>Salary Below Requirement<br/>---<br/>Will need assets<br/>---<br/>Upload:<br/>• Employment letter if available<br/>• Pay stubs 1-3 months<br/>• SSA-1099 if applicable<br/>• Asset documentation"/]
+
+    %% ============================================
+    %% FINAL FLOW
+    %% ============================================
+    A1 --> FinalDoc[Proceed to<br/>Document Upload<br/>with recommendations]
+    A2 --> FinalDoc
+    A3 --> FinalDoc
+    A4 --> FinalDoc
+    A5 --> FinalDoc
+    A6 --> FinalDoc
+    A1_2023 --> FinalDoc
+    A2_2023 --> FinalDoc
+    A3_2023 --> FinalDoc
+    A4_2023 --> FinalDoc
+    A5_2023 --> FinalDoc
+    A6_2023 --> FinalDoc
+    W1 --> FinalDoc
+    W2 --> FinalDoc
+    W3 --> FinalDoc
+    W4 --> FinalDoc
+    W5 --> FinalDoc
+    W6 --> FinalDoc
+    SE1 --> FinalDoc
+    SE2 --> FinalDoc
+    SE3 --> FinalDoc
+    SE4 --> FinalDoc
+    SE5 --> FinalDoc
+    E1_SE --> FinalDoc
+    E1_UE --> FinalDoc
+    E2 --> FinalDoc
+    E3 --> FinalDoc
+    E4 --> FinalDoc
+    E5 --> FinalDoc
+    DocUpload --> FinalDoc
+
+    FinalDoc --> Assets[Part 2: Assets Section]
+    Assets --> Contributions[Part 3: Additional Support<br/>Optional]
+    Contributions --> Complete([Complete Section 1.7])
+
+    %% ============================================
+    %% STYLING
+    %% ============================================
+    classDef strongEndpoint fill:#c8e6c9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
+    classDef warningEndpoint fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17
+    classDef assetEndpoint fill:#ffccbc,stroke:#ff5722,stroke-width:2px,color:#bf360c
+    classDef criticalEndpoint fill:#ffebee,stroke:#d32f2f,stroke-width:3px,color:#b71c1c
+    classDef question fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#9c27b0,stroke-width:1px
+
+    class A1,A4,A1_2023,A4_2023,W1,SE1,E4 strongEndpoint
+    class A3,A5,A3_2023,A5_2023,E1_SE,E1_UE,E3,E5,SE2,W4 warningEndpoint
+    class A2,A6,A2_2023,A6_2023,E2,SE3,SE4,SE5,W2,W3,W5,W6 assetEndpoint
+    class SE_Critical criticalEndpoint
+    class Q1,Q2,AGI_Check_2024,AGI_Check_2023,Q3a_2024,Q3b_2024,Q3c_2024,Q3e_2024,Q3a_2023,Q3b_2023,Q3c_2023,Q3e_2023,Q4,Q4a,Q4_AGI_Check,Q4_improve,Q4_improve_yes,Q4d,Q4e,Q4_W2_Check,Q4f,Q5,Q5b,Q5c,Q5d,Q5e,Q5f,Q7,Emp_Check,Salary_Check,Q10,Q11,ModeSelect question
+    class Q2_Check,Q8 process

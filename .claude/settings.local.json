@@ -8,7 +8,11 @@
       "Bash(npm run dev:*)",
       "Bash(npm run:*)",
       "Bash(git checkout:*)",
-      "Bash(timeout 5 npm start)"
+      "Bash(timeout 5 npm start)",
+      "Bash(npx eslint:*)",
+      "Bash(dir:*)",
+      "Bash(move Section1_7.jsx Section1_8.jsx)",
+      "Bash(move Section1_7_Questionnaire.jsx Section1_8_Questionnaire.jsx)"
     ],
     "deny": [],
     "ask": []

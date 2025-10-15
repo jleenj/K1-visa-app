@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Section1_7 from './components/sections/Section1_7';
+import Section1_8 from './components/sections/Section1_8';
 
 // Yup schema for marriage history validation
 const marriageHistorySchema = yup.object().shape({
@@ -427,34 +428,33 @@ const K1VisaQuestionnaire = () => {
   ];
 
 
-  // Financial sections are large, so I'm breaking them into subsections
-  const sponsorFinancialSubsections = [
-    {
-      id: '1.7-financial-income',
-      title: '1.7 Financial Information',
-      icon: FileText,
-      description: 'Income, assets, and contributions to beneficiary',
-      questionCount: 20,
-      fields: [
-        { id: 'section1_7_component', type: 'section1_7_component' }
-      ]
-    }
-    // Add more financial subsections here...
-  ];
-
+  // Petitions & Affidavits - MUST come before Financial to calculate household size
   const sponsorPetitionsSubsections = [
     {
-      id: '1.8-petitions',
-      title: '1.8 Previous Petitions & Affidavits',
+      id: '1.7-petitions',
+      title: '1.7 Previous Petitions & Affidavits',
       icon: FileText,
       description: 'Previous I-129F petitions and support affidavits',
       questionCount: 6,
       fields: [
-        { id: 'sponsorFiledI129FBefore', label: 'Have you filed Form I-129F before?', type: 'select', options: ['No', 'Yes'], required: true },
-        { id: 'sponsorI129FCount', label: 'How many times?', type: 'number', required: false, conditional: true },
-        // Add more fields...
+        { id: 'section1_7_component', type: 'section1_7_component' }
       ]
     }
+  ];
+
+  // Financial sections are large, so I'm breaking them into subsections
+  const sponsorFinancialSubsections = [
+    {
+      id: '1.8-financial-income',
+      title: '1.8 Financial Information',
+      icon: FileText,
+      description: 'Income, assets, and contributions to beneficiary',
+      questionCount: 20,
+      fields: [
+        { id: 'section1_8_component', type: 'section1_8_component' }
+      ]
+    }
+    // Add more financial subsections here...
   ];
 
   const sponsorLegalSubsections = [
@@ -485,8 +485,8 @@ const K1VisaQuestionnaire = () => {
         ...sponsorMaritalSubsections,
         ...sponsorFamilySubsections,
         ...sponsorEmploymentSubsections,
-        ...sponsorFinancialSubsections,
         ...sponsorPetitionsSubsections,
+        ...sponsorFinancialSubsections,
         ...sponsorLegalSubsections
       ]
     },
@@ -5237,6 +5237,14 @@ const K1VisaQuestionnaire = () => {
       case 'section1_7_component':
         return (
           <Section1_7
+            currentData={currentData}
+            updateField={updateField}
+          />
+        );
+
+      case 'section1_8_component':
+        return (
+          <Section1_8
             currentData={currentData}
             updateField={updateField}
           />
