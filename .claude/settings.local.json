@@ -12,7 +12,8 @@
       "Bash(npx eslint:*)",
       "Bash(dir:*)",
       "Bash(move Section1_7.jsx Section1_8.jsx)",
-      "Bash(move Section1_7_Questionnaire.jsx Section1_8_Questionnaire.jsx)"
+      "Bash(move Section1_7_Questionnaire.jsx Section1_8_Questionnaire.jsx)",
+      "Read(//c/Users/vnix8/OneDrive/Documents/Evernest/Questionnaire/Qualifying test/Marriage visa (AOS + Consular)/**)"
     ],
     "deny": [],
     "ask": []

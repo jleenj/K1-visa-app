@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Section1_7 from './components/sections/Section1_7';
 import Section1_8 from './components/sections/Section1_8';
+import Section1_9 from './components/sections/Section1_9';
 
 // Yup schema for marriage history validation
 const marriageHistorySchema = yup.object().shape({
@@ -58,6 +59,7 @@ const K1VisaQuestionnaire = () => {
   const [touchedFields, setTouchedFields] = useState({});
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [showEarlierPlaces, setShowEarlierPlaces] = useState(false);
+  const [hasCriminalHistory, setHasCriminalHistory] = useState(false);
 
   // TODO: Expand phone validation for international support
   // Current implementation only supports 5 countries (US, CA, GB, AU, DE)
@@ -462,11 +464,10 @@ const K1VisaQuestionnaire = () => {
       id: '1.9-legal',
       title: '1.9 Legal History',
       icon: FileText,
-      description: 'Criminal history and legal matters',
-      questionCount: 20,
+      description: 'Required background check information',
+      questionCount: 5,
       fields: [
-        { id: 'sponsorEverArrested', label: 'Have you ever been arrested or convicted of any crime?', type: 'select', options: ['No', 'Yes'], required: true },
-        // Add more legal fields...
+        { id: 'section1_9_component', type: 'section1_9_component' }
       ]
     }
   ];
@@ -5250,6 +5251,15 @@ const K1VisaQuestionnaire = () => {
           />
         );
 
+      case 'section1_9_component':
+        return (
+          <Section1_9
+            currentData={currentData}
+            updateField={updateField}
+            onBlock={setHasCriminalHistory}
+          />
+        );
+
       default:
         // This handles 'text', 'number', and any other basic input types
         const isDefaultTouched = touchedFields && touchedFields[field.id];
@@ -5477,11 +5487,17 @@ const K1VisaQuestionnaire = () => {
                                   const preparingWhileDivorcing = currentData['preparingWhileDivorcing'] || false;
 
                                   // Gray out form except for marital status dropdown and married eligibility check questions
-                                  const shouldGrayField = isMaritalSection &&
+                                  const shouldGrayMaritalField = isMaritalSection &&
                                     maritalStatus === 'Married' &&
                                     (marriedTo === 'sponsor' || (marriedTo === 'someone-else' && !preparingWhileDivorcing)) &&
                                     field.id !== 'sponsorMaritalStatus' &&
                                     field.id !== 'marriedEligibilityCheck';
+
+                                  // Block all other subsections if criminal history has "Yes" answer
+                                  const isLegalSection = subsection.id === '1.9-legal';
+                                  const shouldGrayCriminalField = hasCriminalHistory && !isLegalSection;
+
+                                  const shouldGrayField = shouldGrayMaritalField || shouldGrayCriminalField;
 
                                   return (
                                     <div key={`${subsection.id}-${field.id}-${fieldIndex}`} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
@@ -5631,6 +5647,33 @@ const K1VisaQuestionnaire = () => {
                                                         ))}
                                                       </div>
                                                     )}
+                                                    {/* Show customer service routing if "Yes" is selected */}
+                                                    {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                      <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                        <div className="flex items-start">
+                                                          <div className="mr-3 mt-0.5">
+                                                            <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                            </svg>
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-medium text-amber-800 mb-2">
+                                                              We need to review your situation
+                                                            </p>
+                                                            <p className="text-sm text-amber-700 mb-3">
+                                                              Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                            </p>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                              className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                            >
+                                                              Contact Customer Service
+                                                            </button>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 );
                                               }
@@ -5651,6 +5694,33 @@ const K1VisaQuestionnaire = () => {
                                                             {line}
                                                           </div>
                                                         ))}
+                                                      </div>
+                                                    )}
+                                                    {/* Show customer service routing if "Yes" is selected */}
+                                                    {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                      <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                        <div className="flex items-start">
+                                                          <div className="mr-3 mt-0.5">
+                                                            <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                            </svg>
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-medium text-amber-800 mb-2">
+                                                              We need to review your situation
+                                                            </p>
+                                                            <p className="text-sm text-amber-700 mb-3">
+                                                              Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                            </p>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                              className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                            >
+                                                              Contact Customer Service
+                                                            </button>
+                                                          </div>
+                                                        </div>
                                                       </div>
                                                     )}
                                                   </div>
@@ -5681,6 +5751,33 @@ const K1VisaQuestionnaire = () => {
                                                         ))}
                                                       </div>
                                                     )}
+                                                    {/* Show customer service routing if "Yes" is selected */}
+                                                    {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                      <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                        <div className="flex items-start">
+                                                          <div className="mr-3 mt-0.5">
+                                                            <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                            </svg>
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-medium text-amber-800 mb-2">
+                                                              We need to review your situation
+                                                            </p>
+                                                            <p className="text-sm text-amber-700 mb-3">
+                                                              Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                            </p>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                              className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                            >
+                                                              Contact Customer Service
+                                                            </button>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 );
                                               }
@@ -5701,6 +5798,33 @@ const K1VisaQuestionnaire = () => {
                                                             {line}
                                                           </div>
                                                         ))}
+                                                      </div>
+                                                    )}
+                                                    {/* Show customer service routing if "Yes" is selected */}
+                                                    {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                      <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                        <div className="flex items-start">
+                                                          <div className="mr-3 mt-0.5">
+                                                            <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                            </svg>
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-medium text-amber-800 mb-2">
+                                                              We need to review your situation
+                                                            </p>
+                                                            <p className="text-sm text-amber-700 mb-3">
+                                                              Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                            </p>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                              className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                            >
+                                                              Contact Customer Service
+                                                            </button>
+                                                          </div>
+                                                        </div>
                                                       </div>
                                                     )}
                                                   </div>
@@ -5728,6 +5852,33 @@ const K1VisaQuestionnaire = () => {
                                                             ))}
                                                           </div>
                                                         )}
+                                                        {/* Show customer service routing if "Yes" is selected */}
+                                                        {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                          <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                            <div className="flex items-start">
+                                                              <div className="mr-3 mt-0.5">
+                                                                <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                                </svg>
+                                                              </div>
+                                                              <div>
+                                                                <p className="text-sm font-medium text-amber-800 mb-2">
+                                                                  We need to review your situation
+                                                                </p>
+                                                                <p className="text-sm text-amber-700 mb-3">
+                                                                  Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                                </p>
+                                                                <button
+                                                                  type="button"
+                                                                  onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                                  className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                                >
+                                                                  Contact Customer Service
+                                                                </button>
+                                                              </div>
+                                                            </div>
+                                                          </div>
+                                                        )}
                                                       </div>
                                                     );
                                                   }
@@ -5745,6 +5896,33 @@ const K1VisaQuestionnaire = () => {
                                                             {line}
                                                           </div>
                                                         ))}
+                                                      </div>
+                                                    )}
+                                                    {/* Show customer service routing if "Yes" is selected */}
+                                                    {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                      <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                        <div className="flex items-start">
+                                                          <div className="mr-3 mt-0.5">
+                                                            <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                            </svg>
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-medium text-amber-800 mb-2">
+                                                              We need to review your situation
+                                                            </p>
+                                                            <p className="text-sm text-amber-700 mb-3">
+                                                              Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                            </p>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                              className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                            >
+                                                              Contact Customer Service
+                                                            </button>
+                                                          </div>
+                                                        </div>
                                                       </div>
                                                     )}
                                                   </div>
@@ -5768,6 +5946,33 @@ const K1VisaQuestionnaire = () => {
                                                   ))}
                                                 </div>
                                               )}
+                                              {/* Show customer service routing if "Yes" is selected */}
+                                              {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                                <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                                  <div className="flex items-start">
+                                                    <div className="mr-3 mt-0.5">
+                                                      <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                      </svg>
+                                                    </div>
+                                                    <div>
+                                                      <p className="text-sm font-medium text-amber-800 mb-2">
+                                                        We need to review your situation
+                                                      </p>
+                                                      <p className="text-sm text-amber-700 mb-3">
+                                                        Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                      </p>
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                        className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                      >
+                                                        Contact Customer Service
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              )}
                                             </div>
                                           );
                                         })()
@@ -5783,6 +5988,33 @@ const K1VisaQuestionnaire = () => {
                                                   {line}
                                                 </div>
                                               ))}
+                                            </div>
+                                          )}
+                                          {/* Show customer service routing if "Yes" is selected */}
+                                          {field.routeToSupportOnYes && currentData[field.id] === 'Yes' && (
+                                            <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                                              <div className="flex items-start">
+                                                <div className="mr-3 mt-0.5">
+                                                  <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                  </svg>
+                                                </div>
+                                                <div>
+                                                  <p className="text-sm font-medium text-amber-800 mb-2">
+                                                    We need to review your situation
+                                                  </p>
+                                                  <p className="text-sm text-amber-700 mb-3">
+                                                    Based on your answer, we'll need to discuss your case individually to provide the best guidance. Our team will help you understand the next steps.
+                                                  </p>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - Legal History Question'}
+                                                    className="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors"
+                                                  >
+                                                    Contact Customer Service
+                                                  </button>
+                                                </div>
+                                              </div>
                                             </div>
                                           )}
                                         </div>

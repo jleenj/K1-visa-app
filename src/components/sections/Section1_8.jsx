@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Plus, Trash2, Info, AlertCircle, DollarSign, HelpCircle, X, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Upload, Plus, Trash2, Info, AlertCircle, DollarSign, HelpCircle, X, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { QuestionnaireSteps } from './Section1_8_Questionnaire';
 
 const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }) => {
@@ -21,7 +21,18 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showIncomeGuide, setShowIncomeGuide] = useState(false);
 
-  const MINIMUM_INCOME_REQUIRED = currentData.minimumIncomeRequired || 30000;
+  // K-1 Visa (Form I-134) specific constants
+  const K1_ASSET_MULTIPLIER = 5; // Each $5 in assets = $1 toward income requirement
+  const K1_POVERTY_GUIDELINE_PERCENTAGE = 100; // 100% of poverty guidelines for K-1
+
+  // For reference only (used in "Planning Ahead" section):
+  const AOS_ASSET_MULTIPLIER = 3; // Form I-864 uses 3x multiplier
+  const AOS_POVERTY_GUIDELINE_PERCENTAGE = 125; // Form I-864 requires 125%
+
+  // Get K-1 requirements from Section 1.7
+  const k1MinimumIncomeRequired = currentData.minimumRequiredIncome || 30000;
+  const k1HouseholdSize = currentData.householdSize || 2;
+
   // Calculate current and available tax years dynamically
   const getCurrentTaxYear = () => {
     const currentDate = new Date();
@@ -195,8 +206,72 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
     }
   };
 
+  // K-1 Financial Calculation Functions
+
+  // Calculate sponsor's actual income for K-1
+  const calculateK1ActualIncome = () => {
+    // If questionnaire was completed, use that AGI
+    if (questionnaireData.adjustedGrossIncome) {
+      return parseFloat(questionnaireData.adjustedGrossIncome) || 0;
+    }
+
+    // Otherwise, if manual income sources were added, sum them
+    const manualTotal = calculateTotalIncome();
+    if (manualTotal > 0) {
+      return manualTotal;
+    }
+
+    // Fallback to any stored extracted income (legacy)
+    if (currentData.extractedIncome) {
+      return parseFloat(currentData.extractedIncome) || 0;
+    }
+
+    return 0;
+  };
+
+  // Calculate K-1 income gap
+  const calculateK1IncomeGap = () => {
+    const actualIncome = calculateK1ActualIncome();
+    const gap = k1MinimumIncomeRequired - actualIncome;
+    return gap > 0 ? gap : 0;
+  };
+
+  // Calculate required assets for K-1 (gap × 5)
+  const calculateK1RequiredAssets = () => {
+    const gap = calculateK1IncomeGap();
+    return gap * K1_ASSET_MULTIPLIER;
+  };
+
+  // Calculate asset value as income equivalent for K-1 (assets ÷ 5)
+  const calculateK1AssetAsIncome = () => {
+    const totalAssets = calculateTotalAssets();
+    return totalAssets / K1_ASSET_MULTIPLIER;
+  };
+
+  // Determine overall K-1 financial status
+  const getK1FinancialStatus = () => {
+    const actualIncome = calculateK1ActualIncome();
+    const totalAssets = calculateTotalAssets();
+    const assetAsIncome = calculateK1AssetAsIncome();
+    const equivalentIncome = actualIncome + assetAsIncome;
+    const incomeGap = calculateK1IncomeGap();
+    const requiredAssets = calculateK1RequiredAssets();
+
+    return {
+      meetsRequirement: equivalentIncome >= k1MinimumIncomeRequired,
+      actualIncome,
+      incomeGap,
+      requiredAssets,
+      totalAssets,
+      assetAsIncome,
+      equivalentIncome,
+      surplus: equivalentIncome - k1MinimumIncomeRequired
+    };
+  };
+
+  // Legacy function for questionnaire (kept for backward compatibility)
   const calculateGap = (agi) => {
-    return MINIMUM_INCOME_REQUIRED - parseFloat(agi || 0);
+    return k1MinimumIncomeRequired - parseFloat(agi || 0);
   };
 
   const handleNoneOfAboveToggle = (currentArray, itemId, stateField) => {
@@ -291,12 +366,20 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
     const newAsset = {
       id: Date.now(),
       type: '',
-      description: '',
       value: '0',
       currency: 'USD',
       originalValue: '0',
       usdValue: '0',
-      documents: []
+      documents: [],
+      // Real estate specific fields
+      marketValue: '0',
+      mortgageBalance: '0',
+      ownershipPercentage: '100',
+      // Retirement account specific fields
+      accountType: '',
+      // CD specific fields
+      maturityDate: '',
+      earlyWithdrawalPenalty: ''
     };
     const updatedAssets = [...assets, newAsset];
     setAssets(updatedAssets);
@@ -350,6 +433,135 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
     });
     setAssets(updatedAssets);
     updateField('assets', updatedAssets);
+  };
+
+  // Asset calculation helpers
+  const calculateRealEstateNetEquity = (asset) => {
+    const marketValue = parseFloat(asset.marketValue || 0);
+    const mortgageBalance = parseFloat(asset.mortgageBalance || 0);
+    const ownershipPercentage = parseFloat(asset.ownershipPercentage || 100) / 100;
+    const grossEquity = marketValue - mortgageBalance;
+    return grossEquity * ownershipPercentage;
+  };
+
+  const getRetirementAccountGuidance = (accountType) => {
+    const guidanceByType = {
+      '401k': {
+        docs: 'Quarterly statement from your 401(k) provider',
+        howToGet: 'Log into your provider\'s website (check with your HR department for provider name). Statements are sent quarterly, usually 45 days after quarter end.',
+        shows: 'Current account balance, contributions, employer match'
+      },
+      '403b': {
+        docs: 'Quarterly statement from your 403(b) provider',
+        howToGet: 'Log into your provider\'s website or contact your HR department. Statements are sent quarterly.',
+        shows: 'Current account balance, contributions, employer match'
+      },
+      'traditional-ira': {
+        docs: 'Statement from your brokerage or bank (e.g., Vanguard, Fidelity, Schwab)',
+        howToGet: 'Log into your brokerage account. Monthly statements for accounts with activity, quarterly for all accounts.',
+        shows: 'Current account balance, holdings, recent transactions'
+      },
+      'roth-ira': {
+        docs: 'Statement from your brokerage or bank (e.g., Vanguard, Fidelity, Schwab)',
+        howToGet: 'Log into your brokerage account. Monthly statements for accounts with activity, quarterly for all accounts.',
+        shows: 'Current account balance, contributions, holdings'
+      },
+      '529': {
+        docs: 'Quarterly or annual statement from 529 plan administrator',
+        howToGet: 'Log into your 529 plan account. Annual statements show year-end balances and contributions.',
+        shows: 'Current account balance, total contributions, earnings'
+      },
+      'other': {
+        docs: 'Recent account statement from your plan administrator or provider',
+        howToGet: 'Contact your plan administrator or check your online account portal.',
+        shows: 'Current account balance'
+      }
+    };
+
+    return guidanceByType[accountType] || guidanceByType['other'];
+  };
+
+  const getAssetGuidance = (assetType) => {
+    const guidance = {
+      'Checking account': {
+        title: 'Checking Account',
+        description: 'List your current checking account balance.',
+        valueLabel: 'Current Balance',
+        requiredDocs: ['Recent bank statement (within 30 days)'],
+        notes: []
+      },
+      'Savings account': {
+        title: 'Savings Account',
+        description: 'List your current savings account balance.',
+        valueLabel: 'Current Balance',
+        requiredDocs: ['Recent bank statement (within 30 days)'],
+        notes: []
+      },
+      'Annuities': {
+        title: 'Annuities',
+        description: 'List the surrender value (not account value) of your annuities.',
+        valueLabel: 'Surrender Value',
+        requiredDocs: ['Annuity statement showing surrender value', 'Letter from insurance company confirming surrender value'],
+        notes: [
+          'Use surrender value (amount if cashed out today), not account value',
+          'Contact your insurance provider for current surrender value'
+        ]
+      },
+      'Stocks, Bonds, Certificates of Deposit': {
+        title: 'Stocks, Bonds, or CDs',
+        description: 'List the current value of your investments.',
+        valueLabel: 'Current Market Value / Face Value',
+        requiredDocs: ['Recent brokerage/bank statement (within 30 days)'],
+        notes: [
+          'For stocks/bonds: Use current market value as of statement date',
+          'For CDs: Use face value (or early withdrawal value if maturity > 12 months)'
+        ]
+      },
+      'Retirement or educational account': {
+        title: 'Retirement or Educational Account',
+        description: 'List the current value of your retirement or educational accounts.',
+        valueLabel: 'Current Account Balance',
+        requiredDocs: ['Quarterly or annual account statement'],
+        notes: [
+          'Use current account balance as shown on your statement',
+          'Statements must be from official plan provider or brokerage'
+        ]
+      },
+      'Real estate holdings': {
+        title: 'Real Estate Holdings',
+        description: 'Calculate net equity: Market Value - Mortgage Balance.',
+        valueLabel: 'Net Equity',
+        requiredDocs: [
+          'Documentation of ownership (property deed, tax statement, etc.)',
+          'Recent appraisal by licensed appraiser',
+          'Mortgage statement showing remaining balance (if applicable)'
+        ],
+        notes: [
+          'Official instructions require a professional appraisal',
+          'Net equity = Fair Market Value - Outstanding Loans/Liens',
+          'If jointly owned, multiply by your ownership percentage'
+        ]
+      },
+      'Personal property (net value)': {
+        title: 'Personal Property',
+        description: 'List valuable personal property (vehicles, jewelry, etc.).',
+        valueLabel: 'Net Market Value',
+        requiredDocs: ['Appraisal, KBB value, or comparable sales documentation'],
+        notes: [
+          'Cannot include your primary vehicle',
+          'Acceptable: Second/third vehicles, valuable jewelry, collectibles, business equipment',
+          'Not acceptable: Primary vehicle, furniture, electronics, clothing'
+        ]
+      }
+    };
+
+    return guidance[assetType] || {
+      title: 'Asset',
+      description: 'List the cash value of this asset.',
+      valueLabel: 'Cash Value',
+      requiredDocs: ['Supporting documentation'],
+      notes: []
+    };
   };
 
   // Income source management
@@ -737,7 +949,7 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
     goToStep,
     handleNoneOfAboveToggle,
     mostRecentEmployment,
-    MINIMUM_INCOME_REQUIRED,
+    MINIMUM_INCOME_REQUIRED: k1MinimumIncomeRequired,
     calculateGap,
     setShowAgiHelp,
     setShowSalaryAgiHelp
@@ -1644,11 +1856,65 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
       <div className="space-y-6">
         <h3 className="text-lg font-semibold text-gray-900">Part 2: Assets</h3>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-800">
-            List assets available to support the beneficiary (convertible to cash within 12 months)
-          </p>
-        </div>
+        {(() => {
+          const incomeGap = calculateK1IncomeGap();
+          const requiredAssets = calculateK1RequiredAssets();
+          const hasIncomeGap = incomeGap > 0;
+
+          return (
+            <>
+              {/* Show different guidance based on income status */}
+              {hasIncomeGap ? (
+                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-yellow-900 mb-2">
+                        Your income falls short of the requirement
+                      </p>
+                      <div className="text-sm text-yellow-800 space-y-1">
+                        <p>• Minimum required income: <strong>${k1MinimumIncomeRequired.toLocaleString()}</strong></p>
+                        <p>• Your current income: <strong>${calculateK1ActualIncome().toLocaleString()}</strong></p>
+                        <p>• Income gap: <strong>${incomeGap.toLocaleString()}</strong></p>
+                      </div>
+                      <div className="mt-3 p-3 bg-yellow-100 border border-yellow-400 rounded">
+                        <p className="text-sm font-semibold text-yellow-900">
+                          To make up this gap, you need <strong>${requiredAssets.toLocaleString()}</strong> in liquid assets
+                        </p>
+                        <p className="text-xs text-yellow-800 mt-1">
+                          Formula: ${incomeGap.toLocaleString()} gap × {K1_ASSET_MULTIPLIER} = ${requiredAssets.toLocaleString()} required assets
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-2 italic">
+                          For K-1 visas, every ${K1_ASSET_MULTIPLIER} in assets counts as $1 toward the income requirement.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-green-900 mb-1">
+                        Your income meets the requirement!
+                      </p>
+                      <p className="text-sm text-green-800">
+                        Assets are <strong>optional</strong> but can strengthen your application by demonstrating additional financial stability.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  List assets available to support the beneficiary (convertible to cash within 12 months)
+                </p>
+              </div>
+            </>
+          );
+        })()}
 
         <div className="space-y-4">
           {assets.map((asset) => (
@@ -1698,62 +1964,247 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
                 </div>
               </div>
 
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Asset Value in {currencies.find(c => c.code === (asset.currency || 'USD'))?.name || 'USD'}
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    {currencies.find(c => c.code === (asset.currency || 'USD'))?.symbol || '$'}
-                  </span>
-                  <input
-                    type="number"
-                    value={asset.originalValue || asset.value || '0'}
-                    onChange={(e) => updateAssetWithCurrency(asset.id, 'originalValue', e.target.value)}
-                    className="pl-8 w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="0"
-                    step="0.01"
-                  />
-                </div>
-
-                {asset.currency && asset.currency !== 'USD' && (
-                  <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Info className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-800">
-                        Amount for USCIS Form I-134: ${asset.usdValue || '0'} USD
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      This USD amount will appear on your official forms. Exchange rates may vary.
-                    </p>
+              {/* Show guidance when asset type is selected */}
+              {asset.type && (() => {
+                const guidance = getAssetGuidance(asset.type);
+                return (
+                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h5 className="text-sm font-semibold text-blue-900 mb-1">{guidance.title}</h5>
+                    <p className="text-sm text-blue-800 mb-2">{guidance.description}</p>
+                    {guidance.notes.length > 0 && (
+                      <ul className="text-xs text-blue-700 space-y-1 mt-2">
+                        {guidance.notes.map((note, i) => (
+                          <li key={i}>• {note}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description/Details
-                </label>
-                <input
-                  type="text"
-                  value={asset.description}
-                  onChange={(e) => updateAsset(asset.id, 'description', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Bank name, account details, property address, etc."
-                />
-              </div>
+              {/* Conditional fields based on asset type */}
+              {asset.type === 'Real estate holdings' ? (
+                <>
+                  {/* Real Estate Specific Fields */}
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fair Market Value
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input
+                          type="number"
+                          value={asset.marketValue || '0'}
+                          onChange={(e) => {
+                            updateAsset(asset.id, 'marketValue', e.target.value);
+                            // Recalculate net equity
+                            const netEquity = calculateRealEstateNetEquity({...asset, marketValue: e.target.value});
+                            updateAssetWithCurrency(asset.id, 'originalValue', netEquity.toString());
+                          }}
+                          className="pl-8 w-full border border-gray-300 rounded-md px-3 py-2"
+                          placeholder="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
 
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Supporting Documentation
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                  <p className="mt-1 text-sm text-gray-600">Upload statements, appraisals, or documentation</p>
-                  <input type="file" className="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Outstanding Mortgage/Loan Balance
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input
+                          type="number"
+                          value={asset.mortgageBalance || '0'}
+                          onChange={(e) => {
+                            updateAsset(asset.id, 'mortgageBalance', e.target.value);
+                            // Recalculate net equity
+                            const netEquity = calculateRealEstateNetEquity({...asset, mortgageBalance: e.target.value});
+                            updateAssetWithCurrency(asset.id, 'originalValue', netEquity.toString());
+                          }}
+                          className="pl-8 w-full border border-gray-300 rounded-md px-3 py-2"
+                          placeholder="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Ownership Percentage
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={asset.ownershipPercentage || '100'}
+                          onChange={(e) => {
+                            updateAsset(asset.id, 'ownershipPercentage', e.target.value);
+                            // Recalculate net equity
+                            const netEquity = calculateRealEstateNetEquity({...asset, ownershipPercentage: e.target.value});
+                            updateAssetWithCurrency(asset.id, 'originalValue', netEquity.toString());
+                          }}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2"
+                          placeholder="100"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                        />
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">If jointly owned, enter your ownership percentage (e.g., 50% for equal ownership)</p>
+                    </div>
+
+                    {/* Calculated Net Equity */}
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-green-900">Calculated Net Equity:</span>
+                        <span className="text-lg font-semibold text-green-900">
+                          ${calculateRealEstateNetEquity(asset).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </span>
+                      </div>
+                      <p className="text-xs text-green-700 mt-1">
+                        This is the amount that will be reported on Form I-134
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : asset.type === 'Retirement or educational account' ? (
+                <>
+                  {/* Retirement Account Specific Fields */}
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Account Type
+                      </label>
+                      <select
+                        value={asset.accountType || ''}
+                        onChange={(e) => updateAsset(asset.id, 'accountType', e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="">Select type</option>
+                        <option value="401k">401(k)</option>
+                        <option value="403b">403(b)</option>
+                        <option value="traditional-ira">Traditional IRA</option>
+                        <option value="roth-ira">Roth IRA</option>
+                        <option value="529">529 Educational Savings Plan</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Documentation Guidance */}
+                    {asset.accountType && (
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-blue-900">Documentation Needed</h4>
+                            {(() => {
+                              const retirementGuidance = getRetirementAccountGuidance(asset.accountType);
+                              return (
+                                <>
+                                  <div>
+                                    <p className="text-sm font-medium text-blue-800">What you need:</p>
+                                    <p className="text-sm text-blue-700">{retirementGuidance.docs}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-blue-800">How to get it:</p>
+                                    <p className="text-sm text-blue-700">{retirementGuidance.howToGet}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-blue-800">What it shows:</p>
+                                    <p className="text-sm text-blue-700">{retirementGuidance.shows}</p>
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Current Account Balance
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input
+                          type="number"
+                          value={asset.originalValue || '0'}
+                          onChange={(e) => updateAssetWithCurrency(asset.id, 'originalValue', e.target.value)}
+                          className="pl-8 w-full border border-gray-300 rounded-md px-3 py-2"
+                          placeholder="0"
+                          step="0.01"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">Use the current balance as shown on your account statement</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Standard Value Field for other asset types */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {asset.type ? getAssetGuidance(asset.type).valueLabel : 'Asset Value'} in {currencies.find(c => c.code === (asset.currency || 'USD'))?.name || 'USD'}
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        {currencies.find(c => c.code === (asset.currency || 'USD'))?.symbol || '$'}
+                      </span>
+                      <input
+                        type="number"
+                        value={asset.originalValue || asset.value || '0'}
+                        onChange={(e) => updateAssetWithCurrency(asset.id, 'originalValue', e.target.value)}
+                        className="pl-8 w-full border border-gray-300 rounded-md px-3 py-2"
+                        placeholder="0"
+                        step="0.01"
+                      />
+                    </div>
+
+                    {asset.currency && asset.currency !== 'USD' && (
+                      <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Info className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-800">
+                            Amount for USCIS Form I-134: ${asset.usdValue || '0'} USD
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          This USD amount will appear on your official forms. Exchange rates may vary.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Required Documentation */}
+              {asset.type && (() => {
+                const guidance = getAssetGuidance(asset.type);
+                return (
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Required Documentation
+                    </label>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+                      <p className="text-xs font-medium text-gray-700 mb-1">You must attach:</p>
+                      <ul className="text-xs text-gray-600 space-y-1">
+                        {guidance.requiredDocs.map((doc, i) => (
+                          <li key={i}>• {doc}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                      <p className="mt-1 text-sm text-gray-600">Upload supporting documentation</p>
+                      <input type="file" className="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ))}
 
@@ -1765,16 +2216,94 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
             <p className="mt-1 text-sm text-gray-600">Add Asset</p>
           </button>
 
-          {assets.length > 0 && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-900">Total Liquid Assets:</span>
-                <span className="text-lg font-semibold text-gray-900">
-                  ${calculateTotalAssets().toLocaleString()}
-                </span>
+          {assets.length > 0 && (() => {
+            const totalAssets = calculateTotalAssets();
+            const incomeGap = calculateK1IncomeGap();
+            const requiredAssets = calculateK1RequiredAssets();
+            const hasIncomeGap = incomeGap > 0;
+            const meetsAssetRequirement = !hasIncomeGap || totalAssets >= requiredAssets;
+            const assetSurplus = totalAssets - requiredAssets;
+
+            return (
+              <div className={`border rounded-lg p-4 ${
+                meetsAssetRequirement
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-red-50 border-red-300'
+              }`}>
+                <div className="space-y-3">
+                  {/* Total Assets */}
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-900">Total Liquid Assets:</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      ${totalAssets.toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Asset Requirement Status */}
+                  {hasIncomeGap && (
+                    <>
+                      <div className="border-t border-gray-300 pt-3">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-700">Required to cover income gap:</span>
+                          <span className="font-medium text-gray-900">
+                            ${requiredAssets.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-300 pt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-gray-900">
+                            {assetSurplus >= 0 ? 'Asset Surplus:' : 'Asset Deficit:'}
+                          </span>
+                          <span className={`text-lg font-semibold ${
+                            assetSurplus >= 0 ? 'text-green-700' : 'text-red-700'
+                          }`}>
+                            {assetSurplus >= 0 ? '+' : ''}${assetSurplus.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Status Message */}
+                      <div className={`p-3 rounded-lg border ${
+                        meetsAssetRequirement
+                          ? 'bg-green-100 border-green-400'
+                          : 'bg-red-100 border-red-400'
+                      }`}>
+                        <div className="flex items-start space-x-2">
+                          {meetsAssetRequirement ? (
+                            <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-700 flex-shrink-0 mt-0.5" />
+                          )}
+                          <p className={`text-sm font-medium ${
+                            meetsAssetRequirement ? 'text-green-900' : 'text-red-900'
+                          }`}>
+                            {meetsAssetRequirement
+                              ? 'Your assets meet the requirement to cover your income gap!'
+                              : `You need $${Math.abs(assetSurplus).toLocaleString()} more in assets to cover your income gap.`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* No Income Gap - Optional Assets */}
+                  {!hasIncomeGap && (
+                    <div className="p-3 bg-green-100 border border-green-400 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-green-900">
+                          These assets strengthen your application and demonstrate additional financial stability.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 
@@ -1876,6 +2405,163 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
               </div>
             </div>
           )}
+        </div>
+
+        {/* Overall K-1 Financial Status Summary */}
+        <div className="mt-8 border-t-2 border-gray-300 pt-8">
+          {(() => {
+            const financialStatus = getK1FinancialStatus();
+            const { meetsRequirement, actualIncome, incomeGap, totalAssets, assetAsIncome, equivalentIncome } = financialStatus;
+
+            return (
+              <div className={`border-2 rounded-lg p-6 ${
+                meetsRequirement
+                  ? 'bg-green-50 border-green-400'
+                  : 'bg-yellow-50 border-yellow-400'
+              }`}>
+                <div className="flex items-start gap-3 mb-4">
+                  {meetsRequirement ? (
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                  ) : (
+                    <AlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-1" />
+                  )}
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold mb-1">
+                      {meetsRequirement
+                        ? '✅ Your K-1 Financial Requirements Are Met!'
+                        : '⚠️ K-1 Financial Requirements Summary'}
+                    </h4>
+                    <p className="text-sm text-gray-700">
+                      Form I-134 financial status for household size of {k1HouseholdSize}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                  {/* Income Section */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Required Income (100% poverty guidelines):</span>
+                      <span className="font-semibold text-gray-900">
+                        ${k1MinimumIncomeRequired.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">Your Annual Income:</span>
+                      <span className="font-semibold text-gray-900">
+                        ${actualIncome.toLocaleString()}
+                      </span>
+                    </div>
+                    {incomeGap > 0 && (
+                      <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-200">
+                        <span className="text-yellow-800 font-medium">Income Gap:</span>
+                        <span className="font-semibold text-yellow-900">
+                          -${incomeGap.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Assets Section (if applicable) */}
+                  {totalAssets > 0 && (
+                    <>
+                      <div className="border-t border-gray-300 my-3"></div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-700">Total Liquid Assets:</span>
+                          <span className="font-semibold text-gray-900">
+                            ${totalAssets.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-700">Asset Value as Income (÷ {K1_ASSET_MULTIPLIER}):</span>
+                          <span className="font-semibold text-gray-900">
+                            ${assetAsIncome.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Total Equivalent Income */}
+                  <div className="border-t-2 border-gray-400 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-gray-900">
+                        Total Equivalent Income:
+                      </span>
+                      <span className="text-xl font-bold text-gray-900">
+                        ${equivalentIncome.toLocaleString()}
+                      </span>
+                    </div>
+                    {totalAssets > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Income (${actualIncome.toLocaleString()}) + Assets as Income (${assetAsIncome.toLocaleString()})
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Status Message */}
+                  <div className={`p-3 rounded-lg mt-4 ${
+                    meetsRequirement
+                      ? 'bg-green-100 border border-green-300'
+                      : 'bg-yellow-100 border border-yellow-300'
+                  }`}>
+                    <p className={`text-sm font-semibold ${
+                      meetsRequirement ? 'text-green-900' : 'text-yellow-900'
+                    }`}>
+                      {meetsRequirement ? (
+                        <>
+                          Your equivalent income of ${equivalentIncome.toLocaleString()} exceeds the requirement of ${k1MinimumIncomeRequired.toLocaleString()}.
+                          You meet the K-1 financial requirements!
+                        </>
+                      ) : (
+                        <>
+                          You currently need ${Math.abs(k1MinimumIncomeRequired - equivalentIncome).toLocaleString()} more
+                          {incomeGap > 0 ? ' in income or assets' : ''} to meet the K-1 requirement.
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Planning Ahead: Green Card Requirements */}
+        <div className="mt-8">
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h4 className="text-lg font-semibold text-blue-900 mb-3">
+                  📋 Planning Ahead: Green Card Application
+                </h4>
+                <div className="space-y-3 text-sm text-blue-900">
+                  <p>
+                    After you marry, you'll apply for a green card which requires <strong>Form I-864</strong> showing <strong>125% of poverty guidelines</strong> (${Math.round(k1MinimumIncomeRequired * 1.25).toLocaleString()} for your household size of {k1HouseholdSize}).
+                  </p>
+                  <p>
+                    Right now for your K-1 visa, you need <strong>100% of poverty guidelines</strong> (${k1MinimumIncomeRequired.toLocaleString()}).
+                  </p>
+
+                  <div className="bg-white border border-blue-200 rounded p-4 mt-4">
+                    <p className="font-semibold text-blue-900 mb-2">Before the green card interview, you can:</p>
+                    <ul className="space-y-1 ml-4 list-disc text-blue-800">
+                      <li>Increase your income through raises, promotions, or additional work</li>
+                      <li>Add a joint sponsor (another U.S. citizen or permanent resident who meets the 125% requirement)</li>
+                      <li>Use additional assets (each $3 in assets counts as $1 in income for I-864)</li>
+                      <li>Combine approaches (your income + joint sponsor's income + assets)</li>
+                    </ul>
+                  </div>
+
+                  <p className="text-xs italic mt-3">
+                    ⏱️ <strong>Timeline:</strong> Most couples apply for green cards 2-6 months after marriage. You'll have time to prepare and can explore these options before filing Form I-864.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
         </>
