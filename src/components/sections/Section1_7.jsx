@@ -2,76 +2,90 @@ import React, { useState, useEffect } from 'react';
 import { Info, Plus, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 
 const Section1_7 = ({ currentData = {}, updateField }) => {
-  // State for previous sponsorships
-  const [hasPreviousSponsorships, setHasPreviousSponsorships] = useState(
-    currentData.hasPreviousSponsorships || null
+  // PART A: Previous I-129F Petitions
+  const [hasPreviousPetitions, setHasPreviousPetitions] = useState(
+    currentData.hasPreviousPetitions || null
   );
-  const [previousSponsorshipsCount, setPreviousSponsorshipsCount] = useState(
-    currentData.previousSponsorshipsCount || 0
+  const [petitionsCount, setPetitionsCount] = useState(
+    currentData.petitionsCount || '0'
   );
-  const [previousSponsorshipsCountCustom, setPreviousSponsorshipsCountCustom] = useState(
-    currentData.previousSponsorshipsCountCustom || ''
-  );
-  const [previouslySponsoredIndividuals, setPreviouslySponsoredIndividuals] = useState(
-    currentData.previouslySponsoredIndividuals || []
+  const [previousPetitions, setPreviousPetitions] = useState(
+    currentData.previousPetitions || []
   );
 
-  // State for household members
-  const [householdMembersCount, setHouseholdMembersCount] = useState(
-    currentData.householdMembersCount || 0
+  // PART B: Other Ongoing Financial Obligations
+  const [hasOtherObligations, setHasOtherObligations] = useState(
+    currentData.hasOtherObligations || null
   );
-  const [householdMembersCountCustom, setHouseholdMembersCountCustom] = useState(
-    currentData.householdMembersCountCustom || ''
+  const [otherObligationsCount, setOtherObligationsCount] = useState(
+    currentData.otherObligationsCount || 0
   );
-  const [householdMembers, setHouseholdMembers] = useState(
-    currentData.householdMembers || []
+  const [otherObligations, setOtherObligations] = useState(
+    currentData.otherObligations || []
   );
 
-  // Get fiancé name from data (fallback to generic terms)
+  // PART C: Children Under 18
+  const [hasChildrenUnder18, setHasChildrenUnder18] = useState(
+    currentData.hasChildrenUnder18 || null
+  );
+  const [childrenCount, setChildrenCount] = useState(
+    currentData.childrenCount || 0
+  );
+  const [childrenLivingStatus, setChildrenLivingStatus] = useState(
+    currentData.childrenLivingStatus || null
+  );
+  const [childrenLivingWithSponsor, setChildrenLivingWithSponsor] = useState(
+    currentData.childrenLivingWithSponsor || 0
+  );
+  const [childrenDetails, setChildrenDetails] = useState(
+    currentData.childrenDetails || []
+  );
+
+  // Other Household Members (not children)
+  const [otherDependentsCount, setOtherDependentsCount] = useState(
+    currentData.otherDependentsCount || 0
+  );
+  const [otherDependents, setOtherDependents] = useState(
+    currentData.otherDependents || []
+  );
+
+  // Get fiancé name from data
   const fianceName = currentData.beneficiaryFirstName || 'your fiancé(e)';
-  const fianePronoun = currentData.beneficiaryGender === 'male' ? 'him' :
-                       currentData.beneficiaryGender === 'female' ? 'her' : 'them';
+  const fiancePronoun = currentData.beneficiaryGender === 'male' ? 'him' :
+                        currentData.beneficiaryGender === 'female' ? 'her' : 'them';
 
-  // State for duplicate detection
-  const [duplicateAcknowledgments, setDuplicateAcknowledgments] = useState(
-    currentData.duplicateAcknowledgments || {}
-  );
-
-  // 2025 Poverty Guidelines (100% - for I-134)
-  // Source: HHS Federal Poverty Guidelines effective January 15, 2025
+  // 2025 Poverty Guidelines
   const povertyGuidelines2025 = {
-    1: 15650,
-    2: 21150,
-    3: 26650,
-    4: 32150,
-    5: 37650,
-    6: 43150,
-    7: 48650,
-    8: 54150
+    1: 15650, 2: 21150, 3: 26650, 4: 32150,
+    5: 37650, 6: 43150, 7: 48650, 8: 54150
   };
 
   const getPovertyGuideline = (size) => {
-    if (size <= 8) {
-      return povertyGuidelines2025[size];
-    }
-    // For each person over 8, add $5,500
+    if (size <= 8) return povertyGuidelines2025[size];
     return povertyGuidelines2025[8] + ((size - 8) * 5500);
   };
 
-  // Calculate household size and minimum income
+  // Calculate household size
   const calculateHouseholdData = () => {
-    const sponsorCount = 1; // User
-    const fianeeCount = 1; // Fiancé(e)
+    const sponsorCount = 1;
+    const fianeeCount = 1;
 
-    const prevSponsorships = previousSponsorshipsCount === 5
-      ? parseInt(previousSponsorshipsCountCustom) || 5
-      : previousSponsorshipsCount;
+    // Count active I-134 obligations from Part A
+    const activeI134Count = previousPetitions.filter(p =>
+      p.uscisAction === 'Approved' && p.filedI134 === 'yes'
+    ).length;
 
-    const householdCount = householdMembersCount === 5
-      ? parseInt(householdMembersCountCustom) || 5
-      : householdMembersCount;
+    // Count other obligations from Part B
+    const otherObligCount = otherObligations.length;
 
-    const totalHouseholdSize = sponsorCount + fianeeCount + prevSponsorships + householdCount;
+    // Count children living with sponsor from Part C
+    const childrenLivingCount = childrenLivingWithSponsor || 0;
+
+    // Count other dependents from Part C
+    const otherDepsCount = otherDependents.length;
+
+    const totalHouseholdSize = sponsorCount + fianeeCount + activeI134Count +
+                               otherObligCount + childrenLivingCount + otherDepsCount;
     const minimumIncome = getPovertyGuideline(totalHouseholdSize);
 
     return {
@@ -80,216 +94,108 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
       breakdown: {
         sponsor: sponsorCount,
         fiance: fianeeCount,
-        previousSponsorships: prevSponsorships,
-        householdMembers: householdCount
+        activeI134: activeI134Count,
+        otherObligations: otherObligCount,
+        childrenLiving: childrenLivingCount,
+        otherDependents: otherDepsCount
       }
     };
   };
 
   const householdData = calculateHouseholdData();
 
-  // Duplicate detection: Compare previously sponsored individuals with household members, sponsor, and beneficiary
-  const detectDuplicates = () => {
-    const duplicates = [];
-
-    // Get sponsor and beneficiary info from currentData
-    const sponsorFirstName = currentData.sponsorFirstName || '';
-    const sponsorLastName = currentData.sponsorLastName || '';
-    const sponsorDOB = currentData.sponsorDOB || '';
-    const beneficiaryFirstName = currentData.beneficiaryFirstName || '';
-    const beneficiaryLastName = currentData.beneficiaryLastName || '';
-    const beneficiaryDOB = currentData.beneficiaryDOB || '';
-
-    // Helper function to check for duplicates
-    const checkDuplicate = (person1Name, person1DOB, person2Name, person2DOB) => {
-      if (person1Name && person2Name && person1DOB && person2DOB) {
-        return person1Name === person2Name && person1DOB === person2DOB;
-      }
-      return false;
-    };
-
-    // Check previously sponsored vs household members
-    previouslySponsoredIndividuals.forEach((sponsored, sponsoredIndex) => {
-      householdMembers.forEach((member, memberIndex) => {
-        const sponsoredFullName = `${sponsored.firstName} ${sponsored.lastName}`.toLowerCase().trim();
-        const memberFullName = `${member.firstName} ${member.lastName}`.toLowerCase().trim();
-
-        if (checkDuplicate(sponsoredFullName, sponsored.dateOfBirth, memberFullName, member.dateOfBirth)) {
-          const duplicateKey = `${sponsoredFullName}-${sponsored.dateOfBirth}`;
-          duplicates.push({
-            key: duplicateKey,
-            name: `${sponsored.firstName} ${sponsored.lastName}`,
-            dob: sponsored.dateOfBirth,
-            type: 'sponsored-vs-household',
-            sponsoredIndex,
-            memberIndex
-          });
-        }
-      });
-    });
-
-    // Check previously sponsored vs sponsor
-    const sponsorFullName = `${sponsorFirstName} ${sponsorLastName}`.toLowerCase().trim();
-    previouslySponsoredIndividuals.forEach((sponsored, sponsoredIndex) => {
-      const sponsoredFullName = `${sponsored.firstName} ${sponsored.lastName}`.toLowerCase().trim();
-
-      if (checkDuplicate(sponsoredFullName, sponsored.dateOfBirth, sponsorFullName, sponsorDOB)) {
-        const duplicateKey = `sponsor-${sponsoredFullName}-${sponsored.dateOfBirth}`;
-        duplicates.push({
-          key: duplicateKey,
-          name: `${sponsored.firstName} ${sponsored.lastName}`,
-          dob: sponsored.dateOfBirth,
-          type: 'sponsored-vs-sponsor',
-          sponsoredIndex
-        });
-      }
-    });
-
-    // Check previously sponsored vs beneficiary
-    const beneficiaryFullName = `${beneficiaryFirstName} ${beneficiaryLastName}`.toLowerCase().trim();
-    previouslySponsoredIndividuals.forEach((sponsored, sponsoredIndex) => {
-      const sponsoredFullName = `${sponsored.firstName} ${sponsored.lastName}`.toLowerCase().trim();
-
-      if (checkDuplicate(sponsoredFullName, sponsored.dateOfBirth, beneficiaryFullName, beneficiaryDOB)) {
-        const duplicateKey = `beneficiary-${sponsoredFullName}-${sponsored.dateOfBirth}`;
-        duplicates.push({
-          key: duplicateKey,
-          name: `${sponsored.firstName} ${sponsored.lastName}`,
-          dob: sponsored.dateOfBirth,
-          type: 'sponsored-vs-beneficiary',
-          sponsoredIndex
-        });
-      }
-    });
-
-    // Check household members vs sponsor
-    householdMembers.forEach((member, memberIndex) => {
-      const memberFullName = `${member.firstName} ${member.lastName}`.toLowerCase().trim();
-
-      if (checkDuplicate(memberFullName, member.dateOfBirth, sponsorFullName, sponsorDOB)) {
-        const duplicateKey = `sponsor-household-${memberFullName}-${member.dateOfBirth}`;
-        duplicates.push({
-          key: duplicateKey,
-          name: `${member.firstName} ${member.lastName}`,
-          dob: member.dateOfBirth,
-          type: 'household-vs-sponsor',
-          memberIndex
-        });
-      }
-    });
-
-    // Check household members vs beneficiary
-    householdMembers.forEach((member, memberIndex) => {
-      const memberFullName = `${member.firstName} ${member.lastName}`.toLowerCase().trim();
-
-      if (checkDuplicate(memberFullName, member.dateOfBirth, beneficiaryFullName, beneficiaryDOB)) {
-        const duplicateKey = `beneficiary-household-${memberFullName}-${member.dateOfBirth}`;
-        duplicates.push({
-          key: duplicateKey,
-          name: `${member.firstName} ${member.lastName}`,
-          dob: member.dateOfBirth,
-          type: 'household-vs-beneficiary',
-          memberIndex
-        });
-      }
-    });
-
-    return duplicates;
-  };
-
-  const duplicates = detectDuplicates();
-
-  // Update parent component whenever data changes
+  // Update parent whenever data changes
   useEffect(() => {
     const dataToSave = {
-      hasPreviousSponsorships,
-      previousSponsorshipsCount,
-      previousSponsorshipsCountCustom,
-      previouslySponsoredIndividuals,
-      householdMembersCount,
-      householdMembersCountCustom,
-      householdMembers,
+      hasPreviousPetitions,
+      petitionsCount,
+      previousPetitions,
+      hasOtherObligations,
+      otherObligationsCount,
+      otherObligations,
+      hasChildrenUnder18,
+      childrenCount,
+      childrenLivingStatus,
+      childrenLivingWithSponsor,
+      childrenDetails,
+      otherDependentsCount,
+      otherDependents,
       householdSize: householdData.householdSize,
-      minimumRequiredIncome: householdData.minimumRequiredIncome,
-      duplicateAcknowledgments
+      minimumRequiredIncome: householdData.minimumRequiredIncome
     };
 
     Object.keys(dataToSave).forEach(key => {
       updateField(key, dataToSave[key]);
     });
   }, [
-    hasPreviousSponsorships,
-    previousSponsorshipsCount,
-    previousSponsorshipsCountCustom,
-    previouslySponsoredIndividuals,
-    householdMembersCount,
-    householdMembersCountCustom,
-    householdMembers,
-    duplicateAcknowledgments
+    hasPreviousPetitions, petitionsCount, previousPetitions,
+    hasOtherObligations, otherObligationsCount, otherObligations,
+    hasChildrenUnder18, childrenCount, childrenLivingStatus,
+    childrenLivingWithSponsor, childrenDetails,
+    otherDependentsCount, otherDependents
   ]);
 
-  // Handle adding/removing previously sponsored individuals
-  const addPreviouslySponsoredIndividual = () => {
-    setPreviouslySponsoredIndividuals([
-      ...previouslySponsoredIndividuals,
-      {
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        dateOfBirth: '',
-        relationship: '',
-        relationshipOther: '',
-        aNumber: '',
-        receiptNumber: ''
-      }
-    ]);
-  };
-
-  const removePreviouslySponsoredIndividual = (index) => {
-    setPreviouslySponsoredIndividuals(previouslySponsoredIndividuals.filter((_, i) => i !== index));
-  };
-
-  const updatePreviouslySponsoredIndividual = (index, field, value) => {
-    const updated = [...previouslySponsoredIndividuals];
-    updated[index][field] = value;
-    setPreviouslySponsoredIndividuals(updated);
-  };
-
-  // Handle adding/removing household members
-  const addHouseholdMember = () => {
-    setHouseholdMembers([
-      ...householdMembers,
-      {
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        dateOfBirth: '',
-        relationship: '',
-        relationshipOther: '',
-        aNumber: '',
-        receiptNumber: ''
-      }
-    ]);
-  };
-
-  const removeHouseholdMember = (index) => {
-    setHouseholdMembers(householdMembers.filter((_, i) => i !== index));
-  };
-
-  const updateHouseholdMember = (index, field, value) => {
-    const updated = [...householdMembers];
-    updated[index][field] = value;
-    setHouseholdMembers(updated);
-  };
-
-  // Initialize previously sponsored individuals array when count changes
+  // Initialize arrays when counts change
   useEffect(() => {
-    const count = previousSponsorshipsCount === 5
-      ? parseInt(previousSponsorshipsCountCustom) || 5
-      : previousSponsorshipsCount;
+    const count = petitionsCount === '3+' ? Math.max(previousPetitions.length, 3) : parseInt(petitionsCount) || 0;
 
-    if (count > previouslySponsoredIndividuals.length) {
-      const newIndividuals = Array(count - previouslySponsoredIndividuals.length).fill(null).map(() => ({
+    if (count > previousPetitions.length) {
+      const newPetitions = Array(count - previousPetitions.length).fill(null).map(() => ({
+        beneficiaryFirstName: '',
+        beneficiaryMiddleName: '',
+        beneficiaryLastName: '',
+        beneficiaryANumber: '',
+        dateOfFiling: '',
+        uscisAction: '',
+        uscisActionOther: '',
+        filedI134: null,
+        relationship: '',
+        relationshipOther: '',
+        beneficiaryDOB: '',
+        i134ReceiptNumber: ''
+      }));
+      setPreviousPetitions([...previousPetitions, ...newPetitions]);
+    } else if (count < previousPetitions.length && petitionsCount !== '3+') {
+      setPreviousPetitions(previousPetitions.slice(0, count));
+    }
+  }, [petitionsCount]);
+
+  useEffect(() => {
+    if (otherObligationsCount > otherObligations.length) {
+      const newObs = Array(otherObligationsCount - otherObligations.length).fill(null).map(() => ({
+        formType: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        dateOfFiling: '',
+        relationship: '',
+        relationshipOther: '',
+        receiptNumber: ''
+      }));
+      setOtherObligations([...otherObligations, ...newObs]);
+    } else if (otherObligationsCount < otherObligations.length) {
+      setOtherObligations(otherObligations.slice(0, otherObligationsCount));
+    }
+  }, [otherObligationsCount]);
+
+  useEffect(() => {
+    if (childrenLivingWithSponsor > childrenDetails.length) {
+      const newChildren = Array(childrenLivingWithSponsor - childrenDetails.length).fill(null).map(() => ({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        dateOfBirth: '',
+        aNumber: ''
+      }));
+      setChildrenDetails([...childrenDetails, ...newChildren]);
+    } else if (childrenLivingWithSponsor < childrenDetails.length) {
+      setChildrenDetails(childrenDetails.slice(0, childrenLivingWithSponsor));
+    }
+  }, [childrenLivingWithSponsor]);
+
+  useEffect(() => {
+    if (otherDependentsCount > otherDependents.length) {
+      const newDeps = Array(otherDependentsCount - otherDependents.length).fill(null).map(() => ({
         firstName: '',
         middleName: '',
         lastName: '',
@@ -299,69 +205,557 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         aNumber: '',
         receiptNumber: ''
       }));
-      setPreviouslySponsoredIndividuals([...previouslySponsoredIndividuals, ...newIndividuals]);
-    } else if (count < previouslySponsoredIndividuals.length) {
-      setPreviouslySponsoredIndividuals(previouslySponsoredIndividuals.slice(0, count));
+      setOtherDependents([...otherDependents, ...newDeps]);
+    } else if (otherDependentsCount < otherDependents.length) {
+      setOtherDependents(otherDependents.slice(0, otherDependentsCount));
     }
-  }, [previousSponsorshipsCount, previousSponsorshipsCountCustom]);
+  }, [otherDependentsCount]);
 
-  // Initialize household members array when count changes
-  useEffect(() => {
-    const count = householdMembersCount === 5
-      ? parseInt(householdMembersCountCustom) || 5
-      : householdMembersCount;
+  // Helper functions
+  const updatePetition = (index, field, value) => {
+    const updated = [...previousPetitions];
+    updated[index][field] = value;
+    setPreviousPetitions(updated);
+  };
 
-    if (count > householdMembers.length) {
-      const newMembers = Array(count - householdMembers.length).fill(null).map(() => ({
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        dateOfBirth: '',
-        relationship: '',
-        relationshipOther: '',
-        aNumber: '',
-        receiptNumber: ''
-      }));
-      setHouseholdMembers([...householdMembers, ...newMembers]);
-    } else if (count < householdMembers.length) {
-      setHouseholdMembers(householdMembers.slice(0, count));
-    }
-  }, [householdMembersCount, householdMembersCountCustom]);
+  const addPetition = () => {
+    setPreviousPetitions([...previousPetitions, {
+      beneficiaryFirstName: '',
+      beneficiaryMiddleName: '',
+      beneficiaryLastName: '',
+      beneficiaryANumber: '',
+      dateOfFiling: '',
+      uscisAction: '',
+      uscisActionOther: '',
+      filedI134: null,
+      relationship: '',
+      relationshipOther: '',
+      beneficiaryDOB: '',
+      i134ReceiptNumber: ''
+    }]);
+  };
+
+  const removePetition = (index) => {
+    setPreviousPetitions(previousPetitions.filter((_, i) => i !== index));
+  };
+
+  const updateOtherObligation = (index, field, value) => {
+    const updated = [...otherObligations];
+    updated[index][field] = value;
+    setOtherObligations(updated);
+  };
+
+  const addOtherObligation = () => {
+    setOtherObligations([...otherObligations, {
+      formType: '',
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      dateOfFiling: '',
+      relationship: '',
+      relationshipOther: '',
+      receiptNumber: ''
+    }]);
+    setOtherObligationsCount(otherObligations.length + 1);
+  };
+
+  const updateChild = (index, field, value) => {
+    const updated = [...childrenDetails];
+    updated[index][field] = value;
+    setChildrenDetails(updated);
+  };
+
+  const updateOtherDependent = (index, field, value) => {
+    const updated = [...otherDependents];
+    updated[index][field] = value;
+    setOtherDependents(updated);
+  };
+
+  const addOtherDependent = () => {
+    setOtherDependents([...otherDependents, {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      dateOfBirth: '',
+      relationship: '',
+      relationshipOther: '',
+      aNumber: '',
+      receiptNumber: ''
+    }]);
+    setOtherDependentsCount(otherDependents.length + 1);
+  };
+
+  // Get excluded names for Part B
+  const getExcludedNames = () => {
+    return previousPetitions
+      .filter(p => p.beneficiaryFirstName && p.beneficiaryLastName)
+      .map((p, idx) => `${p.beneficiaryFirstName} ${p.beneficiaryLastName} (Petition #${idx + 1})`)
+      .join(', ');
+  };
 
   return (
     <div className="space-y-8">
       {/* Introduction */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Previous Sponsorship Obligations
+          Previous Petitions & Financial Obligations
         </h3>
         <p className="text-sm text-gray-700">
-          We need to understand your current financial obligations to determine the minimum income you'll need to sponsor {fianceName}.
-          This helps ensure you can financially support both {fianePronoun} and anyone else depending on your income.
+          We need to understand your previous immigration petitions and current financial obligations to determine
+          the minimum income you'll need to sponsor {fianceName}. This helps ensure you can financially support both {fiancePronoun} and
+          anyone else depending on your income.
         </p>
       </div>
 
-      {/* Question 1: Previous Sponsorships */}
+      {/* PART A: Previous I-129F Petitions */}
       <div className="space-y-4">
         <h4 className="text-base font-semibold text-gray-900">
-          Have you previously sponsored anyone using an immigration form where you're still financially responsible?
+          Part A: Previous I-129F Petitions
         </h4>
 
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-gray-900 mb-2">
+            Have you ever filed Form I-129F (Petition for Alien Fiancé(e)) for any other beneficiary?
+          </p>
+          <p className="text-xs text-gray-700">
+            This includes petitions that were approved, denied, revoked, or withdrawn. Don't include your current fiancé(e) - we'll count them separately.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input
+              type="radio"
+              name="hasPreviousPetitions"
+              value="yes"
+              checked={hasPreviousPetitions === 'yes'}
+              onChange={(e) => {
+                setHasPreviousPetitions(e.target.value);
+                if (petitionsCount === '0') setPetitionsCount('1');
+              }}
+              className="h-4 w-4 text-blue-600"
+            />
+            <span className="text-sm font-medium text-gray-900">Yes</span>
+          </label>
+
+          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input
+              type="radio"
+              name="hasPreviousPetitions"
+              value="no"
+              checked={hasPreviousPetitions === 'no'}
+              onChange={(e) => {
+                setHasPreviousPetitions(e.target.value);
+                setPetitionsCount('0');
+                setPreviousPetitions([]);
+              }}
+              className="h-4 w-4 text-blue-600"
+            />
+            <span className="text-sm font-medium text-gray-900">No</span>
+          </label>
+        </div>
+
+        {hasPreviousPetitions === 'yes' && (
+          <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <label className="block text-sm font-medium text-gray-900">
+              How many times have you filed Form I-129F for other beneficiaries?
+            </label>
+            <p className="text-xs text-gray-600">
+              Count the total number of petitions filed, even if some were for the same person. For example, if you filed twice for the
+              same beneficiary (once withdrawn, once approved), count that as 2 petitions.
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              {['1', '2', '3+'].map(option => (
+                <label key={option} className="flex items-center space-x-2 p-3 border-2 border-gray-300 rounded-lg hover:bg-white cursor-pointer">
+                  <input
+                    type="radio"
+                    name="petitionsCount"
+                    value={option}
+                    checked={petitionsCount === option}
+                    onChange={(e) => setPetitionsCount(e.target.value)}
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-sm font-medium text-gray-900">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Previous Petitions Details */}
+        {hasPreviousPetitions === 'yes' && previousPetitions.length > 0 && (
+          <div className="ml-6 space-y-6 mt-6">
+            {previousPetitions.map((petition, index) => (
+              <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h5 className="text-base font-semibold text-gray-900">Previous Petition #{index + 1}</h5>
+                  {petitionsCount === '3+' && previousPetitions.length > 3 && (
+                    <button
+                      onClick={() => removePetition(index)}
+                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {/* Beneficiary Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beneficiary's full legal name for this petition:
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">First Name (Given Name) *</label>
+                      <input
+                        type="text"
+                        value={petition.beneficiaryFirstName}
+                        onChange={(e) => updatePetition(index, 'beneficiaryFirstName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Middle Name</label>
+                      <input
+                        type="text"
+                        value={petition.beneficiaryMiddleName}
+                        onChange={(e) => updatePetition(index, 'beneficiaryMiddleName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Last Name (Family Name) *</label>
+                      <input
+                        type="text"
+                        value={petition.beneficiaryLastName}
+                        onChange={(e) => updatePetition(index, 'beneficiaryLastName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* A-Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Beneficiary's A-Number (Alien Registration Number)
+                  </label>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Format: 7, 8, or 9 digits. May be written with an "A" prefix (A12345678) or with dashes (123-456-789). Leave blank if they were never assigned one.
+                  </p>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
+                      A
+                    </span>
+                    <input
+                      type="text"
+                      value={petition.beneficiaryANumber ? petition.beneficiaryANumber.replace(/^A0*/, '') : ''}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/\D/g, '');
+                        if (val.length > 9) val = val.slice(0, 9);
+                        if (val) {
+                          const paddedVal = val.padStart(9, '0');
+                          updatePetition(index, 'beneficiaryANumber', `A${paddedVal}`);
+                        } else {
+                          updatePetition(index, 'beneficiaryANumber', '');
+                        }
+                      }}
+                      placeholder="12345678 (7-9 digits)"
+                      maxLength="9"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Date of Filing */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    When did you file this Form I-129F petition? *
+                  </label>
+                  <p className="text-xs text-gray-600 mb-2">
+                    This is the date you submitted the petition to USCIS, not when it was approved.
+                  </p>
+                  <input
+                    type="date"
+                    value={petition.dateOfFiling}
+                    onChange={(e) => updatePetition(index, 'dateOfFiling', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                {/* USCIS Action */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    What action did USCIS take on this petition? *
+                  </label>
+                  <select
+                    value={petition.uscisAction}
+                    onChange={(e) => {
+                      updatePetition(index, 'uscisAction', e.target.value);
+                      if (e.target.value !== 'Approved') {
+                        updatePetition(index, 'filedI134', null);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select action...</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Denied">Denied</option>
+                    <option value="Revoked">Revoked</option>
+                    <option value="Withdrawn">Withdrawn</option>
+                    <option value="Other">Other (please specify)</option>
+                  </select>
+
+                  {petition.uscisAction === 'Other' && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-600 mb-1">
+                        Please specify (e.g., "Still pending", "Reopened", etc.):
+                      </p>
+                      <input
+                        type="text"
+                        value={petition.uscisActionOther}
+                        onChange={(e) => updatePetition(index, 'uscisActionOther', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Describe the status..."
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* I-134 Question (only if Approved) */}
+                {petition.uscisAction === 'Approved' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 mb-2">
+                        Do you currently have an active Form I-134 filed for {petition.beneficiaryFirstName || 'this beneficiary'}?
+                      </p>
+                      <div className="bg-white border border-gray-300 rounded p-3 mb-3 space-y-2">
+                        <p className="text-xs text-gray-700">
+                          <strong>What is Form I-134?</strong>
+                        </p>
+                        <p className="text-xs text-gray-700">
+                          Form I-134 is the financial support form sponsors may submit to help their beneficiary obtain a K-1 visa at the consular interview.
+                        </p>
+                        <p className="text-xs text-gray-700 mt-3">
+                          <strong>⚠️ Important:</strong> Answer "Yes" only if {petition.beneficiaryFirstName ? `${petition.beneficiaryFirstName}'s` : "the beneficiary's"} K-1 status has not yet expired.
+                        </p>
+                        <p className="text-xs text-gray-700">
+                          K-1 status expires when {petition.beneficiaryFirstName ? 'they' : 'the beneficiary'} either:
+                        </p>
+                        <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                          <li>Reaches 90 days after entering the U.S., OR</li>
+                          <li>Adjusts status to permanent resident (gets their green card)</li>
+                        </ul>
+                        <p className="text-xs text-gray-700 italic">
+                          If either has happened, answer "No" below.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        {['yes', 'no'].map(option => (
+                          <label key={option} className="flex items-center space-x-3 p-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`filedI134_${index}`}
+                              value={option}
+                              checked={petition.filedI134 === option}
+                              onChange={(e) => updatePetition(index, 'filedI134', e.target.value)}
+                              className="h-4 w-4 text-blue-600"
+                            />
+                            <span className="text-sm text-gray-900">
+                              {option === 'yes' ? 'Yes' : 'No'}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {petition.filedI134 === 'yes' && (
+                      <div className="space-y-4 pt-4 border-t border-blue-300">
+                        {/* Relationship */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            What is {petition.beneficiaryFirstName ? `${petition.beneficiaryFirstName}'s` : "this beneficiary's"} relationship to you? *
+                          </label>
+                          <select
+                            value={petition.relationship}
+                            onChange={(e) => updatePetition(index, 'relationship', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                          >
+                            <option value="">Select relationship...</option>
+                            <option value="former-fiance">Former fiancé(e)</option>
+                            <option value="former-spouse">Former spouse</option>
+                            <option value="current-spouse">Current spouse</option>
+                            <option value="former-partner">Former romantic partner (never married or engaged)</option>
+                            <option value="parent">Parent</option>
+                            <option value="sibling">Sibling</option>
+                            <option value="child">Child</option>
+                            <option value="other-relative">Other relative</option>
+                            <option value="friend">Friend</option>
+                            <option value="other">Other</option>
+                          </select>
+
+                          {petition.relationship === 'other' && (
+                            <input
+                              type="text"
+                              value={petition.relationshipOther}
+                              onChange={(e) => updatePetition(index, 'relationshipOther', e.target.value)}
+                              placeholder="Please specify relationship..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mt-2"
+                            />
+                          )}
+                        </div>
+
+                        {/* Current Spouse Warning */}
+                        {petition.relationship === 'current-spouse' && (
+                          <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4">
+                            <div className="flex gap-3">
+                              <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-red-900 mb-2">⚠️ Your situation requires individual review</p>
+                                <p className="text-sm text-red-800 mb-3">
+                                  If you previously sponsored {petition.beneficiaryFirstName || 'someone'} on a K-1 visa and are now married to {petition.beneficiaryFirstName ? 'them' : 'that person'}, you would typically file
+                                  Form I-485 (Adjustment of Status) and Form I-864 (Affidavit of Support), not another K-1 petition.
+                                </p>
+                                <p className="text-sm text-red-800 mb-3">
+                                  If you're trying to sponsor a different person while currently married, K-1 visas are only for unmarried
+                                  U.S. citizens sponsoring their fiancé(e). You may need a different visa category.
+                                </p>
+                                <p className="text-sm font-medium text-red-900">
+                                  Please contact our support team for personalized guidance on your situation.
+                                </p>
+                                <p className="text-xs text-red-700 mt-2 italic">
+                                  Note: You can continue filling out this questionnaire, but we recommend getting professional review before submitting.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Date of Birth */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            What is {petition.beneficiaryFirstName ? `${petition.beneficiaryFirstName}'s` : "this beneficiary's"} date of birth? *
+                          </label>
+                          <input
+                            type="date"
+                            value={petition.beneficiaryDOB}
+                            onChange={(e) => updatePetition(index, 'beneficiaryDOB', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+
+                        {/* Receipt Number */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            USCIS Receipt Number for {petition.beneficiaryFirstName ? `${petition.beneficiaryFirstName}'s` : "this"} I-134
+                          </label>
+                          <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-2 space-y-2">
+                            <p className="text-xs text-gray-700">
+                              <strong>What is this?</strong>
+                            </p>
+                            <p className="text-xs text-gray-700">
+                              A unique 13-character identifier assigned when USCIS receives your form.
+                            </p>
+                            <p className="text-xs text-gray-700">
+                              <strong>Format:</strong>
+                            </p>
+                            <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                              <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
+                            </ul>
+                            <p className="text-xs text-gray-700 ml-4 font-medium my-1">OR</p>
+                            <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                              <li>IOE + 13 digits<br/><span className="italic">Example: IOE1234567890123</span></li>
+                            </ul>
+                            <p className="text-xs text-gray-700">
+                              <strong>Where to find it:</strong>
+                            </p>
+                            <ul className="text-xs text-gray-700 ml-4 list-disc">
+                              <li>I-797 Notice of Action</li>
+                              <li>Your USCIS online account</li>
+                              <li>Email or text notifications from USCIS</li>
+                            </ul>
+                            <p className="text-xs text-gray-600 italic">
+                              Leave blank if you don't have it available.
+                            </p>
+                          </div>
+                          <input
+                            type="text"
+                            value={petition.i134ReceiptNumber}
+                            onChange={(e) => {
+                              let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                              if (val.length > 13) val = val.slice(0, 13);
+                              updatePetition(index, 'i134ReceiptNumber', val);
+                            }}
+                            placeholder="MSC2190123456 or IOE1234567890123"
+                            maxLength="13"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {petitionsCount === '3+' && (
+              <button
+                onClick={addPetition}
+                className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Another Petition
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* PART B: Other Ongoing Financial Obligations */}
+      <div className="space-y-4 border-t pt-8">
+        <h4 className="text-base font-semibold text-gray-900">
+          Part B: Other Ongoing Financial Obligations
+        </h4>
+
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+          <p className="text-sm font-semibold text-gray-900">
+            Have you previously sponsored anyone ELSE using an immigration form where you're still financially responsible?
+          </p>
+
+          {getExcludedNames() && (
+            <div className="bg-yellow-50 border border-yellow-300 rounded p-3">
+              <p className="text-sm text-yellow-900">
+                <strong>⚠️ Please do not include:</strong> {getExcludedNames()} - we've already counted them above.
+              </p>
+            </div>
+          )}
+
           <p className="text-sm text-gray-700 font-medium">This includes these forms:</p>
           <ul className="text-sm text-gray-700 space-y-1 ml-4 list-disc">
-            <li>Form I-134 (Declaration of Financial Support)</li>
             <li>Form I-134A (Online Request to be a Supporter)</li>
             <li>Form I-864 (Affidavit of Support)</li>
             <li>Form I-864EZ (Affidavit of Support - simplified)</li>
             <li>Form I-864A (Contract Between Sponsor and Household Member)</li>
           </ul>
+
           <p className="text-sm text-gray-700 font-medium mt-3">Your support obligation has ended ONLY if one of these happened:</p>
 
           <div className="ml-4 mt-2 space-y-3">
             <div className="bg-white border border-gray-300 rounded p-3">
-              <p className="text-sm font-semibold text-gray-900 mb-2">For I-134 / I-134A (temporary visas/parole):</p>
-              <p className="text-sm text-gray-700">Their temporary status expired (for instance, K-1, K-3, B-2 tourist, F-1 student, humanitarian parole)</p>
+              <p className="text-sm font-semibold text-gray-900 mb-2">For I-134A (supporting someone else's I-134):</p>
+              <p className="text-sm text-gray-700 mb-2">The beneficiary's temporary immigration status has expired</p>
+              <p className="text-xs text-gray-600 italic">
+                Examples of expired status: K-1 visa holder's 90-day entry period ended without filing for adjustment of status, K-3 visa expired,
+                beneficiary on humanitarian parole and parole period ended, OR the beneficiary adjusted status to permanent resident (green card)
+                which ended their temporary K-1/K-3/parole status.
+              </p>
             </div>
 
             <div className="bg-white border border-gray-300 rounded p-3">
@@ -377,158 +771,121 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
               <p className="text-xs text-gray-600 mt-2 italic">⚠️ Divorce does NOT end your obligation</p>
             </div>
           </div>
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
-            <p className="text-sm text-yellow-900">
-              <strong>Don't include:</strong> {fianceName} - we'll count {fianePronoun} separately.
-            </p>
-          </div>
         </div>
 
         <div className="space-y-3">
-          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input
-              type="radio"
-              name="hasPreviousSponsorships"
-              value="yes"
-              checked={hasPreviousSponsorships === 'yes'}
-              onChange={(e) => {
-                setHasPreviousSponsorships(e.target.value);
-                if (previousSponsorshipsCount === 0) {
-                  setPreviousSponsorshipsCount(1);
-                }
-              }}
-              className="h-4 w-4 text-blue-600"
-            />
-            <span className="text-sm font-medium text-gray-900">Yes, I have active sponsorships</span>
-          </label>
-
-          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input
-              type="radio"
-              name="hasPreviousSponsorships"
-              value="no"
-              checked={hasPreviousSponsorships === 'no'}
-              onChange={(e) => {
-                setHasPreviousSponsorships(e.target.value);
-                setPreviousSponsorshipsCount(0);
-                setPreviousSponsorshipsCountCustom('');
-                setPreviouslySponsoredIndividuals([]);
-              }}
-              className="h-4 w-4 text-blue-600"
-            />
-            <span className="text-sm font-medium text-gray-900">No, I haven't sponsored anyone before</span>
-          </label>
+          {['yes', 'no'].map(option => (
+            <label key={option} className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+              <input
+                type="radio"
+                name="hasOtherObligations"
+                value={option}
+                checked={hasOtherObligations === option}
+                onChange={(e) => {
+                  setHasOtherObligations(e.target.value);
+                  if (e.target.value !== 'yes') {
+                    setOtherObligationsCount(0);
+                    setOtherObligations([]);
+                  }
+                }}
+                className="h-4 w-4 text-blue-600"
+              />
+              <span className="text-sm font-medium text-gray-900">
+                {option === 'yes' ? 'Yes' : 'No'}
+              </span>
+            </label>
+          ))}
         </div>
 
-        {/* Follow-up: How many sponsorships */}
-        {hasPreviousSponsorships === 'yes' && (
+        {hasOtherObligations === 'yes' && (
           <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <label className="block text-sm font-medium text-gray-900">
-              How many people are you currently sponsoring through these forms?
+              How many people are you still financially obligated to support (not including anyone listed above)?
             </label>
-            <select
-              value={previousSponsorshipsCount}
-              onChange={(e) => setPreviousSponsorshipsCount(parseInt(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value={0}>Select...</option>
-              <option value={1}>1 person</option>
-              <option value={2}>2 people</option>
-              <option value={3}>3 people</option>
-              <option value={4}>4 people</option>
-              <option value={5}>5 or more people</option>
-            </select>
-
-            {previousSponsorshipsCount === 5 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  How many people total?
-                </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="99"
-                  value={previousSponsorshipsCountCustom}
-                  onChange={(e) => setPreviousSponsorshipsCountCustom(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter number"
-                />
-              </div>
-            )}
+            <input
+              type="number"
+              min="1"
+              value={otherObligationsCount}
+              onChange={(e) => setOtherObligationsCount(parseInt(e.target.value) || 0)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter number..."
+            />
           </div>
         )}
 
-        {/* Follow-up: Previously Sponsored Individual Details */}
-        {hasPreviousSponsorships === 'yes' && previousSponsorshipsCount > 0 && (
-          <div className="ml-6 space-y-4 mt-6">
-            <h5 className="text-sm font-semibold text-gray-900">
-              Tell us about each person you're currently sponsoring
-            </h5>
+        {hasOtherObligations === 'yes' && otherObligations.length > 0 && (
+          <div className="ml-6 space-y-6 mt-6">
+            {otherObligations.map((obligation, index) => (
+              <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
+                <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Individual #{index + 1}</h5>
 
-            {previouslySponsoredIndividuals.map((individual, index) => (
-              <div key={index} className="border border-gray-300 rounded-lg p-4 space-y-4 bg-white">
-                <div className="flex justify-between items-center">
-                  <h6 className="text-sm font-medium text-gray-900">Sponsored Person {index + 1}</h6>
-                  {previouslySponsoredIndividuals.length > 1 && (
-                    <button
-                      onClick={() => removePreviouslySponsoredIndividual(index)}
-                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={individual.firstName}
-                      onChange={(e) => updatePreviouslySponsoredIndividual(index, 'firstName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Middle Name
-                    </label>
-                    <input
-                      type="text"
-                      value={individual.middleName}
-                      onChange={(e) => updatePreviouslySponsoredIndividual(index, 'middleName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={individual.lastName}
-                      onChange={(e) => updatePreviouslySponsoredIndividual(index, 'lastName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Date of Birth */}
+                {/* Form Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
+                    Which form did you file? *
+                  </label>
+                  <select
+                    value={obligation.formType}
+                    onChange={(e) => updateOtherObligation(index, 'formType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select form...</option>
+                    <option value="I-134A">I-134A (Online Request to be a Supporter)</option>
+                    <option value="I-864">I-864 (Affidavit of Support)</option>
+                    <option value="I-864EZ">I-864EZ (Affidavit of Support - simplified)</option>
+                    <option value="I-864A">I-864A (Contract Between Sponsor and Household Member)</option>
+                  </select>
+                </div>
+
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What is this person's full legal name?
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">First Name *</label>
+                      <input
+                        type="text"
+                        value={obligation.firstName}
+                        onChange={(e) => updateOtherObligation(index, 'firstName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Middle Name</label>
+                      <input
+                        type="text"
+                        value={obligation.middleName}
+                        onChange={(e) => updateOtherObligation(index, 'middleName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Last Name *</label>
+                      <input
+                        type="text"
+                        value={obligation.lastName}
+                        onChange={(e) => updateOtherObligation(index, 'lastName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Date of Filing */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    When did you file this form? *
                   </label>
                   <input
                     type="date"
-                    value={individual.dateOfBirth}
-                    onChange={(e) => updatePreviouslySponsoredIndividual(index, 'dateOfBirth', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={obligation.dateOfFiling}
+                    onChange={(e) => updateOtherObligation(index, 'dateOfFiling', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
@@ -536,525 +893,528 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                 {/* Relationship */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Relationship to you <span className="text-red-500">*</span>
+                    What is their relationship to you? *
                   </label>
                   <select
-                    value={individual.relationship}
-                    onChange={(e) => updatePreviouslySponsoredIndividual(index, 'relationship', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={obligation.relationship}
+                    onChange={(e) => updateOtherObligation(index, 'relationship', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     <option value="">Select relationship...</option>
-                    <option value="child">Child</option>
-                    <option value="ex-spouse">Ex-spouse</option>
-                    <option value="grandchild">Grandchild</option>
-                    <option value="grandparent">Grandparent</option>
+                    <option value="spouse">Spouse</option>
                     <option value="parent">Parent</option>
+                    <option value="child">Child</option>
                     <option value="sibling">Sibling</option>
                     <option value="other-relative">Other relative</option>
                     <option value="non-relative">Non-relative</option>
                   </select>
 
-                  {(individual.relationship === 'other-relative' || individual.relationship === 'non-relative') && (
+                  {obligation.relationship === 'other-relative' && (
                     <input
                       type="text"
-                      value={individual.relationshipOther}
-                      onChange={(e) => updatePreviouslySponsoredIndividual(index, 'relationshipOther', e.target.value)}
-                      placeholder="Please describe the relationship"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
+                      value={obligation.relationshipOther}
+                      onChange={(e) => updateOtherObligation(index, 'relationshipOther', e.target.value)}
+                      placeholder="Please specify relationship..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mt-2"
                     />
-                  )}
-                </div>
-
-                {/* A-Number */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    A-Number (if any)
-                  </label>
-                  <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                    <p className="text-xs text-blue-900">
-                      An A-Number (Alien Registration Number) is 7-9 digits starting with "A". Found on green cards (under "USCIS#"), work permits (EAD), immigrant visa stamps (as "Registration Number"), or USCIS notices (Form I-797).
-                      <strong> If this person has one, please include it.</strong>
-                    </p>
-                  </div>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
-                      A
-                    </span>
-                    <input
-                      type="text"
-                      value={individual.aNumber ? individual.aNumber.replace(/^A0*/, '') : ''}
-                      onChange={(e) => {
-                        let val = e.target.value.replace(/\D/g, '');
-                        if (val.length > 9) val = val.slice(0, 9);
-
-                        if (val) {
-                          const paddedVal = val.padStart(9, '0');
-                          updatePreviouslySponsoredIndividual(index, 'aNumber', `A${paddedVal}`);
-                        } else {
-                          updatePreviouslySponsoredIndividual(index, 'aNumber', '');
-                        }
-                      }}
-                      placeholder="12345678 (7-9 digits)"
-                      maxLength="9"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  {individual.aNumber && individual.aNumber.replace(/^A0*/, '').length >= 7 && individual.aNumber.replace(/^A0*/, '').length <= 9 && (
-                    <div className="text-sm text-green-600 mt-1">
-                      ✅ Valid A-Number format
-                    </div>
-                  )}
-                  {individual.aNumber && (individual.aNumber.replace(/^A0*/, '').length < 7 || individual.aNumber.replace(/^A0*/, '').length > 9) && (
-                    <div className="text-sm text-orange-600 mt-1">
-                      A-Number should be 7-9 digits
-                    </div>
                   )}
                 </div>
 
                 {/* Receipt Number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Receipt Number (if any)
+                    USCIS Receipt Number
                   </label>
-                  <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                    <p className="text-xs text-blue-900">
-                      13-character USCIS receipt number. Found on Form I-797, in your USCIS online account, or in email/text notifications. Format: 3 letters + 10 numbers (e.g., <strong>EAC2190012345</strong> or <strong>IOE1234567890</strong>).
-                      <strong> If they have one, please include it.</strong>
+                  <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-2 space-y-2">
+                    <p className="text-xs text-gray-700">
+                      <strong>What is this?</strong>
+                    </p>
+                    <p className="text-xs text-gray-700">
+                      A unique 13-character identifier assigned when USCIS receives your form.
+                    </p>
+                    <p className="text-xs text-gray-700">
+                      <strong>Format:</strong>
+                    </p>
+                    <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                      <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
+                    </ul>
+                    <p className="text-xs text-gray-700 ml-4 font-medium my-1">OR</p>
+                    <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                      <li>IOE + 13 digits<br/><span className="italic">Example: IOE1234567890123</span></li>
+                    </ul>
+                    <p className="text-xs text-gray-700">
+                      <strong>Where to find it:</strong>
+                    </p>
+                    <ul className="text-xs text-gray-700 ml-4 list-disc">
+                      <li>I-797 Notice of Action</li>
+                      <li>Your USCIS online account</li>
+                      <li>Email or text notifications from USCIS</li>
+                    </ul>
+                    <p className="text-xs text-gray-600 italic">
+                      Leave blank if you don't have it available.
                     </p>
                   </div>
                   <input
                     type="text"
-                    value={individual.receiptNumber || ''}
+                    value={obligation.receiptNumber}
                     onChange={(e) => {
                       let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                       if (val.length > 13) val = val.slice(0, 13);
-                      updatePreviouslySponsoredIndividual(index, 'receiptNumber', val);
+                      updateOtherObligation(index, 'receiptNumber', val);
                     }}
-                    placeholder="EAC2190012345"
+                    placeholder="MSC2190123456 or IOE1234567890123"
                     maxLength="13"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
                   />
-                  {individual.receiptNumber && individual.receiptNumber.length === 13 && /^[A-Z]{3}\d{10}$/.test(individual.receiptNumber) && (
-                    <div className="text-sm text-green-600 mt-1">
-                      ✅ Valid receipt number format
-                    </div>
-                  )}
-                  {individual.receiptNumber && individual.receiptNumber.length > 0 && !/^[A-Z]{3}\d{10}$/.test(individual.receiptNumber) && (
-                    <div className="text-sm text-orange-600 mt-1">
-                      Receipt number should be 3 letters + 10 numbers (13 characters total)
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
+
+            <button
+              onClick={addOtherObligation}
+              className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
+            >
+              <Plus className="h-5 w-5" />
+              Add Another Individual
+            </button>
           </div>
         )}
       </div>
 
-      {/* Question 2: Household Members */}
+      {/* PART C: Children Under 18 & Other Household Members */}
       <div className="space-y-4 border-t pt-8">
         <h4 className="text-base font-semibold text-gray-900">
-          Besides yourself and {fianceName}, how many people depend on your income for their financial support?
+          Part C: Children Under 18 & Other Household Members
         </h4>
 
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
-          <p className="text-sm text-gray-700">
-            Count anyone you support financially - meaning you pay for <strong>more than half of their living expenses</strong> (food, housing, bills, medical care, etc.).
+        {/* Children Question */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-gray-900 mb-2">
+            Do you have any children under 18 years of age?
           </p>
-
-          <p className="text-sm text-gray-700">
-            This includes anyone who depends on you for support, regardless of their relationship to you or where they live.
+          <p className="text-xs text-gray-700">
+            Include biological children, adopted children, and stepchildren. Count all children under 18, regardless of where they live or their citizenship.
           </p>
+        </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded p-3">
-            <p className="text-sm text-blue-900">
-              <strong>Tip:</strong> If you claimed someone as a dependent on your tax return, they likely meet this test (the IRS uses the same 50% rule).
+        <div className="space-y-3">
+          {['yes', 'no'].map(option => (
+            <label key={option} className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+              <input
+                type="radio"
+                name="hasChildrenUnder18"
+                value={option}
+                checked={hasChildrenUnder18 === option}
+                onChange={(e) => {
+                  setHasChildrenUnder18(e.target.value);
+                  if (e.target.value === 'no') {
+                    setChildrenCount(0);
+                    setChildrenLivingStatus(null);
+                    setChildrenLivingWithSponsor(0);
+                    setChildrenDetails([]);
+                  }
+                }}
+                className="h-4 w-4 text-blue-600"
+              />
+              <span className="text-sm font-medium text-gray-900">
+                {option === 'yes' ? 'Yes' : 'No'}
+              </span>
+            </label>
+          ))}
+        </div>
+
+        {hasChildrenUnder18 === 'yes' && (
+          <>
+            <div className="mt-8 space-y-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm font-semibold text-gray-900 mb-2">
+                  How many children under 18 do you have?
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                {[1, 2, 3, 4, 5].map(num => (
+                  <label key={num} className="flex items-center justify-center p-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="childrenCount"
+                      value={num}
+                      checked={childrenCount === num}
+                      onChange={() => setChildrenCount(num)}
+                      className="sr-only"
+                    />
+                    <span className={`text-sm font-medium ${childrenCount === num ? 'text-blue-600' : 'text-gray-900'}`}>
+                      {num === 5 ? '5+' : num}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {childrenCount > 0 && (
+              <>
+                <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm font-medium text-gray-900">
+                    Do any of the children under 18 meet the criteria below?
+                  </p>
+                  <ul className="text-sm text-gray-700 ml-6 list-disc space-y-2 mt-3 mb-3">
+                    <li>You claimed them as a dependent on your most recent Federal income tax return, OR</li>
+                    <li>They have lived with you for at least the past 6 months</li>
+                  </ul>
+                  <p className="text-xs text-gray-600 mb-3 italic">
+                    💡 Note: If you did not file a Federal income tax return, select "No, none of them."
+                  </p>
+                  <div className="space-y-2 mt-4">
+                    {['all', 'some', 'none'].map(option => (
+                      <label key={option} className="flex items-center space-x-3 p-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="childrenLivingStatus"
+                          value={option}
+                          checked={childrenLivingStatus === option}
+                          onChange={(e) => {
+                            setChildrenLivingStatus(e.target.value);
+                            if (e.target.value === 'all') {
+                              setChildrenLivingWithSponsor(childrenCount);
+                            } else if (e.target.value === 'none') {
+                              setChildrenLivingWithSponsor(0);
+                              setChildrenDetails([]);
+                            }
+                          }}
+                          className="h-4 w-4 text-blue-600"
+                        />
+                        <span className="text-sm text-gray-900">
+                          {option === 'all' ? 'Yes, all of them' :
+                           option === 'some' ? 'Yes, some of them' :
+                           'No, none of them'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {childrenLivingStatus === 'some' && (
+                  <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-900">
+                      How many of your children under 18 did you claim as dependents?
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={childrenCount}
+                      value={childrenLivingWithSponsor}
+                      onChange={(e) => setChildrenLivingWithSponsor(Math.min(parseInt(e.target.value) || 0, childrenCount))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter number..."
+                    />
+                  </div>
+                )}
+
+                {childrenLivingWithSponsor > 0 && (
+                  <div className="ml-6 space-y-4 mt-6">
+                    <p className="text-sm font-medium text-gray-900">
+                      Please provide details for each child you claimed as a dependent:
+                    </p>
+                    <p className="text-xs text-gray-700">
+                      We need complete information for household size calculation (required for Form I-134).
+                    </p>
+
+                    {childrenDetails.map((child, index) => (
+                      <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
+                        <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Child #{index + 1}</h5>
+
+                        {/* Name */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Full legal name:</label>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">First Name *</label>
+                              <input
+                                type="text"
+                                value={child.firstName}
+                                onChange={(e) => updateChild(index, 'firstName', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Middle Name</label>
+                              <input
+                                type="text"
+                                value={child.middleName}
+                                onChange={(e) => updateChild(index, 'middleName', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Last Name *</label>
+                              <input
+                                type="text"
+                                value={child.lastName}
+                                onChange={(e) => updateChild(index, 'lastName', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Date of Birth */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Date of Birth *
+                          </label>
+                          <input
+                            type="date"
+                            value={child.dateOfBirth}
+                            onChange={(e) => updateChild(index, 'dateOfBirth', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+
+                        {/* A-Number */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            A-Number (if any)
+                          </label>
+                          <p className="text-xs text-gray-600 mb-2">
+                            Leave blank if your child doesn't have one.
+                          </p>
+                          <div className="flex">
+                            <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
+                              A
+                            </span>
+                            <input
+                              type="text"
+                              value={child.aNumber ? child.aNumber.replace(/^A0*/, '') : ''}
+                              onChange={(e) => {
+                                let val = e.target.value.replace(/\D/g, '');
+                                if (val.length > 9) val = val.slice(0, 9);
+                                if (val) {
+                                  const paddedVal = val.padStart(9, '0');
+                                  updateChild(index, 'aNumber', `A${paddedVal}`);
+                                } else {
+                                  updateChild(index, 'aNumber', '');
+                                }
+                              }}
+                              placeholder="12345678 (7-9 digits)"
+                              maxLength="9"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* Other Dependents */}
+        <div className="mt-8 space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-gray-900 mb-2">
+              How many dependents did you claim on your most recent Federal income tax return?
+            </p>
+            <p className="text-xs text-gray-600 mb-3 italic">
+              If you did not file a Federal income tax return, select "0" (None).
+            </p>
+            <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-3">
+              <p className="text-xs text-yellow-900 font-medium mb-1">⚠️ Do NOT include:</p>
+              <ul className="text-xs text-yellow-900 space-y-1 ml-4 list-disc">
+                <li>Yourself</li>
+                <li>{fianceName}</li>
+                <li>Anyone from "Previous Petitions" (Part A) above</li>
+                <li>Children you already listed in Part C above</li>
+              </ul>
+            </div>
+            <div className="bg-white border border-gray-200 rounded p-3 mb-3">
+              <p className="text-xs text-gray-700 mb-2">
+                <strong>This can include:</strong>
+              </p>
+              <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
+                <li>Adult children (18+)</li>
+                <li>Parents or grandparents</li>
+                <li>Siblings</li>
+                <li>Other relatives</li>
+                <li>Non-relatives you claimed as dependents</li>
+              </ul>
+            </div>
+            <p className="text-xs text-gray-600 italic">
+              💡 Check your Form 1040 to see who you listed as dependents.
             </p>
           </div>
 
-          <p className="text-sm text-gray-700 font-medium">Do NOT include:</p>
-          <ul className="text-sm text-gray-700 space-y-1 ml-4 list-disc">
-            <li><strong>Yourself and {fianceName}</strong> (counted separately)</li>
-            <li><strong>Anyone listed in "Previously Sponsored" above</strong> (already counted)</li>
-          </ul>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Number of people you financially support
-          </label>
-          <select
-            value={householdMembersCount}
-            onChange={(e) => setHouseholdMembersCount(parseInt(e.target.value))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value={0}>None</option>
-            <option value={1}>1 person</option>
-            <option value={2}>2 people</option>
-            <option value={3}>3 people</option>
-            <option value={4}>4 people</option>
-            <option value={5}>5 or more people</option>
-          </select>
-
-          {householdMembersCount === 5 && (
-            <div className="mt-3">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                How many people total?
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            {[0, 1, 2, 3, 4, 5].map(num => (
+              <label key={num} className="flex items-center justify-center p-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="radio"
+                  name="otherDependentsCount"
+                  value={num}
+                  checked={otherDependentsCount === num}
+                  onChange={() => setOtherDependentsCount(num)}
+                  className="sr-only"
+                />
+                <span className={`text-sm font-medium ${otherDependentsCount === num ? 'text-blue-600' : 'text-gray-900'}`}>
+                  {num === 0 ? 'None' : num === 5 ? '5+' : num}
+                </span>
               </label>
-              <input
-                type="number"
-                min="5"
-                max="99"
-                value={householdMembersCountCustom}
-                onChange={(e) => setHouseholdMembersCountCustom(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter number"
-              />
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
-        {/* Household Member Details */}
-        {householdMembersCount > 0 && (
-          <div className="space-y-4 mt-6">
-            <h5 className="text-sm font-semibold text-gray-900">
-              Tell us about each person in your household
-            </h5>
+        {otherDependentsCount > 0 && (
+          <div className="ml-6 space-y-6 mt-6">
+            {otherDependents.map((dependent, index) => (
+              <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
+                <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Person #{index + 1}</h5>
 
-            {householdMembers.map((member, index) => (
-              <div key={index} className="border border-gray-300 rounded-lg p-4 space-y-4 bg-white">
-                <div className="flex justify-between items-center">
-                  <h6 className="text-sm font-medium text-gray-900">Person {index + 1}</h6>
-                  {householdMembers.length > 1 && (
-                    <button
-                      onClick={() => removeHouseholdMember(index)}
-                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={member.firstName}
-                      onChange={(e) => updateHouseholdMember(index, 'firstName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Middle Name
-                    </label>
-                    <input
-                      type="text"
-                      value={member.middleName}
-                      onChange={(e) => updateHouseholdMember(index, 'middleName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={member.lastName}
-                      onChange={(e) => updateHouseholdMember(index, 'lastName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full legal name:</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">First Name *</label>
+                      <input
+                        type="text"
+                        value={dependent.firstName}
+                        onChange={(e) => updateOtherDependent(index, 'firstName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Middle Name</label>
+                      <input
+                        type="text"
+                        value={dependent.middleName}
+                        onChange={(e) => updateOtherDependent(index, 'middleName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Last Name *</label>
+                      <input
+                        type="text"
+                        value={dependent.lastName}
+                        onChange={(e) => updateOtherDependent(index, 'lastName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* Date of Birth */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
                   <input
                     type="date"
-                    value={member.dateOfBirth}
-                    onChange={(e) => updateHouseholdMember(index, 'dateOfBirth', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={dependent.dateOfBirth}
+                    onChange={(e) => updateOtherDependent(index, 'dateOfBirth', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
 
                 {/* Relationship */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Relationship to you <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Relationship to you *</label>
                   <select
-                    value={member.relationship}
-                    onChange={(e) => updateHouseholdMember(index, 'relationship', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={dependent.relationship}
+                    onChange={(e) => updateOtherDependent(index, 'relationship', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     <option value="">Select relationship...</option>
-                    <option value="child">Child</option>
-                    <option value="ex-spouse">Ex-spouse</option>
-                    <option value="grandchild">Grandchild</option>
-                    <option value="grandparent">Grandparent</option>
+                    <option value="child">Child (18 or older)</option>
                     <option value="parent">Parent</option>
+                    <option value="grandparent">Grandparent</option>
+                    <option value="grandchild">Grandchild</option>
                     <option value="sibling">Sibling</option>
                     <option value="other-relative">Other relative</option>
                     <option value="non-relative">Non-relative dependent</option>
                   </select>
 
-                  {(member.relationship === 'other-relative' || member.relationship === 'non-relative') && (
+                  {dependent.relationship === 'other-relative' && (
                     <input
                       type="text"
-                      value={member.relationshipOther}
-                      onChange={(e) => updateHouseholdMember(index, 'relationshipOther', e.target.value)}
-                      placeholder="Please describe the relationship"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
+                      value={dependent.relationshipOther}
+                      onChange={(e) => updateOtherDependent(index, 'relationshipOther', e.target.value)}
+                      placeholder="Please specify relationship..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mt-2"
                     />
                   )}
                 </div>
 
                 {/* A-Number */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    A-Number (if any)
-                  </label>
-                  <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                    <p className="text-xs text-blue-900">
-                      An A-Number (Alien Registration Number) is 7-9 digits starting with "A". Found on green cards (under "USCIS#"), work permits (EAD), immigrant visa stamps (as "Registration Number"), or USCIS notices (Form I-797).
-                      <strong> If this person has one, please include it.</strong>
-                    </p>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">A-Number (if any)</label>
                   <div className="flex">
                     <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
                       A
                     </span>
                     <input
                       type="text"
-                      value={member.aNumber ? member.aNumber.replace(/^A0*/, '') : ''}
+                      value={dependent.aNumber ? dependent.aNumber.replace(/^A0*/, '') : ''}
                       onChange={(e) => {
                         let val = e.target.value.replace(/\D/g, '');
                         if (val.length > 9) val = val.slice(0, 9);
-
                         if (val) {
                           const paddedVal = val.padStart(9, '0');
-                          updateHouseholdMember(index, 'aNumber', `A${paddedVal}`);
+                          updateOtherDependent(index, 'aNumber', `A${paddedVal}`);
                         } else {
-                          updateHouseholdMember(index, 'aNumber', '');
+                          updateOtherDependent(index, 'aNumber', '');
                         }
                       }}
                       placeholder="12345678 (7-9 digits)"
                       maxLength="9"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  {member.aNumber && member.aNumber.replace(/^A0*/, '').length >= 7 && member.aNumber.replace(/^A0*/, '').length <= 9 && (
-                    <div className="text-sm text-green-600 mt-1">
-                      ✅ Valid A-Number format
-                    </div>
-                  )}
-                  {member.aNumber && (member.aNumber.replace(/^A0*/, '').length < 7 || member.aNumber.replace(/^A0*/, '').length > 9) && (
-                    <div className="text-sm text-orange-600 mt-1">
-                      A-Number should be 7-9 digits
-                    </div>
-                  )}
                 </div>
 
                 {/* Receipt Number */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Receipt Number (if any)
-                  </label>
-                  <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                    <p className="text-xs text-blue-900">
-                      13-character USCIS receipt number (only if you're sponsoring this person on another immigration form). Found on Form I-797, in your USCIS online account, or in email/text notifications. Format: 3 letters + 10 numbers (e.g., <strong>EAC2190012345</strong>).
-                      <strong> If they have one, please include it.</strong>
-                    </p>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Receipt Number (if any)</label>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Only if you're sponsoring this person on another immigration form. Leave blank otherwise.
+                  </p>
                   <input
                     type="text"
-                    value={member.receiptNumber || ''}
+                    value={dependent.receiptNumber}
                     onChange={(e) => {
                       let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                       if (val.length > 13) val = val.slice(0, 13);
-                      updateHouseholdMember(index, 'receiptNumber', val);
+                      updateOtherDependent(index, 'receiptNumber', val);
                     }}
-                    placeholder="EAC2190012345"
+                    placeholder="MSC2190123456"
                     maxLength="13"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
                   />
-                  {member.receiptNumber && member.receiptNumber.length === 13 && /^[A-Z]{3}\d{10}$/.test(member.receiptNumber) && (
-                    <div className="text-sm text-green-600 mt-1">
-                      ✅ Valid receipt number format
-                    </div>
-                  )}
-                  {member.receiptNumber && member.receiptNumber.length > 0 && !/^[A-Z]{3}\d{10}$/.test(member.receiptNumber) && (
-                    <div className="text-sm text-orange-600 mt-1">
-                      Receipt number should be 3 letters + 10 numbers (13 characters total)
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
+
+            {otherDependentsCount >= 5 && (
+              <button
+                onClick={addOtherDependent}
+                className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Another Person
+              </button>
+            )}
           </div>
         )}
       </div>
 
-      {/* Duplicate Detection Warning */}
-      {duplicates.length > 0 && (
-        <div className="bg-red-50 border-2 border-red-400 rounded-lg p-6 mt-8">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-1" />
-            <div className="flex-1">
-              <h4 className="text-base font-semibold text-red-900 mb-3">
-                ⚠️ Duplicate Person Detected
-              </h4>
-              <div className="space-y-4">
-                {duplicates.map((duplicate) => {
-                  // Determine what message to show based on duplicate type
-                  let listDescription = '';
-                  let warningMessage = '';
-
-                  if (duplicate.type === 'sponsored-vs-household') {
-                    listDescription = (
-                      <ul className="text-sm text-red-800 mb-3 ml-4 list-disc">
-                        <li>Previously Sponsored Individuals (Person #{duplicate.sponsoredIndex + 1})</li>
-                        <li>Household Members/Dependents (Person #{duplicate.memberIndex + 1})</li>
-                      </ul>
-                    );
-                    warningMessage = 'The same person should only appear in ONE list. If this person was previously sponsored AND is currently a household member, they should ONLY be counted in "Previously Sponsored" above.';
-                  } else if (duplicate.type === 'sponsored-vs-sponsor') {
-                    listDescription = (
-                      <ul className="text-sm text-red-800 mb-3 ml-4 list-disc">
-                        <li>Previously Sponsored Individuals (Person #{duplicate.sponsoredIndex + 1})</li>
-                        <li>You (the sponsor)</li>
-                      </ul>
-                    );
-                    warningMessage = 'You should not list yourself in "Previously Sponsored Individuals." This section is only for other people you have sponsored.';
-                  } else if (duplicate.type === 'sponsored-vs-beneficiary') {
-                    listDescription = (
-                      <ul className="text-sm text-red-800 mb-3 ml-4 list-disc">
-                        <li>Previously Sponsored Individuals (Person #{duplicate.sponsoredIndex + 1})</li>
-                        <li>Your fiancé(e) (beneficiary)</li>
-                      </ul>
-                    );
-                    warningMessage = 'Your fiancé(e) should not be listed in "Previously Sponsored Individuals." They are already counted automatically in the household size.';
-                  } else if (duplicate.type === 'household-vs-sponsor') {
-                    listDescription = (
-                      <ul className="text-sm text-red-800 mb-3 ml-4 list-disc">
-                        <li>Household Members/Dependents (Person #{duplicate.memberIndex + 1})</li>
-                        <li>You (the sponsor)</li>
-                      </ul>
-                    );
-                    warningMessage = 'You should not list yourself in "Household Members/Dependents." You are already counted automatically in the household size.';
-                  } else if (duplicate.type === 'household-vs-beneficiary') {
-                    listDescription = (
-                      <ul className="text-sm text-red-800 mb-3 ml-4 list-disc">
-                        <li>Household Members/Dependents (Person #{duplicate.memberIndex + 1})</li>
-                        <li>Your fiancé(e) (beneficiary)</li>
-                      </ul>
-                    );
-                    warningMessage = 'Your fiancé(e) should not be listed in "Household Members/Dependents." They are already counted automatically in the household size.';
-                  }
-
-                  return (
-                    <div key={duplicate.key} className="bg-white border border-red-300 rounded-lg p-4">
-                      <p className="text-sm text-red-900 mb-3">
-                        <strong>{duplicate.name}</strong> (DOB: {new Date(duplicate.dob).toLocaleDateString()}) appears in both:
-                      </p>
-                      {listDescription}
-
-                      <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-3">
-                        <p className="text-xs text-yellow-900">
-                          <strong>Important:</strong> {warningMessage}
-                        </p>
-                      </div>
-
-                      {!duplicateAcknowledgments[duplicate.key] && (
-                        <div className="space-y-3">
-                          <p className="text-sm text-gray-700 font-medium">Choose one option:</p>
-
-                          {/* Remove Duplicate Button - shown for cases where we can auto-remove */}
-                          {(duplicate.type === 'sponsored-vs-household' ||
-                            duplicate.type === 'household-vs-sponsor' ||
-                            duplicate.type === 'household-vs-beneficiary' ||
-                            duplicate.type === 'sponsored-vs-sponsor' ||
-                            duplicate.type === 'sponsored-vs-beneficiary') && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                // Remove from lower-priority list based on type
-                                if (duplicate.type === 'sponsored-vs-household') {
-                                  // Remove from household members (lower priority)
-                                  const newHouseholdMembers = householdMembers.filter((_, i) => i !== duplicate.memberIndex);
-                                  setHouseholdMembers(newHouseholdMembers);
-                                  // Decrease the count
-                                  const newCount = Math.max(0, householdMembersCount - 1);
-                                  setHouseholdMembersCount(newCount);
-                                } else if (duplicate.type === 'household-vs-sponsor' || duplicate.type === 'household-vs-beneficiary') {
-                                  // Remove from household members (this person shouldn't be there at all)
-                                  const newHouseholdMembers = householdMembers.filter((_, i) => i !== duplicate.memberIndex);
-                                  setHouseholdMembers(newHouseholdMembers);
-                                  // Decrease the count
-                                  const newCount = Math.max(0, householdMembersCount - 1);
-                                  setHouseholdMembersCount(newCount);
-                                } else if (duplicate.type === 'sponsored-vs-sponsor' || duplicate.type === 'sponsored-vs-beneficiary') {
-                                  // Remove from previously sponsored (this person shouldn't be there at all)
-                                  const newPreviouslySponsoredIndividuals = previouslySponsoredIndividuals.filter((_, i) => i !== duplicate.sponsoredIndex);
-                                  setPreviouslySponsoredIndividuals(newPreviouslySponsoredIndividuals);
-                                  // Decrease the count
-                                  const newCount = Math.max(0, previousSponsorshipsCount - 1);
-                                  setPreviousSponsorshipsCount(newCount);
-                                }
-                              }}
-                              className="w-full px-4 py-3 bg-red-100 text-red-900 border-2 border-red-400 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm text-left"
-                            >
-                              Remove duplicate
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = {
-                                ...duplicateAcknowledgments,
-                                [duplicate.key]: true
-                              };
-                              setDuplicateAcknowledgments(updated);
-                              updateField('duplicateAcknowledgments', updated);
-                            }}
-                            className="w-full px-4 py-3 bg-red-100 text-red-900 border-2 border-red-400 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm text-left"
-                          >
-                            Keep both - they're different people
-                          </button>
-                        </div>
-                      )}
-
-                      {duplicateAcknowledgments[duplicate.key] && (
-                        <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-300 rounded p-3">
-                          <CheckCircle className="h-5 w-5" />
-                          <span className="text-sm font-medium">Confirmed as separate individuals</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Visual Summary */}
+      {/* Household Size Summary */}
       <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mt-8">
         <div className="flex items-start gap-3">
           <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
@@ -1063,78 +1423,18 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
               📊 Household Size Summary
             </h4>
 
-            {/* Summary counts */}
             <div className="space-y-2 text-sm text-blue-900 mb-4">
               <p>Based on your answers:</p>
               <ul className="ml-4 space-y-1">
                 <li>• You: <strong>1 person</strong></li>
                 <li>• {fianceName}: <strong>1 person</strong></li>
-                <li>• People you're sponsoring on other forms: <strong>{householdData.breakdown.previousSponsorships} {householdData.breakdown.previousSponsorships === 1 ? 'person' : 'people'}</strong></li>
-                <li>• Your household members/dependents: <strong>{householdData.breakdown.householdMembers} {householdData.breakdown.householdMembers === 1 ? 'person' : 'people'}</strong></li>
+                <li>• Active I-134 obligations (from Part A): <strong>{householdData.breakdown.activeI134} {householdData.breakdown.activeI134 === 1 ? 'person' : 'people'}</strong></li>
+                <li>• Other financial obligations (from Part B): <strong>{householdData.breakdown.otherObligations} {householdData.breakdown.otherObligations === 1 ? 'person' : 'people'}</strong></li>
+                <li>• Children under 18 living with you: <strong>{householdData.breakdown.childrenLiving} {householdData.breakdown.childrenLiving === 1 ? 'child' : 'children'}</strong></li>
+                <li>• Other dependents: <strong>{householdData.breakdown.otherDependents} {householdData.breakdown.otherDependents === 1 ? 'person' : 'people'}</strong></li>
               </ul>
             </div>
 
-            {/* Detailed Table */}
-            {(previouslySponsoredIndividuals.length > 0 || householdMembers.length > 0) && (
-              <div className="bg-white border border-blue-300 rounded-lg overflow-hidden mt-4">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-blue-200">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-blue-900 uppercase">Full Name</th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-blue-900 uppercase">DOB</th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-blue-900 uppercase">Relationship to You</th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-blue-900 uppercase">A-Number</th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-blue-900 uppercase">Receipt Number</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-blue-200">
-                      {/* Previously Sponsored Individuals */}
-                      {previouslySponsoredIndividuals.map((individual, index) => (
-                        <tr key={`sponsored-${index}`} className="bg-yellow-50">
-                          <td className="px-3 py-2 text-blue-900">
-                            {individual.firstName} {individual.middleName} {individual.lastName}
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">
-                            {individual.dateOfBirth ? new Date(individual.dateOfBirth).toLocaleDateString() : '—'}
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">
-                            {individual.relationship === 'other-relative' || individual.relationship === 'non-relative'
-                              ? individual.relationshipOther || individual.relationship
-                              : individual.relationship || '—'}
-                            <span className="ml-1 text-xs text-yellow-800">(Previously Sponsored)</span>
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">{individual.aNumber || '—'}</td>
-                          <td className="px-3 py-2 text-blue-900">{individual.receiptNumber || '—'}</td>
-                        </tr>
-                      ))}
-
-                      {/* Household Members */}
-                      {householdMembers.map((member, index) => (
-                        <tr key={`household-${index}`} className="bg-white">
-                          <td className="px-3 py-2 text-blue-900">
-                            {member.firstName} {member.middleName} {member.lastName}
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">
-                            {member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString() : '—'}
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">
-                            {member.relationship === 'other-relative' || member.relationship === 'non-relative'
-                              ? member.relationshipOther || member.relationship
-                              : member.relationship || '—'}
-                            <span className="ml-1 text-xs text-blue-800">(Household Member)</span>
-                          </td>
-                          <td className="px-3 py-2 text-blue-900">{member.aNumber || '—'}</td>
-                          <td className="px-3 py-2 text-blue-900">{member.receiptNumber || '—'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Total Summary */}
             <div className="border-t border-blue-300 pt-4 mt-4">
               <p className="font-semibold text-base text-blue-900">
                 Total household size: <strong className="text-lg">{householdData.householdSize} people</strong>
