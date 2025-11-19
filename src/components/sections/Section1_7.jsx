@@ -135,9 +135,35 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     otherDependentsCount, otherDependents
   ]);
 
+  // Check for IMBRA waiver requirements
+  const requiresIMBRAWaiver = () => {
+    // Condition 1: User selected 2+ petitions
+    if (petitionsCount === '2+') {
+      return true;
+    }
+
+    // Condition 2: User has 1 petition that was approved AND filed less than 2 years ago
+    if (petitionsCount === '1' && previousPetitions.length > 0) {
+      const petition = previousPetitions[0];
+      if (petition.uscisAction === 'Approved' && petition.dateOfFiling) {
+        const filingDate = new Date(petition.dateOfFiling);
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+        if (filingDate > twoYearsAgo) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  const needsIMBRAWaiver = requiresIMBRAWaiver();
+
   // Initialize arrays when counts change
   useEffect(() => {
-    const count = petitionsCount === '3+' ? Math.max(previousPetitions.length, 3) : parseInt(petitionsCount) || 0;
+    const count = petitionsCount === '2+' ? Math.max(previousPetitions.length, 2) : parseInt(petitionsCount) || 0;
 
     if (count > previousPetitions.length) {
       const newPetitions = Array(count - previousPetitions.length).fill(null).map(() => ({
@@ -155,7 +181,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         i134ReceiptNumber: ''
       }));
       setPreviousPetitions([...previousPetitions, ...newPetitions]);
-    } else if (count < previousPetitions.length && petitionsCount !== '3+') {
+    } else if (count < previousPetitions.length && petitionsCount !== '2+') {
       setPreviousPetitions(previousPetitions.slice(0, count));
     }
   }, [petitionsCount]);
@@ -293,6 +319,30 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
       .join(', ');
   };
 
+  // Disqualification component for IMBRA waiver
+  const DisqualificationMessage = () => (
+    <div className="mt-4 p-6 bg-red-50 border-l-4 border-red-400 rounded">
+      <div className="flex items-start">
+        <AlertCircle className="w-6 h-6 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <p className="text-base font-semibold text-red-800 mb-2">
+            Your situation requires individual review
+          </p>
+          <p className="text-sm text-red-700 mb-4">
+            Based on your answer, you require an IMBRA multiple filer waiver. This is a complex situation that requires personalized guidance. Please contact our customer service team to discuss your options.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - IMBRA Multiple Filer Waiver'}
+            className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+          >
+            Contact Customer Service
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       {/* Introduction */}
@@ -364,8 +414,8 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
               Count the total number of petitions filed, even if some were for the same person. For example, if you filed twice for the
               same beneficiary (once withdrawn, once approved), count that as 2 petitions.
             </p>
-            <div className="grid grid-cols-3 gap-3">
-              {['1', '2', '3+'].map(option => (
+            <div className="grid grid-cols-2 gap-3">
+              {['1', '2+'].map(option => (
                 <label key={option} className="flex items-center space-x-2 p-3 border-2 border-gray-300 rounded-lg hover:bg-white cursor-pointer">
                   <input
                     type="radio"
@@ -379,11 +429,13 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                 </label>
               ))}
             </div>
+
+            {petitionsCount === '2+' && <DisqualificationMessage />}
           </div>
         )}
 
         {/* Previous Petitions Details */}
-        {hasPreviousPetitions === 'yes' && previousPetitions.length > 0 && (
+        {hasPreviousPetitions === 'yes' && previousPetitions.length > 0 && petitionsCount !== '2+' && (
           <div className="ml-6 space-y-6 mt-6">
             {previousPetitions.map((petition, index) => (
               <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
@@ -527,8 +579,8 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   )}
                 </div>
 
-                {/* I-134 Question (only if Approved) */}
-                {petition.uscisAction === 'Approved' && (
+                {/* I-134 Question (only if Approved AND not requiring IMBRA waiver) */}
+                {petition.uscisAction === 'Approved' && !needsIMBRAWaiver && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                     <div>
                       <p className="text-sm font-medium text-gray-900 mb-2">
@@ -704,22 +756,19 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                 )}
               </div>
             ))}
+          </div>
+        )}
 
-            {petitionsCount === '3+' && (
-              <button
-                onClick={addPetition}
-                className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
-              >
-                <Plus className="h-5 w-5" />
-                Add Another Petition
-              </button>
-            )}
+        {/* Show disqualification if 2-year condition is met */}
+        {hasPreviousPetitions === 'yes' && petitionsCount === '1' && needsIMBRAWaiver && (
+          <div className="ml-6 mt-4">
+            <DisqualificationMessage />
           </div>
         )}
       </div>
 
       {/* PART B: Other Ongoing Financial Obligations */}
-      <div className="space-y-4 border-t pt-8">
+      <div className={`space-y-4 border-t pt-8 ${needsIMBRAWaiver ? 'opacity-50 pointer-events-none' : ''}`}>
         <h4 className="text-base font-semibold text-gray-900">
           Part B: Other Ongoing Financial Obligations
         </h4>
@@ -983,7 +1032,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
       </div>
 
       {/* PART C: Children Under 18 & Other Household Members */}
-      <div className="space-y-4 border-t pt-8">
+      <div className={`space-y-4 border-t pt-8 ${needsIMBRAWaiver ? 'opacity-50 pointer-events-none' : ''}`}>
         <h4 className="text-base font-semibold text-gray-900">
           Part C: Children Under 18 & Other Household Members
         </h4>

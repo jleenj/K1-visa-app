@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, Check, Info, User, Users, FileText, Home, Ph
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import Section1 from './components/sections/Section1';
 import Section1_7 from './components/sections/Section1_7';
 import Section1_8 from './components/sections/Section1_8';
 import Section1_9 from './components/sections/Section1_9';
@@ -140,6 +141,139 @@ const K1VisaQuestionnaire = () => {
         'Hesse', 'Lower Saxony', 'Mecklenburg-Vorpommern', 'North Rhine-Westphalia',
         'Rhineland-Palatinate', 'Saarland', 'Saxony', 'Saxony-Anhalt', 'Schleswig-Holstein',
         'Thuringia'
+      ]
+    },
+    // NON-LATIN ALPHABET COUNTRIES (for native alphabet address field)
+    'China': {
+      stateRequired: true,
+      stateLabel: 'Province',
+      postalLabel: 'Postal Code',
+      postalFormat: /^\d{6}$/,
+      postalPlaceholder: '100000',
+      states: [
+        'Anhui', 'Fujian', 'Gansu', 'Guangdong', 'Guizhou', 'Hainan',
+        'Hebei', 'Heilongjiang', 'Henan', 'Hubei', 'Hunan', 'Jiangsu',
+        'Jiangxi', 'Jilin', 'Liaoning', 'Qinghai', 'Shaanxi', 'Shandong',
+        'Shanxi', 'Sichuan', 'Yunnan', 'Zhejiang',
+        'Guangxi Zhuang Autonomous Region', 'Inner Mongolia Autonomous Region',
+        'Ningxia Hui Autonomous Region', 'Tibet Autonomous Region',
+        'Xinjiang Uygur Autonomous Region',
+        'Beijing', 'Chongqing', 'Shanghai', 'Tianjin',
+        'Hong Kong', 'Macau'
+      ]
+    },
+    'Russia': {
+      stateRequired: true,
+      stateLabel: 'Oblast/Region',
+      postalLabel: 'Postal Code',
+      postalFormat: /^[1-6]\d{5}$/,
+      postalPlaceholder: '101000',
+      states: [
+        'Amur Oblast', 'Arkhangelsk Oblast', 'Astrakhan Oblast',
+        'Belgorod Oblast', 'Bryansk Oblast', 'Chelyabinsk Oblast',
+        'Irkutsk Oblast', 'Ivanovo Oblast', 'Kaliningrad Oblast',
+        'Kaluga Oblast', 'Kemerovo Oblast', 'Kirov Oblast',
+        'Kostroma Oblast', 'Kurgan Oblast', 'Kursk Oblast',
+        'Leningrad Oblast', 'Lipetsk Oblast', 'Magadan Oblast',
+        'Moscow Oblast', 'Murmansk Oblast', 'Nizhny Novgorod Oblast',
+        'Novgorod Oblast', 'Novosibirsk Oblast', 'Omsk Oblast',
+        'Orenburg Oblast', 'Oryol Oblast', 'Penza Oblast',
+        'Pskov Oblast', 'Rostov Oblast', 'Ryazan Oblast',
+        'Sakhalin Oblast', 'Samara Oblast', 'Saratov Oblast',
+        'Smolensk Oblast', 'Sverdlovsk Oblast', 'Tambov Oblast',
+        'Tomsk Oblast', 'Tula Oblast', 'Tver Oblast',
+        'Tyumen Oblast', 'Ulyanovsk Oblast', 'Vladimir Oblast',
+        'Volgograd Oblast', 'Vologda Oblast', 'Voronezh Oblast',
+        'Yaroslavl Oblast',
+        'Altai Krai', 'Kamchatka Krai', 'Khabarovsk Krai',
+        'Krasnodar Krai', 'Krasnoyarsk Krai', 'Perm Krai',
+        'Primorsky Krai', 'Stavropol Krai', 'Zabaykalsky Krai',
+        'Adygea Republic', 'Altai Republic', 'Bashkortostan Republic',
+        'Buryatia Republic', 'Chechnya Republic', 'Chuvashia Republic',
+        'Crimea Republic', 'Dagestan Republic', 'Ingushetia Republic',
+        'Kabardino-Balkaria Republic', 'Kalmykia Republic', 'Karachay-Cherkessia Republic',
+        'Karelia Republic', 'Khakassia Republic', 'Komi Republic',
+        'Mari El Republic', 'Mordovia Republic', 'North Ossetia-Alania Republic',
+        'Sakha (Yakutia) Republic', 'Tatarstan Republic', 'Tyva Republic',
+        'Udmurtia Republic',
+        'Moscow', 'Saint Petersburg', 'Sevastopol',
+        'Chukotka Autonomous Okrug', 'Khanty-Mansi Autonomous Okrug',
+        'Nenets Autonomous Okrug', 'Yamalo-Nenets Autonomous Okrug',
+        'Jewish Autonomous Oblast'
+      ]
+    },
+    'Thailand': {
+      stateRequired: true,
+      stateLabel: 'Province',
+      postalLabel: 'Postal Code',
+      postalFormat: /^\d{5}$/,
+      postalPlaceholder: '10300',
+      states: [
+        'Chiang Mai', 'Chiang Rai', 'Lampang', 'Lamphun',
+        'Mae Hong Son', 'Nan', 'Phayao', 'Phrae', 'Uttaradit',
+        'Amnat Charoen', 'Bueng Kan', 'Buriram', 'Chaiyaphum',
+        'Kalasin', 'Khon Kaen', 'Loei', 'Maha Sarakham',
+        'Mukdahan', 'Nakhon Phanom', 'Nakhon Ratchasima', 'Nong Bua Lamphu',
+        'Nong Khai', 'Roi Et', 'Sakon Nakhon', 'Sisaket',
+        'Surin', 'Ubon Ratchathani', 'Udon Thani', 'Yasothon',
+        'Ang Thong', 'Bangkok', 'Chai Nat', 'Kanchanaburi',
+        'Lop Buri', 'Nakhon Nayok', 'Nakhon Pathom', 'Nonthaburi',
+        'Pathum Thani', 'Phetchaburi', 'Phra Nakhon Si Ayutthaya', 'Prachin Buri',
+        'Prachuap Khiri Khan', 'Ratchaburi', 'Samut Prakan', 'Samut Sakhon',
+        'Samut Songkhram', 'Saraburi', 'Sing Buri', 'Suphan Buri',
+        'Nakhon Sawan', 'Uthai Thani',
+        'Chumphon', 'Krabi', 'Nakhon Si Thammarat', 'Narathiwat',
+        'Pattani', 'Phang Nga', 'Phatthalung', 'Phuket',
+        'Ranong', 'Satun', 'Songkhla', 'Surat Thani',
+        'Trang', 'Yala',
+        'Chachoengsao', 'Chanthaburi', 'Chon Buri', 'Rayong',
+        'Sa Kaeo', 'Trat', 'Pattaya',
+        'Tak', 'Kamphaeng Phet', 'Phichit', 'Phitsanulok',
+        'Sukhothai'
+      ]
+    },
+    'Ukraine': {
+      stateRequired: true,
+      stateLabel: 'Oblast',
+      postalLabel: 'Postal Code',
+      postalFormat: /^\d{5}$/,
+      postalPlaceholder: '01001',
+      states: [
+        'Cherkasy Oblast', 'Chernihiv Oblast', 'Chernivtsi Oblast',
+        'Dnipropetrovsk Oblast', 'Donetsk Oblast', 'Ivano-Frankivsk Oblast',
+        'Kharkiv Oblast', 'Kherson Oblast', 'Khmelnytskyi Oblast',
+        'Kirovohrad Oblast', 'Kyiv Oblast', 'Luhansk Oblast',
+        'Lviv Oblast', 'Mykolaiv Oblast', 'Odesa Oblast',
+        'Poltava Oblast', 'Rivne Oblast', 'Sumy Oblast',
+        'Ternopil Oblast', 'Vinnytsia Oblast', 'Volyn Oblast',
+        'Zakarpattia Oblast', 'Zaporizhzhia Oblast', 'Zhytomyr Oblast',
+        'Autonomous Republic of Crimea',
+        'Kyiv', 'Sevastopol'
+      ]
+    },
+    'Vietnam': {
+      stateRequired: true,
+      stateLabel: 'Province/City',
+      postalLabel: 'Postal Code',
+      postalFormat: /^\d{5}$/,
+      postalPlaceholder: '10000',
+      states: [
+        'Hanoi', 'Ho Chi Minh City', 'Da Nang',
+        'Hai Phong', 'Can Tho', 'Hue',
+        'Hoa Binh', 'Son La', 'Dien Bien', 'Lai Chau', 'Lao Cai', 'Yen Bai',
+        'Ha Nam', 'Ninh Binh', 'Bac Ninh', 'Hai Duong',
+        'Hung Yen', 'Nam Dinh', 'Thai Binh', 'Vinh Phuc',
+        'Ha Giang', 'Cao Bang', 'Bac Can', 'Lang Son', 'Tuyen Quang',
+        'Thai Nguyen', 'Phu Tho', 'Bac Giang', 'Quang Ninh',
+        'Thanh Hoa', 'Nghe An', 'Ha Tinh', 'Quang Binh', 'Quang Tri',
+        'Kon Tum', 'Gia Lai', 'Dak Lak', 'Dak Nong', 'Lam Dong',
+        'Khanh Hoa', 'Ninh Thuan', 'Binh Thuan', 'Quang Nam',
+        'Quang Ngai', 'Binh Dinh', 'Phu Yen',
+        'Ba Ria-Vung Tau', 'Binh Duong', 'Binh Phuoc',
+        'Dong Nai', 'Tay Ninh',
+        'Long An', 'Tien Giang', 'Ben Tre', 'Vinh Long',
+        'Tra Vinh', 'Hau Giang', 'Soc Trang', 'Dong Thap',
+        'An Giang', 'Kien Giang', 'Bac Lieu', 'Ca Mau'
       ]
     }
   };
@@ -333,7 +467,7 @@ const K1VisaQuestionnaire = () => {
         { id: 'sponsorMailingAddress', label: 'Mailing Address', type: 'address-with-careof', required: true },
 
         // Check if physical is different
-        { id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['No', 'Yes'], required: true },
+        { id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['Yes', 'No'], required: true },
 
         // Physical Address (conditional)
         { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, conditional: true },
@@ -389,7 +523,7 @@ const K1VisaQuestionnaire = () => {
         // Parent 1's Information
         { id: 'sponsorParent1Header', type: 'section-header', label: "Parent 1's Information", conditional: true },
         { id: 'sponsorParent1FirstName', label: "Parent 1's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
-        { id: 'sponsorParent1MiddleName', label: "Parent 1's Middle Name", type: 'text', required: false, conditional: true },
+        { id: 'sponsorParent1MiddleName', label: "Parent 1's Middle Name", type: 'text', required: false, conditional: true, placeholder: 'Leave blank if none or unknown' },
         { id: 'sponsorParent1LastName', label: "Parent 1's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable', helpText: 'USCIS requires a best-effort basis for finding this information - such as reaching out to family members or checking old records. "Unknown" is also allowed when information isn\'t available despite these efforts.' },
         { id: 'sponsorParent1DOB', label: "Parent 1's Date of Birth", type: 'date', required: true, conditional: true },
         { id: 'sponsorParent1Sex', label: "Parent 1's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
@@ -400,7 +534,7 @@ const K1VisaQuestionnaire = () => {
         // Parent 2's Information  
         { id: 'sponsorParent2Header', type: 'section-header', label: "Parent 2's Information", conditional: true },
         { id: 'sponsorParent2FirstName', label: "Parent 2's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
-        { id: 'sponsorParent2MiddleName', label: "Parent 2's Middle Name", type: 'text', required: false, conditional: true },
+        { id: 'sponsorParent2MiddleName', label: "Parent 2's Middle Name", type: 'text', required: false, conditional: true, placeholder: 'Leave blank if none or unknown' },
         { id: 'sponsorParent2LastName', label: "Parent 2's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable', helpText: 'USCIS requires a best-effort basis for finding this information - such as reaching out to family members or checking old records. "Unknown" is completely fine when information truly isn\'t available despite these efforts.' },
         { id: 'sponsorParent2DOB', label: "Parent 2's Date of Birth", type: 'date', required: true, conditional: true },
         { id: 'sponsorParent2Sex', label: "Parent 2's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
@@ -472,10 +606,361 @@ const K1VisaQuestionnaire = () => {
     }
   ];
 
+  // Beneficiary Subsections
+  const beneficiarySubsections = [
+    {
+      id: '3.1-personal-info',
+      title: '3.1 Personal Information',
+      icon: User,
+      description: 'Legal names, identification, and personal details',
+      questionCount: 12,
+      fields: [
+        // Legal Name
+        { id: 'beneficiaryLastName', label: 'Legal Last Name (Family Name)', type: 'text', required: true },
+        { id: 'beneficiaryFirstName', label: 'Legal First Name (Given Name)', type: 'text', required: true },
+        { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
+
+        // Other Names
+        { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false },
+
+        // Name in Native Alphabet
+        { id: 'beneficiaryNameNativeAlphabet', label: '[BeneficiaryFirstName]\'s Name in Native Alphabet (if applicable)', type: 'native-alphabet-name', required: false, helpText: 'Provide name in non-Latin script if applicable (Arabic, Chinese, Cyrillic, etc.)' },
+
+        // Basic Information
+        { id: 'beneficiaryDOB', label: '[BeneficiaryFirstName]\'s Date of Birth', type: 'date', required: true },
+        { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
+        { id: 'beneficiaryBirthLocation', label: 'Place of Birth', type: 'birth-location', required: true },
+        { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'country', required: true },
+
+        // Account Numbers (if any)
+        { id: 'beneficiaryANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
+        { id: 'beneficiarySSN', label: 'U.S. Social Security Number (if any)', type: 'ssn', required: false }
+      ]
+    },
+    {
+      id: '3.2-contact',
+      title: '3.2 Contact Information',
+      icon: Phone,
+      description: 'Phone numbers and email',
+      questionCount: 2,
+      fields: [
+        { id: 'beneficiaryDaytimePhone', label: 'Daytime Phone Number', type: 'international-phone', required: true },
+        { id: 'beneficiaryEmail', label: 'Email Address', type: 'smart-email', required: false }
+      ]
+    }
+  ];
+
+  const beneficiaryAddressSubsections = [
+    {
+      id: '3.3-addresses',
+      title: '3.3 Complete Address History',
+      icon: Home,
+      description: 'Mailing, current, and previous addresses',
+      questionCount: 10,
+      fields: [
+        // Mailing Address (FIRST)
+        { id: 'beneficiaryMailingAddress', label: 'Mailing Address', type: 'address-with-careof', required: true },
+
+        // Check if physical is different
+        { id: 'beneficiaryMailingDifferent', label: 'Is [BeneficiaryFirstName]\'s physical address different from the mailing address?', type: 'select', options: ['Yes', 'No'], required: true },
+
+        // Physical Address (conditional)
+        { id: 'beneficiaryCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, conditional: true },
+
+        // Move-in date (shows for mailing address if same, physical if different)
+        { id: 'beneficiaryMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
+
+        // Address History (if needed based on move-in date)
+        { id: 'beneficiaryAddressHistory', label: 'Previous Addresses (Past 5 Years)', type: 'conditional-address-history', required: true },
+
+        // Intended U.S. Address
+        { id: 'beneficiaryIntendedUSAddress', label: 'Address in the United States Where [BeneficiaryFirstName] Intends to Live', type: 'address', required: true },
+
+        // Address in Native Alphabet
+        { id: 'beneficiaryAddressNativeAlphabet', label: 'Address in Native Alphabet (if applicable)', type: 'native-alphabet-address', required: false, helpText: 'Provide full address in non-Latin script if applicable' }
+      ]
+    }
+  ];
+
+  const beneficiaryMaritalSubsections = [
+    {
+      id: '3.4-marital',
+      title: '3.4 Marital History',
+      icon: Users,
+      description: 'Current and previous marriages',
+      questionCount: 4,
+      fields: [
+        {
+          id: 'beneficiaryMaritalStatus', label: 'Current Marital Status', type: 'select',
+          options: ['Single', 'Divorced', 'Widowed', 'Married'],
+          required: true,
+          helpText: 'Choose based on how most recent marriage ended. For K-1 visa, beneficiary must be legally free to marry.'
+        },
+        { id: 'beneficiaryMarriedEligibilityCheck', type: 'beneficiary-married-eligibility-check', hideLabel: true, required: false, conditional: true },
+        {
+          id: 'beneficiaryPreviousMarriages', label: 'How many times has [BeneficiaryFirstName] been previously married?', type: 'select',
+          options: ['0', '1', '2', '3', '4', '5+'],
+          required: true
+        },
+        { id: 'beneficiaryMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, conditional: true }
+      ]
+    }
+  ];
+
+  const beneficiaryFamilySubsections = [
+    {
+      id: '3.5-family',
+      title: '3.5 Family Background',
+      icon: Users,
+      description: 'Information about beneficiary\'s parents',
+      questionCount: 17,
+      fields: [
+        { id: 'beneficiaryParentCount', label: 'How many parents does [BeneficiaryFirstName] have/has had?', type: 'select', options: ['0', '1', '2'], required: true, helpText: '• "2" - Most people will select this since they have at least some information about both parents\n\n• "1" - Choose this if you know about one parent but the other is truly unknown despite your best efforts to find out\n\n• "0" - This is quite rare and would be for situations like institutional care where no parent information exists at all' },
+
+        // Parent 1's Information
+        { id: 'beneficiaryParent1Header', type: 'section-header', label: "Parent 1's Information", conditional: true },
+        { id: 'beneficiaryParent1FirstName', label: "Parent 1's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'beneficiaryParent1MiddleName', label: "Parent 1's Middle Name", type: 'text', required: false, conditional: true, placeholder: 'Leave blank if none or unknown' },
+        { id: 'beneficiaryParent1LastName', label: "Parent 1's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'beneficiaryParent1DOB', label: "Parent 1's Date of Birth", type: 'date', required: true, conditional: true },
+        { id: 'beneficiaryParent1Sex', label: "Parent 1's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
+        { id: 'beneficiaryParent1BirthCountry', label: "Parent 1's Country of Birth", type: 'country', required: true, conditional: true },
+        { id: 'beneficiaryParent1ResidenceCity', label: "Parent 1's City/Town/Village of Residence", type: 'text', required: true, conditional: true, helpText: 'If parent is deceased, enter their last known residence before they passed away' },
+        { id: 'beneficiaryParent1ResidenceCountry', label: "Parent 1's Country of Residence", type: 'country', required: true, conditional: true },
+
+        // Parent 2's Information
+        { id: 'beneficiaryParent2Header', type: 'section-header', label: "Parent 2's Information", conditional: true },
+        { id: 'beneficiaryParent2FirstName', label: "Parent 2's First Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'beneficiaryParent2MiddleName', label: "Parent 2's Middle Name", type: 'text', required: false, conditional: true, placeholder: 'Leave blank if none or unknown' },
+        { id: 'beneficiaryParent2LastName', label: "Parent 2's Last Name", type: 'text', required: true, conditional: true, placeholder: 'Enter "Unknown" if unavailable' },
+        { id: 'beneficiaryParent2DOB', label: "Parent 2's Date of Birth", type: 'date', required: true, conditional: true },
+        { id: 'beneficiaryParent2Sex', label: "Parent 2's Sex", type: 'select', options: ['Male', 'Female'], required: true, conditional: true },
+        { id: 'beneficiaryParent2BirthCountry', label: "Parent 2's Country of Birth", type: 'country', required: true, conditional: true },
+        { id: 'beneficiaryParent2ResidenceCity', label: "Parent 2's City/Town/Village of Residence", type: 'text', required: true, conditional: true, helpText: 'If parent is deceased, enter their last known residence before they passed away' },
+        { id: 'beneficiaryParent2ResidenceCountry', label: "Parent 2's Country of Residence", type: 'country', required: true, conditional: true }
+      ]
+    }
+  ];
+
+  const beneficiaryEmploymentSubsections = [
+    {
+      id: '3.6-employment',
+      title: '3.6 Employment & Work History',
+      icon: FileText,
+      description: '5-year employment history',
+      helpText: '📋 Work History Instructions\n\nUSCIS requires a complete 5-year employment history with no unexplained gaps. Overlapping periods are perfectly acceptable for situations like part-time work alongside full-time employment, consulting while employed, or transitional periods between jobs.',
+      questionCount: 2,
+      fields: [
+        // Work history periods
+        { id: 'beneficiaryTimeline', label: '5-Year Work History', type: 'chronological-timeline', required: true },
+
+        // Summary and gap check
+        { id: 'beneficiaryTimelineSummary', label: 'Work History Summary', type: 'timeline-summary', required: false }
+      ]
+    }
+  ];
+
+  const beneficiaryChildrenSubsections = [
+    {
+      id: '3.7-children',
+      title: '3.7 Children Information',
+      icon: Users,
+      description: 'Information about beneficiary\'s children',
+      questionCount: 2,
+      fields: [
+        {
+          id: 'beneficiaryHasChildren', label: 'Does [BeneficiaryFirstName] have any children?', type: 'select',
+          options: ['Yes', 'No'],
+          required: true
+        },
+        {
+          id: 'beneficiaryChildrenDetails', label: 'Children Details', type: 'children-list', required: false, conditional: true,
+          helpText: 'Provide information for all children, including those from previous relationships'
+        }
+      ]
+    }
+  ];
+
+  const beneficiaryTravelSubsections = [
+    {
+      id: '3.8-us-travel',
+      title: '3.8 U.S. Travel History',
+      icon: FileText,
+      description: 'Previous and current U.S. visits',
+      questionCount: 8,
+      fields: [
+        {
+          id: 'beneficiaryEverInUS', label: 'Has [BeneficiaryFirstName] ever been in the United States?', type: 'select',
+          options: ['Yes', 'No'],
+          required: true
+        },
+        {
+          id: 'beneficiaryCurrentlyInUS', label: 'Is [BeneficiaryFirstName] currently in the United States?', type: 'select',
+          options: ['Yes', 'No'],
+          required: true,
+          conditional: true
+        },
+        { id: 'beneficiaryCurrentlyInUSWarning', type: 'beneficiary-currently-in-us-warning', hideLabel: true, required: false, conditional: true },
+        {
+          id: 'beneficiaryLastEntryClass',
+          label: 'What is the purpose of [BeneficiaryFirstName]\'s current visit to the U.S.?',
+          type: 'select',
+          options: [
+            'Business Visitor (B-1)',
+            'Tourist/Visitor for Pleasure (B-2)',
+            'Business and Tourism (B-1/B-2)',
+            'Academic Student (F-1)',
+            'F-1 Dependent (F-2)',
+            'Vocational Student (M-1)',
+            'M-1 Dependent (M-2)',
+            'Exchange Visitor (J-1)',
+            'J-1 Dependent (J-2)',
+            'Specialty Occupation Worker (H-1B)',
+            'H-1B Dependent (H-4)',
+            'Temporary Agricultural Worker (H-2A)',
+            'Temporary Non-Agricultural Worker (H-2B)',
+            'Intracompany Transferee (L-1)',
+            'L-1 Dependent (L-2)',
+            'Treaty Trader (E-1)',
+            'Treaty Investor (E-2)',
+            'Australian Specialty Worker (E-3)',
+            'Extraordinary Ability (O-1)',
+            'O-1 Support Staff (O-2)',
+            'O-1/O-2 Dependent (O-3)',
+            'Athlete/Entertainer (P-1)',
+            'Artist/Performer (P-2)',
+            'Culturally Unique Program (P-3)',
+            'P-1/P-2/P-3 Dependent (P-4)',
+            'NAFTA Professional - Mexico/Canada (TN)',
+            'TN Dependent (TD)',
+            'Ambassador/Diplomat (A-1)',
+            'Foreign Government Official (A-2)',
+            'International Organization (G-1 through G-5)',
+            'NATO Personnel (NATO)',
+            'Foreign Media/Journalist (I)',
+            'Religious Worker (R-1)',
+            'R-1 Dependent (R-2)',
+            'Transit (C-1)',
+            'Crewmember (D)',
+            'Spouse of U.S. Citizen (K-3)',
+            'Spouse/Child of LPR (V)',
+            'Victim of Human Trafficking (T)',
+            'Victim of Criminal Activity (U)',
+            'Visa Waiver Program (WB/WT)',
+            'Other (please specify below)'
+          ],
+          required: false,
+          conditional: true,
+          helpText: 'Select the visa classification under which [BeneficiaryFirstName] last entered the U.S. This is shown on the I-94 arrival/departure record.'
+        },
+        {
+          id: 'beneficiaryLastEntryClassOther',
+          label: 'Please specify the purpose of the visit',
+          type: 'text',
+          required: false,
+          conditional: true,
+          placeholder: 'e.g., diplomat, cultural exchange participant, crew member',
+          helpText: 'Describe the purpose of [BeneficiaryFirstName]\'s visit as shown on the I-94 form'
+        },
+        {
+          id: 'beneficiaryI94Number',
+          label: 'I-94 Arrival-Departure Record Number',
+          type: 'i94-number',
+          required: false,
+          conditional: true,
+          placeholder: '11 characters (e.g., 012345678A1 or 01234567890)'
+        },
+        { id: 'beneficiaryArrivalDate', label: 'Date of Arrival', type: 'date', required: false, conditional: true },
+        { id: 'beneficiaryAuthorizedStayExpiration', label: 'Date Authorized Stay Expires (as shown on Form I-94)', type: 'date', required: false, conditional: true },
+        // MUTUALLY EXCLUSIVE: Passport OR Travel Document
+        {
+          id: 'beneficiaryEntryDocumentType',
+          label: 'Did [BeneficiaryFirstName] enter the U.S. using a passport or a travel document?',
+          type: 'select',
+          options: ['Passport', 'Travel Document (in lieu of passport)'],
+          required: false,
+          conditional: true,
+          helpText: 'Most people enter with a passport. Select "Travel Document" only if [BeneficiaryFirstName] is a refugee or stateless person who used a Refugee Travel Document, Convention Travel Document, Certificate of Identity, or Titre de Voyage INSTEAD OF a passport.'
+        },
+
+        // PASSPORT FIELDS (shown if "Passport" selected)
+        {
+          id: 'beneficiaryPassportNumber',
+          label: 'Passport Number',
+          type: 'text',
+          required: false,
+          conditional: true
+        },
+        {
+          id: 'beneficiaryPassportCountryOfIssuance',
+          label: 'Country of Issuance for Passport',
+          type: 'country',
+          required: false,
+          conditional: true
+        },
+        {
+          id: 'beneficiaryPassportExpiration',
+          label: 'Expiration Date for Passport',
+          type: 'date',
+          required: false,
+          conditional: true
+        },
+
+        // TRAVEL DOCUMENT FIELDS (shown if "Travel Document" selected)
+        {
+          id: 'beneficiaryTravelDocumentCountryOfIssuance',
+          label: 'Country of Issuance for Travel Document',
+          type: 'country',
+          required: false,
+          conditional: true,
+          helpText: 'The country that issued the travel document (usually the country where [BeneficiaryFirstName] has refugee/asylee status or residence).'
+        },
+        {
+          id: 'beneficiaryTravelDocumentNumber',
+          label: 'Travel Document Number',
+          type: 'text',
+          required: false,
+          conditional: true,
+          placeholder: 'Enter document number (e.g., A012345678)',
+          helpText: 'Enter the document number exactly as shown on [BeneficiaryFirstName]\'s travel document:\n• Refugee Travel Document\n• Convention Travel Document\n• Certificate of Identity\n• Titre de Voyage\n\nCommon locations: Top right corner, inside front cover, or biographical data page.\n\nU.S. Refugee Travel Document (I-571): Letter "A" followed by 8-9 digits (example: A012345678)'
+        },
+        {
+          id: 'beneficiaryTravelDocumentExpiration',
+          label: 'Expiration Date for Travel Document',
+          type: 'date',
+          required: false,
+          conditional: true
+        }
+      ]
+    }
+  ];
+
+  const beneficiaryLegalSubsections = [
+    {
+      id: '3.9-legal-security',
+      title: '3.9 Legal & Security History',
+      icon: FileText,
+      description: 'Required background check and eligibility screening',
+      questionCount: 5,
+      fields: [
+        { id: 'beneficiaryCriminalHistory', label: 'Criminal History & Legal Background', type: 'beneficiary-legal-screening', required: true }
+      ]
+    }
+  ];
+
   const sections = [
     {
-      id: 'sponsor-section-1',
-      title: 'Section 1: U.S. Citizen Sponsor - Complete Profile',
+      id: 'relationship-section-1',
+      title: 'Section 1: Your Relationship',
+      subtitle: 'K-1 visa eligibility requirements for your relationship',
+      questionCount: 9,
+      role: 'relationship',
+      hasCustomComponent: true,
+      component: 'section1'
+    },
+    {
+      id: 'sponsor-section-2',
+      title: 'Section 2: U.S. Citizen Sponsor - Complete Profile',
       subtitle: 'All sponsor information required for K-1 visa',
       questionCount: 150,
       role: 'sponsor',
@@ -492,22 +977,21 @@ const K1VisaQuestionnaire = () => {
       ]
     },
     {
-      id: 'beneficiary-personal',
-      title: 'Beneficiary Identity & Demographics',
-      subtitle: 'Foreign fiancé(e) core identifying information',
-      questionCount: 10,
+      id: 'beneficiary-section-3',
+      title: 'Section 3: Beneficiary - Complete Profile',
+      subtitle: 'All beneficiary information required for K-1 visa',
+      questionCount: 50,
       role: 'beneficiary',
-      fields: [
-        { id: 'beneficiaryLastName', label: 'Legal Last Name', type: 'text', required: true },
-        { id: 'beneficiaryFirstName', label: 'Legal First Name', type: 'text', required: true },
-        { id: 'beneficiaryMiddleName', label: 'Middle Name', type: 'text', required: false },
-        { id: 'beneficiaryOtherNames', label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'textarea', required: false },
-        { id: 'beneficiaryDOB', label: '[BeneficiaryFirstName]\'s Date of Birth', type: 'date', required: true },
-        { id: 'beneficiarySex', label: 'Sex', type: 'select', options: ['Male', 'Female'], required: true },
-        { id: 'beneficiaryBirthCity', label: 'City/Town/Village of Birth', type: 'text', required: true },
-        { id: 'beneficiaryBirthCountry', label: '[BeneficiaryFirstName]\'s Country of Birth', type: 'text', required: true },
-        { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'text', required: true },
-        { id: 'beneficiaryMaritalStatus', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed', 'Legally Separated'], required: true }
+      hasSubsections: true,
+      subsections: [
+        ...beneficiarySubsections,
+        ...beneficiaryAddressSubsections,
+        ...beneficiaryMaritalSubsections,
+        ...beneficiaryFamilySubsections,
+        ...beneficiaryEmploymentSubsections,
+        ...beneficiaryChildrenSubsections,
+        ...beneficiaryTravelSubsections,
+        ...beneficiaryLegalSubsections
       ]
     }
     // Add your other sections here if you have them
@@ -935,6 +1419,17 @@ const K1VisaQuestionnaire = () => {
           }
         }
 
+        // Dynamic options for beneficiaryPreviousMarriages field
+        if (field.id === 'beneficiaryPreviousMarriages') {
+          const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+          const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+
+          // For married beneficiaries preparing while divorcing, start from 1 (not 0) since they must include current marriage
+          if (beneficiaryMaritalStatus === 'Married' && beneficiaryPreparingWhileDivorcing) {
+            selectOptions = ['1', '2', '3', '4', '5+'];
+          }
+        }
+
         return (
           <div>
             <select
@@ -1088,8 +1583,10 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'conditional-address-history':
-        const moveInDate = currentData['sponsorMoveInDate'] || '';
+      case 'conditional-address-history': {
+        // Determine which move-in date field to check based on field ID
+        const moveInDateField = field.id.includes('beneficiary') ? 'beneficiaryMoveInDate' : 'sponsorMoveInDate';
+        const moveInDate = currentData[moveInDateField] || '';
 
         // If no move-in date is entered yet, don't show anything
         if (!moveInDate) {
@@ -1354,6 +1851,7 @@ const K1VisaQuestionnaire = () => {
             )}
           </div>
         );
+      }
 
       case 'height-converter':
         const heightConverterValue = currentData[field.id] || {};
@@ -1651,7 +2149,11 @@ const K1VisaQuestionnaire = () => {
                   }}
                 >
                   <option value="">Select country...</option>
-                  {phoneCountries.map(c => (
+                  {/* Filter out United States for beneficiary birth location (K-1 beneficiary must be foreign national) */}
+                  {(field.id === 'beneficiaryBirthLocation'
+                    ? phoneCountries.filter(c => c.name !== 'United States')
+                    : phoneCountries
+                  ).map(c => (
                     <option key={c.code} value={c.name}>
                       {c.flag} {c.name}
                     </option>
@@ -1858,7 +2360,11 @@ const K1VisaQuestionnaire = () => {
                 }}
               >
                 <option value="">Select country...</option>
-                {phoneCountries.map(c => (
+                {/* Filter out United States for beneficiary current physical address (K-1 beneficiary must be residing abroad) */}
+                {(field.id === 'beneficiaryCurrentAddress'
+                  ? phoneCountries.filter(c => c.name !== 'United States')
+                  : phoneCountries
+                ).map(c => (
                   <option key={c.code} value={c.name}>
                     {c.flag} {c.name}
                   </option>
@@ -1866,7 +2372,37 @@ const K1VisaQuestionnaire = () => {
               </select>
             </div>
 
-            {mailingCountry && (
+            {/* Show blocking message if beneficiary current address is somehow U.S. */}
+            {field.id === 'beneficiaryCurrentAddress' && mailingCountry === 'United States' && (
+              <div className="mt-4 p-6 bg-red-50 border-l-4 border-red-400 rounded">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-base font-semibold text-red-800 mb-2">
+                      Your situation requires individual review
+                    </p>
+                    <p className="text-sm text-red-700 mb-4">
+                      K-1 visa beneficiaries must be residing outside the United States at the time of filing. If {currentData['beneficiaryFirstName'] || 'your fiancé(e)'} is currently living in the U.S., your situation is complex and needs individual review. Please contact our customer service team to discuss your case.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => window.location.href = `mailto:support@example.com?subject=${encodeURIComponent('K-1 Visa Application - Beneficiary Currently in U.S.')}`}
+                      className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+                    >
+                      Contact Customer Service
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* For beneficiaryCurrentAddress: hide fields if US selected (warning already showing)
+                For all other fields: show fields normally if country selected (including US) */}
+            {mailingCountry && !(field.id === 'beneficiaryCurrentAddress' && mailingCountry === 'United States') && (
               <>
                 {/* In Care Of Name field */}
                 <div>
@@ -1916,11 +2452,9 @@ const K1VisaQuestionnaire = () => {
                       onChange={(e) => updateField(field.id, { ...mailingAddrValue, unitType: e.target.value, unitNumber: e.target.value ? mailingUnitNumber : '' })}
                     >
                       <option value="">Select type...</option>
-                      <option value="Apartment">Apartment</option>
-                      <option value="Suite">Suite</option>
-                      <option value="Floor">Floor</option>
-                      <option value="Unit">Unit</option>
-                      <option value="Room">Room</option>
+                      <option value="Apt">Apt</option>
+                      <option value="Ste">Ste</option>
+                      <option value="Flr">Flr</option>
                     </select>
                     <input
                       type="text"
@@ -2002,9 +2536,18 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'address':
+      case 'address': {
         const mainAddressValue = currentData[field.id] || {};
-        const { street: mainStreet = '', unitType: mainUnitType = '', unitNumber: mainUnitNumber = '', city: mainCity = '', state: mainState = '', zipCode: mainZipCode = '', country: mainCountry = '', inCareOf: mainInCareOf = '' } = mainAddressValue;
+
+        // Check if this is the beneficiary's intended US address - auto-set to US and hide country selector
+        const isIntendedUSAddress = field.id === 'beneficiaryIntendedUSAddress';
+
+        // Auto-set country to US for intended US address if not already set
+        if (isIntendedUSAddress && !mainAddressValue.country) {
+          updateField(field.id, { ...mainAddressValue, country: 'United States' });
+        }
+
+        const { street: mainStreet = '', unitType: mainUnitType = '', unitNumber: mainUnitNumber = '', city: mainCity = '', state: mainState = '', zipCode: mainZipCode = '', country: mainCountry = isIntendedUSAddress ? 'United States' : '', inCareOf: mainInCareOf = '' } = mainAddressValue;
         const mainCountryFormat = addressFormats[mainCountry] || addressFormats['United States'];
 
         // Check if this is a required mailing address
@@ -2012,29 +2555,32 @@ const K1VisaQuestionnaire = () => {
 
         return (
           <div className="space-y-3">
-            <div>
-              {isRequiredMailingAddress && (
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Country <span className="text-red-500">*</span>
-                </label>
-              )}
-              <select
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                value={mainCountry}
-                onChange={(e) => {
-                  updateField(field.id, { ...mainAddressValue, country: e.target.value, state: '', zipCode: '' });
-                }}
-              >
-                <option value="">Select country...</option>
-                {phoneCountries.map(c => (
-                  <option key={c.code} value={c.name}>
-                    {c.flag} {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Hide country selector for intended US address, show for others */}
+            {!isIntendedUSAddress && (
+              <div>
+                {isRequiredMailingAddress && (
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Country <span className="text-red-500">*</span>
+                  </label>
+                )}
+                <select
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={mainCountry}
+                  onChange={(e) => {
+                    updateField(field.id, { ...mainAddressValue, country: e.target.value, state: '', zipCode: '' });
+                  }}
+                >
+                  <option value="">Select country...</option>
+                  {phoneCountries.map(c => (
+                    <option key={c.code} value={c.name}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-            {mainCountry && (
+            {(mainCountry || isIntendedUSAddress) && (
               <>
                 {/* In Care Of Name field for mailing address */}
                 {isRequiredMailingAddress && (
@@ -2088,11 +2634,9 @@ const K1VisaQuestionnaire = () => {
                       onChange={(e) => updateField(field.id, { ...mainAddressValue, unitType: e.target.value, unitNumber: e.target.value ? mainUnitNumber : '' })}
                     >
                       <option value="">Select type...</option>
-                      <option value="Apartment">Apartment</option>
-                      <option value="Suite">Suite</option>
-                      <option value="Floor">Floor</option>
-                      <option value="Unit">Unit</option>
-                      <option value="Room">Room</option>
+                      <option value="Apt">Apt</option>
+                      <option value="Ste">Ste</option>
+                      <option value="Flr">Flr</option>
                     </select>
                     <input
                       type="text"
@@ -2176,6 +2720,7 @@ const K1VisaQuestionnaire = () => {
             )}
           </div>
         );
+      }
 
       case 'checkbox':
         return (
@@ -2452,7 +2997,12 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'country':
+      case 'country': {
+        // Filter out United States for beneficiary birth country and citizenship (K-1 beneficiary must be foreign national)
+        const filteredCountries = (field.id === 'beneficiaryBirthCountry' || field.id === 'beneficiaryCitizenship')
+          ? phoneCountries.filter(c => c.name !== 'United States')
+          : phoneCountries;
+
         return (
           <select
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -2460,13 +3010,14 @@ const K1VisaQuestionnaire = () => {
             onChange={(e) => updateField(field.id, e.target.value)}
           >
             <option value="">Select country...</option>
-            {phoneCountries.map(country => (
+            {filteredCountries.map(country => (
               <option key={country.code} value={country.name}>
                 {country.flag} {country.name}
               </option>
             ))}
           </select>
         );
+      }
 
       case 'number':
         return (
@@ -2757,7 +3308,12 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'country':
+      case 'country': {
+        // Filter out United States for beneficiary birth country and citizenship (K-1 beneficiary must be foreign national)
+        const filteredCountries = (field.id === 'beneficiaryBirthCountry' || field.id === 'beneficiaryCitizenship')
+          ? phoneCountries.filter(c => c.name !== 'United States')
+          : phoneCountries;
+
         return (
           <select
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -2765,13 +3321,14 @@ const K1VisaQuestionnaire = () => {
             onChange={(e) => updateField(field.id, e.target.value)}
           >
             <option value="">Select country...</option>
-            {phoneCountries.map(country => (
+            {filteredCountries.map(country => (
               <option key={country.code} value={country.name}>
                 {country.flag} {country.name}
               </option>
             ))}
           </select>
         );
+      }
 
       case 'currency':
         return (
@@ -2827,8 +3384,12 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'marriage-history':
-        const previousMarriagesValue = currentData['sponsorPreviousMarriages'] || '0';
+      case 'marriage-history': {
+        // Determine which previousMarriages field to check based on field ID
+        const previousMarriagesField = field.id.includes('beneficiary')
+          ? 'beneficiaryPreviousMarriages'
+          : 'sponsorPreviousMarriages';
+        const previousMarriagesValue = currentData[previousMarriagesField] || '0';
         let marriageCount = parseInt(previousMarriagesValue) || 0;
 
         // Handle "5+" option - start with 5 marriages and allow adding more
@@ -3062,6 +3623,561 @@ const K1VisaQuestionnaire = () => {
                   + Add Another Previous Marriage
                 </button>
               </div>
+            )}
+          </div>
+        );
+      }
+
+      case 'native-alphabet-name':
+        const nativeNameValue = currentData[field.id] || {};
+
+        return (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+              <p className="text-blue-800">
+                <strong>ℹ️ When to use this field:</strong> Only if [BeneficiaryFirstName]'s name uses a non-Latin alphabet
+                (Arabic, Chinese, Cyrillic, Hebrew, Japanese, Korean, Thai, etc.). If the name uses Latin letters (A-Z), leave this blank.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Family Name (Last Name) in Native Alphabet</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={nativeNameValue.lastName || ''}
+                  onChange={(e) => updateField(field.id, { ...nativeNameValue, lastName: e.target.value })}
+                  placeholder="Enter in native script"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Given Name (First Name) in Native Alphabet</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={nativeNameValue.firstName || ''}
+                  onChange={(e) => updateField(field.id, { ...nativeNameValue, firstName: e.target.value })}
+                  placeholder="Enter in native script"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name in Native Alphabet (if applicable)</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={nativeNameValue.middleName || ''}
+                  onChange={(e) => updateField(field.id, { ...nativeNameValue, middleName: e.target.value })}
+                  placeholder="Enter in native script (optional)"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'native-alphabet-address': {
+        const nativeAddressValue = currentData[field.id] || {};
+        const { street: nativeStreet = '', unitType: nativeUnitType = '', unitNumber: nativeUnitNumber = '', city: nativeCity = '', state: nativeState = '', zipCode: nativeZipCode = '', country: nativeCountry = '' } = nativeAddressValue;
+        const nativeCountryFormat = addressFormats[nativeCountry] || addressFormats['United States'];
+
+        return (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+              <p className="text-blue-800">
+                <strong>ℹ️ When to use this field:</strong> Only if [BeneficiaryFirstName]'s address uses a non-Latin alphabet
+                (Arabic, Chinese, Cyrillic, Hebrew, Japanese, Korean, Thai, etc.). Provide the complete address in native script.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {/* Country Selection - Only non-Latin alphabet countries */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
+                <select
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={nativeCountry}
+                  onChange={(e) => {
+                    updateField(field.id, { ...nativeAddressValue, country: e.target.value, state: '', zipCode: '' });
+                  }}
+                >
+                  <option value="">Select country...</option>
+                  <option value="China">🇨🇳 China</option>
+                  <option value="Russia">🇷🇺 Russia</option>
+                  <option value="Thailand">🇹🇭 Thailand</option>
+                  <option value="Ukraine">🇺🇦 Ukraine</option>
+                  <option value="Vietnam">🇻🇳 Vietnam</option>
+                </select>
+              </div>
+
+              {nativeCountry && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Street Address (in Native Alphabet)
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={nativeStreet}
+                      onChange={(e) => updateField(field.id, { ...nativeAddressValue, street: e.target.value })}
+                      placeholder="Enter street address in native script"
+                    />
+                  </div>
+
+                  {/* Unit Details */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Unit Details (Optional)
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                        value={nativeUnitType}
+                        onChange={(e) => updateField(field.id, { ...nativeAddressValue, unitType: e.target.value, unitNumber: e.target.value ? nativeUnitNumber : '' })}
+                      >
+                        <option value="">Select type...</option>
+                        <option value="Apt">Apt</option>
+                        <option value="Ste">Ste</option>
+                        <option value="Flr">Flr</option>
+                      </select>
+                      <input
+                        type="text"
+                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!nativeUnitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                        value={nativeUnitNumber}
+                        onChange={(e) => updateField(field.id, { ...nativeAddressValue, unitNumber: e.target.value })}
+                        placeholder="Number/ID"
+                        disabled={!nativeUnitType}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        City (in Native Alphabet)
+                      </label>
+                      <input
+                        type="text"
+                        className="p-2 border rounded focus:ring-2 focus:ring-blue-500 w-full"
+                        value={nativeCity}
+                        onChange={(e) => updateField(field.id, { ...nativeAddressValue, city: e.target.value })}
+                        placeholder="Enter in native script"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        {nativeCountryFormat.stateLabel || 'State'} (in Native Alphabet)
+                        {nativeCountryFormat.stateRequired && <span className="text-red-500 ml-1">*</span>}
+                      </label>
+                      {nativeCountryFormat.states ? (
+                        <select
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                          value={nativeState}
+                          onChange={(e) => updateField(field.id, { ...nativeAddressValue, state: e.target.value })}
+                        >
+                          <option value="">Select {nativeCountryFormat.stateLabel.toLowerCase()}...</option>
+                          {nativeCountryFormat.states.map(stateOption => (
+                            <option key={stateOption} value={stateOption}>{stateOption}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${!nativeCountryFormat.stateRequired && nativeCountry !== 'United States' && nativeCountry !== 'Canada' ? 'bg-gray-50' : ''}`}
+                          value={nativeState}
+                          onChange={(e) => updateField(field.id, { ...nativeAddressValue, state: e.target.value })}
+                          placeholder={`Enter in native script`}
+                          disabled={!nativeCountryFormat.stateRequired && nativeCountry !== 'United States' && nativeCountry !== 'Canada'}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      {nativeCountryFormat.postalLabel || 'Postal Code'} (in Native Alphabet)
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={nativeZipCode}
+                      onChange={(e) => {
+                        const formatted = formatPostalCode(e.target.value, nativeCountry);
+                        updateField(field.id, { ...nativeAddressValue, zipCode: formatted });
+                      }}
+                      placeholder={nativeCountryFormat.postalPlaceholder || 'Enter postal code'}
+                    />
+                    {nativeZipCode && !nativeCountryFormat.postalFormat.test(nativeZipCode) && (
+                      <div className="text-sm text-orange-600 flex items-center mt-1">
+                        <span>Please enter a valid {nativeCountryFormat.postalLabel.toLowerCase()} for {nativeCountry}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      case 'children-list':
+        const hasChildrenValue = currentData['beneficiaryHasChildren'] || 'No';
+
+        if (hasChildrenValue === 'No') return null;
+
+        const childrenListValue = currentData[field.id] || [];
+
+        return (
+          <div className="space-y-4">
+            {childrenListValue.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                <p className="text-gray-600 mb-3">No children added yet</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField(field.id, [{}]);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  + Add First Child
+                </button>
+              </div>
+            ) : (
+              <>
+                {childrenListValue.map((child, index) => {
+                  const childResidesWith = child.residesWithBeneficiary || 'Yes';
+
+                  return (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-gray-800">Child #{index + 1}</h4>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newChildren = childrenListValue.filter((_, i) => i !== index);
+                            updateField(field.id, newChildren);
+                          }}
+                          className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-sm font-medium"
+                          title="Remove this child"
+                        >
+                          ✕ Remove
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {/* Child's Name */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <input
+                            type="text"
+                            className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={child.lastName || ''}
+                            onChange={(e) => {
+                              const newChildren = [...childrenListValue];
+                              newChildren[index] = { ...child, lastName: e.target.value };
+                              updateField(field.id, newChildren);
+                            }}
+                            placeholder="Last Name *"
+                          />
+                          <input
+                            type="text"
+                            className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={child.firstName || ''}
+                            onChange={(e) => {
+                              const newChildren = [...childrenListValue];
+                              newChildren[index] = { ...child, firstName: e.target.value };
+                              updateField(field.id, newChildren);
+                            }}
+                            placeholder="First Name *"
+                          />
+                          <input
+                            type="text"
+                            className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={child.middleName || ''}
+                            onChange={(e) => {
+                              const newChildren = [...childrenListValue];
+                              newChildren[index] = { ...child, middleName: e.target.value };
+                              updateField(field.id, newChildren);
+                            }}
+                            placeholder="Middle Name"
+                          />
+                        </div>
+
+                        {/* Date of Birth and Country of Birth */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Date of Birth *</label>
+                            <input
+                              type="date"
+                              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={child.dateOfBirth || ''}
+                              onChange={(e) => {
+                                const newChildren = [...childrenListValue];
+                                newChildren[index] = { ...child, dateOfBirth: e.target.value };
+                                updateField(field.id, newChildren);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Country of Birth *</label>
+                            <select
+                              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                              value={child.countryOfBirth || ''}
+                              onChange={(e) => {
+                                const newChildren = [...childrenListValue];
+                                newChildren[index] = { ...child, countryOfBirth: e.target.value };
+                                updateField(field.id, newChildren);
+                              }}
+                            >
+                              <option value="">Select country...</option>
+                              {phoneCountries.map(c => (
+                                <option key={c.code} value={c.name}>
+                                  {c.flag} {c.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Does child reside with beneficiary? */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Does this child reside with [BeneficiaryFirstName]? *
+                          </label>
+                          <select
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                            value={childResidesWith}
+                            onChange={(e) => {
+                              const newChildren = [...childrenListValue];
+                              newChildren[index] = {
+                                ...child,
+                                residesWithBeneficiary: e.target.value,
+                                // Clear address if switching to "Yes"
+                                ...(e.target.value === 'Yes' ? { childAddress: {} } : {})
+                              };
+                              updateField(field.id, newChildren);
+                            }}
+                          >
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+
+                        {/* Child's Physical Address (if not residing with beneficiary) */}
+                        {childResidesWith === 'No' && (() => {
+                          const childAddr = child.childAddress || {};
+                          const childCountry = childAddr.country || '';
+                          const childCountryFormat = addressFormats[childCountry] || addressFormats['United States'];
+
+                          return (
+                            <div className="border-t border-gray-300 pt-3 mt-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-2">
+                                Child's Physical Residence Address
+                              </label>
+                              <div className="space-y-2">
+                                {/* Country */}
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Country <span className="text-red-500">*</span>
+                                  </label>
+                                  <select
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                    value={childCountry}
+                                    onChange={(e) => {
+                                      const newChildren = [...childrenListValue];
+                                      newChildren[index] = {
+                                        ...child,
+                                        childAddress: { country: e.target.value, street: childAddr.street || '', unitType: '', unitNumber: '', city: '', state: '', postalCode: '' }
+                                      };
+                                      updateField(field.id, newChildren);
+                                    }}
+                                  >
+                                    <option value="">Select country...</option>
+                                    {phoneCountries.map(c => (
+                                      <option key={c.code} value={c.name}>
+                                        {c.flag} {c.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                {childCountry && (
+                                  <>
+                                    {/* Street Address */}
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                                        Street Address <span className="text-red-500">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                        value={childAddr.street || ''}
+                                        onChange={(e) => {
+                                          const newChildren = [...childrenListValue];
+                                          newChildren[index] = {
+                                            ...child,
+                                            childAddress: { ...childAddr, street: e.target.value }
+                                          };
+                                          updateField(field.id, newChildren);
+                                        }}
+                                        placeholder="Street Number and Name"
+                                      />
+                                    </div>
+
+                                    {/* Unit Details (Apt/Suite/Floor) */}
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Unit Details (Optional)
+                                      </label>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <select
+                                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                                          value={childAddr.unitType || ''}
+                                          onChange={(e) => {
+                                            const newChildren = [...childrenListValue];
+                                            newChildren[index] = {
+                                              ...child,
+                                              childAddress: { ...childAddr, unitType: e.target.value, unitNumber: e.target.value ? childAddr.unitNumber || '' : '' }
+                                            };
+                                            updateField(field.id, newChildren);
+                                          }}
+                                        >
+                                          <option value="">Select type...</option>
+                                          <option value="Apt">Apt</option>
+                                          <option value="Ste">Ste</option>
+                                          <option value="Flr">Flr</option>
+                                        </select>
+                                        <input
+                                          type="text"
+                                          className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!childAddr.unitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                                          value={childAddr.unitNumber || ''}
+                                          onChange={(e) => {
+                                            const newChildren = [...childrenListValue];
+                                            newChildren[index] = {
+                                              ...child,
+                                              childAddress: { ...childAddr, unitNumber: e.target.value }
+                                            };
+                                            updateField(field.id, newChildren);
+                                          }}
+                                          placeholder="Number/ID"
+                                          disabled={!childAddr.unitType}
+                                        />
+                                      </div>
+                                    </div>
+
+                                    {/* City and State/Province */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                          City <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          className="p-2 border rounded focus:ring-2 focus:ring-blue-500 w-full"
+                                          value={childAddr.city || ''}
+                                          onChange={(e) => {
+                                            const newChildren = [...childrenListValue];
+                                            newChildren[index] = {
+                                              ...child,
+                                              childAddress: { ...childAddr, city: e.target.value }
+                                            };
+                                            updateField(field.id, newChildren);
+                                          }}
+                                          placeholder="City"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                          {childCountryFormat.stateLabel || 'State'}
+                                          {childCountryFormat.stateRequired && <span className="text-red-500 ml-1">*</span>}
+                                        </label>
+                                        {childCountryFormat.states ? (
+                                          <select
+                                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                            value={childAddr.state || ''}
+                                            onChange={(e) => {
+                                              const newChildren = [...childrenListValue];
+                                              newChildren[index] = {
+                                                ...child,
+                                                childAddress: { ...childAddr, state: e.target.value }
+                                              };
+                                              updateField(field.id, newChildren);
+                                            }}
+                                          >
+                                            <option value="">Select {childCountryFormat.stateLabel.toLowerCase()}...</option>
+                                            {childCountryFormat.states.map(stateOption => (
+                                              <option key={stateOption} value={stateOption}>{stateOption}</option>
+                                            ))}
+                                          </select>
+                                        ) : (
+                                          <input
+                                            type="text"
+                                            className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${!childCountryFormat.stateRequired && childCountry !== 'United States' && childCountry !== 'Canada' ? 'bg-gray-50' : ''}`}
+                                            value={childAddr.state || ''}
+                                            onChange={(e) => {
+                                              const newChildren = [...childrenListValue];
+                                              newChildren[index] = {
+                                                ...child,
+                                                childAddress: { ...childAddr, state: e.target.value }
+                                              };
+                                              updateField(field.id, newChildren);
+                                            }}
+                                            placeholder={childCountryFormat.stateLabel}
+                                            disabled={!childCountryFormat.stateRequired && childCountry !== 'United States' && childCountry !== 'Canada'}
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Postal Code */}
+                                    <div className="relative">
+                                      <input
+                                        type="text"
+                                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                                        value={childAddr.postalCode || ''}
+                                        onChange={(e) => {
+                                          const formatted = formatPostalCode(e.target.value, childCountry);
+                                          const newChildren = [...childrenListValue];
+                                          newChildren[index] = {
+                                            ...child,
+                                            childAddress: { ...childAddr, postalCode: formatted }
+                                          };
+                                          updateField(field.id, newChildren);
+                                        }}
+                                        placeholder={childCountryFormat.postalPlaceholder}
+                                      />
+                                      <label className="absolute -top-2 left-2 bg-white px-1 text-xs text-gray-600">
+                                        {childCountryFormat.postalLabel} <span className="text-red-500">*</span>
+                                      </label>
+                                    </div>
+
+                                    {childAddr.postalCode && !childCountryFormat.postalFormat.test(childAddr.postalCode) && (
+                                      <div className="text-sm text-orange-600 flex items-center">
+                                        <span>Please enter a valid {childCountryFormat.postalLabel.toLowerCase()} for {childCountry}</span>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Add Another Child button */}
+                <div className="text-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newChildren = [...childrenListValue, {}];
+                      updateField(field.id, newChildren);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    + Add Another Child
+                  </button>
+                </div>
+              </>
             )}
           </div>
         );
@@ -3444,6 +4560,220 @@ const K1VisaQuestionnaire = () => {
 
         return null;
 
+      case 'i94-number': {
+        const i94Value = currentData[field.id] || '';
+        const isI94Touched = touchedFields && touchedFields[field.id];
+        const showI94Error = isI94Touched && field.required && (!i94Value || i94Value === '');
+
+        return (
+          <div className="space-y-3">
+            <input
+              type="text"
+              className={`w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                showI94Error ? 'border-red-500' : 'border-gray-300'
+              }`}
+              value={i94Value}
+              placeholder={field.placeholder}
+              onFocus={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: false }));
+              }}
+              onBlur={() => {
+                setTouchedFields(prev => ({ ...prev, [field.id]: true }));
+              }}
+              onChange={(e) => updateField(field.id, e.target.value)}
+              maxLength={11}
+            />
+            {showI94Error && (
+              <div className="text-sm text-red-600 flex items-center gap-2">
+                <span>⚠️</span>
+                <span>This field is required</span>
+              </div>
+            )}
+
+            {/* Beautiful help section */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-lg">ℹ️</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-3">
+                  <h4 className="font-semibold text-gray-800 text-base">About the I-94 Number</h4>
+
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Your I-94 number is always <strong>11 characters long</strong>. The format depends on when you entered the United States:
+                  </p>
+
+                  <div className="space-y-2 ml-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-0.5">•</span>
+                      <div className="text-sm text-gray-700">
+                        <span className="font-medium">Entries after May 2019:</span> 9 numbers, then 1 letter, then 1 number
+                        <div className="mt-1 px-3 py-1.5 bg-white rounded border border-blue-200 font-mono text-xs inline-block">
+                          012345678A1
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-0.5">•</span>
+                      <div className="text-sm text-gray-700">
+                        <span className="font-medium">Entries before May 2019:</span> 11 numbers only
+                        <div className="mt-1 px-3 py-1.5 bg-white rounded border border-blue-200 font-mono text-xs inline-block">
+                          01234567890
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-blue-200">
+                    <p className="text-sm text-gray-700 mb-2">
+                      <strong>Need to find your I-94 number?</strong>
+                    </p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      You can look it up online at the official U.S. Customs and Border Protection website:
+                    </p>
+                    <a
+                      href="https://i94.cbp.dhs.gov"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                    >
+                      <span>🔗</span>
+                      <span>Get Your I-94 Number</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 'beneficiary-currently-in-us-warning': {
+        const beneficiaryCurrentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+        const beneficiaryUnderstandsUSRequirement = currentData['beneficiaryUnderstandsUSRequirement'] || false;
+        const beneficiaryFirstName = currentData['beneficiaryFirstName'] || 'your fiancé(e)';
+
+        if (beneficiaryCurrentlyInUS !== 'Yes') {
+          return null;
+        }
+
+        return (
+          <div className="mt-4 p-6 bg-red-50 border-l-4 border-red-400 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-base font-semibold text-red-800 mb-2">
+                  K-1 visa beneficiaries must be outside the United States
+                </p>
+                <p className="text-sm text-red-700 mb-4">
+                  For K-1 fiancé(e) visa applications, {beneficiaryFirstName} must be residing outside of the United States in order to file the forms. The K-1 visa requires consular processing abroad and cannot be obtained by changing status within the U.S.
+                </p>
+                {!beneficiaryUnderstandsUSRequirement ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={() => updateField('beneficiaryUnderstandsUSRequirement', true)}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition-colors"
+                    >
+                      I understand - let's continue
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.location.href = `mailto:support@example.com?subject=${encodeURIComponent('K-1 Visa Application - Beneficiary Currently in U.S.')}`}
+                      className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+                    >
+                      Contact Customer Service
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded">
+                    <p className="text-sm text-blue-800">
+                      ✓ You've acknowledged that {beneficiaryFirstName} must leave the U.S. before the K-1 visa can be processed. You can continue filling out the application, but please note that the visa must be obtained through consular processing abroad.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 'beneficiary-married-eligibility-check': {
+        const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+        const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+        const beneficiaryFirstName = currentData['beneficiaryFirstName'] || 'your fiancé(e)';
+
+        if (beneficiaryMaritalStatus !== 'Married') {
+          return null;
+        }
+
+        return (
+          <div className="mt-4 p-6 bg-red-50 border-l-4 border-red-400 rounded">
+            <div className="flex items-start">
+              <svg className="h-6 w-6 text-red-600 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="ml-3 flex-1">
+                <p className="text-base font-semibold text-red-800 mb-2">
+                  K-1 Visa Eligibility: Marital Status Issue
+                </p>
+                <p className="text-sm text-red-700 mb-4">
+                  {beneficiaryFirstName} cannot qualify for a K-1 visa while currently married. USCIS requires the beneficiary to be legally free to marry before filing the I-129F petition.
+                </p>
+                <p className="text-sm text-red-700 mb-4">
+                  However, you can prepare your application documents now and file them once the divorce is finalized.
+                </p>
+
+                {!beneficiaryPreparingWhileDivorcing ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField('beneficiaryPreparingWhileDivorcing', true);
+                      }}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
+                    >
+                      Continue preparing the application now and file when divorce is finalized
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Beneficiary Currently Married - Need Assistance'}
+                      className="px-4 py-2 bg-white text-red-700 border border-red-300 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+                    >
+                      Contact Customer Service
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded">
+                    <div className="flex items-start">
+                      <svg className="h-5 w-5 text-green-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <div className="ml-2">
+                        <p className="text-sm font-medium text-green-800">Great! Let's keep going.</p>
+                        <p className="text-sm text-green-700 mt-1">
+                          Remember: You cannot file the I-129F petition until {beneficiaryFirstName}'s divorce is completely finalized with a final decree.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
       case 'section-header':
         return (
           <div className="border-t-2 border-blue-200 pt-6 mt-8 mb-4 first:border-t-0 first:pt-0 first:mt-0">
@@ -3718,8 +5048,10 @@ const K1VisaQuestionnaire = () => {
           </div>
         );
 
-      case 'chronological-timeline':
-        const chronologicalEntries = currentData['sponsorTimelineEntries'] || [{}];
+      case 'chronological-timeline': {
+        // Determine which timeline field to use based on field ID
+        const timelineFieldId = field.id.includes('beneficiary') ? 'beneficiaryTimelineEntries' : 'sponsorTimelineEntries';
+        const chronologicalEntries = currentData[timelineFieldId] || [{}];
 
 
         return (
@@ -3864,7 +5196,7 @@ const K1VisaQuestionnaire = () => {
                     favorableCircumstances: newCircumstances || entry.favorableCircumstances,
                     professionalField: newProfessionalField !== undefined ? newProfessionalField : entry.professionalField
                   };
-                  updateField('sponsorTimelineEntries', newEntries);
+                  updateField(timelineFieldId, newEntries);
                 };
 
                 // Set default description for new seeking-work entries
@@ -3876,7 +5208,7 @@ const K1VisaQuestionnaire = () => {
                     organization: defaultDescription,
                     lastAutoGenerated: defaultDescription
                   };
-                  updateField('sponsorTimelineEntries', newEntries);
+                  updateField(timelineFieldId, newEntries);
                 }
 
                 return (
@@ -3902,7 +5234,7 @@ const K1VisaQuestionnaire = () => {
                         type="button"
                         onClick={() => {
                           const newEntries = chronologicalEntries.filter((_, i) => i !== index);
-                          updateField('sponsorTimelineEntries', newEntries);
+                          updateField(timelineFieldId, newEntries);
                         }}
                         className="text-red-600 hover:text-red-800 text-sm"
                       >
@@ -3944,7 +5276,7 @@ const K1VisaQuestionnaire = () => {
                                 favorableCircumstances: []
                               };
                             }
-                            updateField('sponsorTimelineEntries', newEntries);
+                            updateField(timelineFieldId, newEntries);
                           }}
                         >
                           <option value="">Select type...</option>
@@ -4188,7 +5520,7 @@ const K1VisaQuestionnaire = () => {
                                         organization: autoGenerated,
                                         lastAutoGenerated: autoGenerated
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="mt-0.5"
                                   />
@@ -4211,7 +5543,7 @@ const K1VisaQuestionnaire = () => {
                                         organization: autoGenerated,
                                         lastAutoGenerated: autoGenerated
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="mt-0.5"
                                   />
@@ -4227,14 +5559,14 @@ const K1VisaQuestionnaire = () => {
                                     checked={entry.unableToWorkType === 'family-caregiving'}
                                     onChange={() => {
                                       const newEntries = [...chronologicalEntries];
-                                      const autoGenerated = "Providing care for family member";
+                                      const autoGenerated = "Unable to work due to full-time caregiving for family member";
                                       newEntries[index] = {
                                         ...entry,
                                         unableToWorkType: 'family-caregiving',
                                         organization: autoGenerated,
                                         lastAutoGenerated: autoGenerated
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="mt-0.5"
                                   />
@@ -4257,7 +5589,7 @@ const K1VisaQuestionnaire = () => {
                                         organization: autoGenerated,
                                         lastAutoGenerated: autoGenerated
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="mt-0.5"
                                   />
@@ -4297,7 +5629,7 @@ const K1VisaQuestionnaire = () => {
                               onChange={(e) => {
                                 const newEntries = [...chronologicalEntries];
                                 newEntries[index] = { ...entry, organization: e.target.value };
-                                updateField('sponsorTimelineEntries', newEntries);
+                                updateField(timelineFieldId, newEntries);
                               }}
                               placeholder="Describe your employment situation"
                             />
@@ -4319,7 +5651,7 @@ const K1VisaQuestionnaire = () => {
                                           ...entry,
                                           organization: lastAutoGenerated
                                         };
-                                        updateField('sponsorTimelineEntries', newEntries);
+                                        updateField(timelineFieldId, newEntries);
                                       }}
                                       className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1"
                                     >
@@ -4344,7 +5676,7 @@ const K1VisaQuestionnaire = () => {
                               onChange={(e) => {
                                 const newEntries = [...chronologicalEntries];
                                 newEntries[index] = { ...entry, organization: e.target.value };
-                                updateField('sponsorTimelineEntries', newEntries);
+                                updateField(timelineFieldId, newEntries);
                               }}
                               placeholder="Edit this description or write your own"
                             />
@@ -4360,7 +5692,7 @@ const K1VisaQuestionnaire = () => {
                                   const guidance = {
                                     'medical-leave': '💡 Consider adding: duration (short-term/long-term), general nature (surgery recovery, treatment), whether from specific employer',
                                     'disability': '💡 Consider adding: whether temporary or permanent, if receiving benefits, general impact on work capacity',
-                                    'family-caregiving': '💡 Consider adding: relationship (parent, spouse, child), whether full-time caregiving, approximate duration',
+                                    'family-caregiving': '💡 Consider adding: relationship to family member (parent, spouse, child), type of care provided (medical care, disability support, elderly care), approximate duration',
                                     'other-health': '💡 Be specific but avoid unnecessary medical details (e.g., "Recovery from surgery", "Treatment for chronic condition")'
                                   };
                                   return guidance[entry.unableToWorkType] || '';
@@ -4385,7 +5717,7 @@ const K1VisaQuestionnaire = () => {
                                           ...entry,
                                           organization: lastAutoGenerated
                                         };
-                                        updateField('sponsorTimelineEntries', newEntries);
+                                        updateField(timelineFieldId, newEntries);
                                       }}
                                       className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1"
                                     >
@@ -4411,7 +5743,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, organization: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 placeholder="e.g., Retired Teacher with 30 years of service"
                               />
@@ -4424,7 +5756,7 @@ const K1VisaQuestionnaire = () => {
                                     ...entry,
                                     showRetiredHelp: !entry.showRetiredHelp
                                   };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
                               >
@@ -4445,7 +5777,7 @@ const K1VisaQuestionnaire = () => {
                                         ...entry,
                                         showRetiredHelp: false
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="text-blue-600 hover:text-blue-800 text-lg leading-none"
                                   >
@@ -4500,7 +5832,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, organization: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 placeholder="e.g., Weekend volunteer at local food bank"
                               />
@@ -4513,7 +5845,7 @@ const K1VisaQuestionnaire = () => {
                                     ...entry,
                                     showOtherHelp: !entry.showOtherHelp
                                   };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
                               >
@@ -4534,7 +5866,7 @@ const K1VisaQuestionnaire = () => {
                                         ...entry,
                                         showOtherHelp: false
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="text-blue-600 hover:text-blue-800 text-lg leading-none"
                                   >
@@ -4602,7 +5934,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, organization: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 placeholder="e.g., U.S. Army, Royal Navy, German Armed Forces, U.S. Air Force Reserve"
                               />
@@ -4615,7 +5947,7 @@ const K1VisaQuestionnaire = () => {
                                     ...entry,
                                     showMilitaryHelp: !entry.showMilitaryHelp
                                   };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 className="px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
                               >
@@ -4636,7 +5968,7 @@ const K1VisaQuestionnaire = () => {
                                         ...entry,
                                         showMilitaryHelp: false
                                       };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     className="text-blue-600 hover:text-blue-800 text-xs"
                                   >
@@ -4680,7 +6012,7 @@ const K1VisaQuestionnaire = () => {
                             onChange={(e) => {
                               const newEntries = [...chronologicalEntries];
                               newEntries[index] = { ...entry, organization: e.target.value };
-                              updateField('sponsorTimelineEntries', newEntries);
+                              updateField(timelineFieldId, newEntries);
                             }}
                             placeholder={(() => {
                               const placeholders = {
@@ -4715,7 +6047,7 @@ const K1VisaQuestionnaire = () => {
                                   onChange={(e) => {
                                     const newEntries = [...chronologicalEntries];
                                     newEntries[index] = { ...entry, jobTitle: e.target.value };
-                                    updateField('sponsorTimelineEntries', newEntries);
+                                    updateField(timelineFieldId, newEntries);
                                   }}
                                 >
                                   <option value="">Select program type...</option>
@@ -4740,7 +6072,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, jobTitle: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                                 placeholder={
                                   entry.type === 'working' ? 'Software Engineer' : 'Sergeant'
@@ -4761,7 +6093,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, employmentStatus: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                               >
                                 <option value="">Select...</option>
@@ -4783,7 +6115,7 @@ const K1VisaQuestionnaire = () => {
                                 onChange={(e) => {
                                   const newEntries = [...chronologicalEntries];
                                   newEntries[index] = { ...entry, employmentStatus: e.target.value };
-                                  updateField('sponsorTimelineEntries', newEntries);
+                                  updateField(timelineFieldId, newEntries);
                                 }}
                               >
                                 <option value="">Select...</option>
@@ -4838,7 +6170,7 @@ const K1VisaQuestionnaire = () => {
                                   state: currentAddress.state || '',
                                   zipCode: currentAddress.zipCode || ''
                                 };
-                                updateField('sponsorTimelineEntries', newEntries);
+                                updateField(timelineFieldId, newEntries);
                               }}
                               className="mb-2 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
                             >
@@ -4858,7 +6190,7 @@ const K1VisaQuestionnaire = () => {
                               onChange={(e) => {
                                 const newEntries = [...chronologicalEntries];
                                 newEntries[index] = { ...entry, country: e.target.value, state: '', zipCode: '' };
-                                updateField('sponsorTimelineEntries', newEntries);
+                                updateField(timelineFieldId, newEntries);
                               }}
                             >
                               <option value="">Select country...</option>
@@ -4883,7 +6215,7 @@ const K1VisaQuestionnaire = () => {
                                     onChange={(e) => {
                                       const newEntries = [...chronologicalEntries];
                                       newEntries[index] = { ...entry, streetAddress: e.target.value };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     placeholder="123 Main Street"
                                   />
@@ -4898,7 +6230,7 @@ const K1VisaQuestionnaire = () => {
                                       onChange={(e) => {
                                         const newEntries = [...chronologicalEntries];
                                         newEntries[index] = { ...entry, unitType: e.target.value };
-                                        updateField('sponsorTimelineEntries', newEntries);
+                                        updateField(timelineFieldId, newEntries);
                                       }}
                                     >
                                       <option value="">Select type...</option>
@@ -4913,7 +6245,7 @@ const K1VisaQuestionnaire = () => {
                                       onChange={(e) => {
                                         const newEntries = [...chronologicalEntries];
                                         newEntries[index] = { ...entry, unitNumber: e.target.value };
-                                        updateField('sponsorTimelineEntries', newEntries);
+                                        updateField(timelineFieldId, newEntries);
                                       }}
                                       placeholder="Number/ID"
                                       disabled={!entry.unitType}
@@ -4935,7 +6267,7 @@ const K1VisaQuestionnaire = () => {
                                     onChange={(e) => {
                                       const newEntries = [...chronologicalEntries];
                                       newEntries[index] = { ...entry, city: e.target.value };
-                                      updateField('sponsorTimelineEntries', newEntries);
+                                      updateField(timelineFieldId, newEntries);
                                     }}
                                     placeholder={entry.country === 'United Kingdom' ? 'London' : 'City name'}
                                   />
@@ -4956,7 +6288,7 @@ const K1VisaQuestionnaire = () => {
                                             onChange={(e) => {
                                               const newEntries = [...chronologicalEntries];
                                               newEntries[index] = { ...entry, state: e.target.value };
-                                              updateField('sponsorTimelineEntries', newEntries);
+                                              updateField(timelineFieldId, newEntries);
                                             }}
                                           >
                                             <option value="">Select {countryFormat.stateLabel}...</option>
@@ -4972,7 +6304,7 @@ const K1VisaQuestionnaire = () => {
                                             onChange={(e) => {
                                               const newEntries = [...chronologicalEntries];
                                               newEntries[index] = { ...entry, state: e.target.value };
-                                              updateField('sponsorTimelineEntries', newEntries);
+                                              updateField(timelineFieldId, newEntries);
                                             }}
                                             placeholder={countryFormat.stateLabel || 'State/Province'}
                                           />
@@ -5000,7 +6332,7 @@ const K1VisaQuestionnaire = () => {
                                           const formatted = formatPostalCode(e.target.value, entry.country);
                                           const newEntries = [...chronologicalEntries];
                                           newEntries[index] = { ...entry, zipCode: formatted };
-                                          updateField('sponsorTimelineEntries', newEntries);
+                                          updateField(timelineFieldId, newEntries);
                                         }}
                                         placeholder={countryFormat.postalPlaceholder || 'Enter postal code'}
                                       />
@@ -5037,7 +6369,7 @@ const K1VisaQuestionnaire = () => {
                               newEntries[index + 1] = { ...newEntries[index + 1], endDate: e.target.value };
                             }
 
-                            updateField('sponsorTimelineEntries', newEntries);
+                            updateField(timelineFieldId, newEntries);
                           }}
                         />
                       </div>
@@ -5068,7 +6400,7 @@ const K1VisaQuestionnaire = () => {
                               onChange={(e) => {
                                 const newEntries = [...chronologicalEntries];
                                 newEntries[index] = { ...entry, endDate: e.target.value };
-                                updateField('sponsorTimelineEntries', newEntries);
+                                updateField(timelineFieldId, newEntries);
                               }}
                             />
                           </div>
@@ -5114,7 +6446,7 @@ const K1VisaQuestionnaire = () => {
                   };
 
                   const newEntries = [...chronologicalEntries, newEntry];
-                  updateField('sponsorTimelineEntries', newEntries);
+                  updateField(timelineFieldId, newEntries);
                 }}
                 className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
               >
@@ -5123,9 +6455,12 @@ const K1VisaQuestionnaire = () => {
             </div>
           </div>
         );
+      }
 
-      case 'timeline-summary':
-        const summaryEntries = currentData['sponsorTimelineEntries'] || [{}];
+      case 'timeline-summary': {
+        // Determine which timeline field to use based on field ID
+        const summaryTimelineFieldId = field.id.includes('beneficiary') ? 'beneficiaryTimelineEntries' : 'sponsorTimelineEntries';
+        const summaryEntries = currentData[summaryTimelineFieldId] || [{}];
 
         if (summaryEntries.length === 0 || (summaryEntries.length === 1 && !summaryEntries[0].type)) {
           return (
@@ -5234,6 +6569,7 @@ const K1VisaQuestionnaire = () => {
 
           </div>
         );
+      }
 
       case 'section1_7_component':
         return (
@@ -5249,6 +6585,171 @@ const K1VisaQuestionnaire = () => {
             currentData={currentData}
             updateField={updateField}
           />
+        );
+
+      case 'beneficiary-legal-screening':
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">Why we ask these questions</h3>
+                  <p className="mt-2 text-sm text-blue-700">
+                    These questions are required by the U.S. Department of State for all K-1 visa applicants (DS-160 form).
+                    Certain criminal, immigration, or security issues may disqualify an applicant from receiving a K-1 visa.
+                    We ask these questions early to ensure we can properly assist with your case.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Question 1: Criminal History */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Has [BeneficiaryFirstName] ever been arrested or convicted for any offense or crime, even if subject to a pardon, amnesty, or other similar action?
+              </label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={currentData['beneficiaryCriminalArrest'] || ''}
+                onChange={(e) => {
+                  updateField('beneficiaryCriminalArrest', e.target.value);
+                }}
+              >
+                <option value="">Select answer...</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+
+            {/* Question 2: Drug Violations */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Has [BeneficiaryFirstName] ever violated, or engaged in a conspiracy to violate, any law relating to controlled substances (drugs)?
+              </label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={currentData['beneficiaryDrugViolation'] || ''}
+                onChange={(e) => {
+                  updateField('beneficiaryDrugViolation', e.target.value);
+                }}
+              >
+                <option value="">Select answer...</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+
+            {/* Question 3: Drug Abuse/Addiction */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Is [BeneficiaryFirstName], or has [BeneficiaryFirstName] ever been, a drug abuser or addict?
+              </label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={currentData['beneficiaryDrugAbuse'] || ''}
+                onChange={(e) => {
+                  updateField('beneficiaryDrugAbuse', e.target.value);
+                }}
+              >
+                <option value="">Select answer...</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+
+            {/* Question 4: Immigration Violations */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Has [BeneficiaryFirstName] ever been removed or deported from the United States, or has [BeneficiaryFirstName] ever been unlawfully present in the U.S.?
+              </label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={currentData['beneficiaryImmigrationViolation'] || ''}
+                onChange={(e) => {
+                  updateField('beneficiaryImmigrationViolation', e.target.value);
+                }}
+              >
+                <option value="">Select answer...</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+
+            {/* Question 5: Serious Crimes */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Has [BeneficiaryFirstName] ever been involved in any of the following: human trafficking, money laundering, terrorism, genocide, torture, or other serious crimes?
+              </label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={currentData['beneficiarySeriousCrimes'] || ''}
+                onChange={(e) => {
+                  updateField('beneficiarySeriousCrimes', e.target.value);
+                }}
+              >
+                <option value="">Select answer...</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+
+            {/* Blocking Message */}
+            {(currentData['beneficiaryCriminalArrest'] === 'Yes' ||
+              currentData['beneficiaryDrugViolation'] === 'Yes' ||
+              currentData['beneficiaryDrugAbuse'] === 'Yes' ||
+              currentData['beneficiaryImmigrationViolation'] === 'Yes' ||
+              currentData['beneficiarySeriousCrimes'] === 'Yes') && (
+                <div className="mt-6 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h3 className="text-lg font-semibold text-red-800 mb-2">
+                        ⚠️ Unable to Proceed with Application
+                      </h3>
+                      <div className="text-sm text-red-700 space-y-3">
+                        <p>
+                          Based on the information provided, [BeneficiaryFirstName] may have legal or security issues that could
+                          significantly impact K-1 visa eligibility. These types of cases require specialized legal expertise
+                          that falls outside the scope of our standard services.
+                        </p>
+                        <p className="font-medium">
+                          What this means:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          <li>Criminal history, immigration violations, or security concerns can be grounds for visa denial</li>
+                          <li>Such cases often require waivers, additional documentation, or legal representation</li>
+                          <li>We recommend consulting with an immigration attorney who specializes in complex cases</li>
+                        </ul>
+                        <p className="font-medium mt-4">
+                          Next steps:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          <li>Consult with a qualified immigration attorney</li>
+                          <li>Gather all relevant documentation about the issue(s)</li>
+                          <li>Do not proceed with the visa application without legal guidance</li>
+                        </ul>
+                        <div className="mt-4 pt-4 border-t border-red-200">
+                          <p className="text-xs text-red-600">
+                            <strong>Important:</strong> This is not a legal determination of visa eligibility. Only a U.S. consular
+                            officer can make the final decision. However, we cannot assist with cases involving these complex issues
+                            to ensure you receive the specialized legal help you need.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+          </div>
         );
 
       case 'section1_9_component':
@@ -5284,6 +6785,37 @@ const K1VisaQuestionnaire = () => {
             {showError && (
               <div className="mt-1 text-sm text-red-600">
                 ⚠️ This field is required
+              </div>
+            )}
+            {field.helpText && (
+              <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                <span>💡 </span>
+                {field.helpText.split('\n').map((line, index) => {
+                  // Check if line contains a URL
+                  const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+                  if (urlMatch) {
+                    const parts = line.split(urlMatch[0]);
+                    return (
+                      <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                        {parts[0]}
+                        <a
+                          href={urlMatch[0]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          {urlMatch[0]}
+                        </a>
+                        {parts[1]}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                      {line}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -5415,7 +6947,7 @@ const K1VisaQuestionnaire = () => {
                         {section.questionCount} questions
                       </span>
                       <span className="text-sm text-gray-500">
-                        {section.role === 'sponsor' ? '👤 Sponsor' : '💑 Beneficiary'}
+                        {section.role === 'sponsor' ? '👤 Sponsor' : section.role === 'beneficiary' ? '💑 Beneficiary' : '💑 Relationship'}
                       </span>
                       {section.hasSubsections && (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
@@ -5493,11 +7025,23 @@ const K1VisaQuestionnaire = () => {
                                     field.id !== 'sponsorMaritalStatus' &&
                                     field.id !== 'marriedEligibilityCheck';
 
+                                  // Check if beneficiary marital section should be grayed out
+                                  const isBeneficiaryMaritalSection = subsection.id === '3.4-marital';
+                                  const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+                                  const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+
+                                  // Gray out beneficiary marital section if married and NOT preparing while divorcing
+                                  const shouldGrayBeneficiaryMaritalField = isBeneficiaryMaritalSection &&
+                                    beneficiaryMaritalStatus === 'Married' &&
+                                    !beneficiaryPreparingWhileDivorcing &&
+                                    field.id !== 'beneficiaryMaritalStatus' &&
+                                    field.id !== 'beneficiaryMarriedEligibilityCheck';
+
                                   // Block all other subsections if criminal history has "Yes" answer
                                   const isLegalSection = subsection.id === '1.9-legal';
                                   const shouldGrayCriminalField = hasCriminalHistory && !isLegalSection;
 
-                                  const shouldGrayField = shouldGrayMaritalField || shouldGrayCriminalField;
+                                  const shouldGrayField = shouldGrayMaritalField || shouldGrayBeneficiaryMaritalField || shouldGrayCriminalField;
 
                                   return (
                                     <div key={`${subsection.id}-${field.id}-${fieldIndex}`} className={shouldGrayField ? 'opacity-50 pointer-events-none' : ''}>
@@ -5530,8 +7074,24 @@ const K1VisaQuestionnaire = () => {
                                                 }
                                               }
 
+                                              // Special labels for beneficiary married and preparing while divorcing
+                                              const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+                                              const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+                                              const beneficiaryFirstName = currentData['beneficiaryFirstName'] || '[BeneficiaryFirstName]';
+
+                                              if (beneficiaryMaritalStatus === 'Married' && beneficiaryPreparingWhileDivorcing) {
+                                                if (field.id === 'beneficiaryPreviousMarriages') {
+                                                  return `Including ${beneficiaryFirstName}'s current marriage, how many times has ${beneficiaryFirstName} been married?`;
+                                                }
+                                                if (field.id === 'beneficiaryMarriageHistory') {
+                                                  return `Marriage Details (including ${beneficiaryFirstName}'s current marriage)`;
+                                                }
+                                              }
+
                                               // Replace placeholder for other fields
-                                              return (field.label || '').replace('[SponsorFirstName]', sponsorFirstName);
+                                              let label = (field.label || '').replace('[SponsorFirstName]', sponsorFirstName);
+                                              label = label.replace('[BeneficiaryFirstName]', beneficiaryFirstName);
+                                              return label;
                                             })()}
                                             {field.required && <span className="text-red-500 ml-1">*</span>}
                                             {field.hasInfo && field.id === 'sponsorInCareOf' && (
@@ -5582,6 +7142,15 @@ const K1VisaQuestionnaire = () => {
                                             return null;
                                           }
 
+                                          // BENEFICIARY: Handle conditional current physical address
+                                          if (field.id === 'beneficiaryCurrentAddress') {
+                                            const beneficiaryMailingDifferent = currentData['beneficiaryMailingDifferent'] || '';
+                                            if (beneficiaryMailingDifferent === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
                                           if (field.id === 'sponsorOccupation' || field.id === 'sponsorEmployer' || field.id === 'sponsorEmployerAddress') {
                                             if (employmentStatus && (employmentStatus.includes('Employed') || employmentStatus === 'Self-Employed') && employmentStatus !== 'Unemployed or Not Employed') {
                                               return renderField(field);
@@ -5627,11 +7196,11 @@ const K1VisaQuestionnaire = () => {
                                           }
 
                                           // Handle parent field visibility
-                                          if (field.id.includes('Parent1') || field.id.includes('Parent2')) {
+                                          if (field.id.includes('sponsorParent1') || field.id.includes('sponsorParent2')) {
                                             const parentCountSelection = currentData['sponsorParentCount'] || '';
                                             const parentCount = parseInt(parentCountSelection);
 
-                                            if (field.id.includes('Parent1')) {
+                                            if (field.id.includes('sponsorParent1')) {
                                               if (parentCountSelection && parentCount >= 1) {
                                                 return (
                                                   <div>
@@ -5680,7 +7249,7 @@ const K1VisaQuestionnaire = () => {
                                               return null;
                                             }
 
-                                            if (field.id.includes('Parent2')) {
+                                            if (field.id.includes('sponsorParent2')) {
                                               if (parentCountSelection && parentCount >= 2) {
                                                 return (
                                                   <div>
@@ -5728,6 +7297,167 @@ const K1VisaQuestionnaire = () => {
                                               }
                                               return null;
                                             }
+                                          }
+
+                                          // BENEFICIARY: Handle previous marriages count visibility
+                                          if (field.id === 'beneficiaryPreviousMarriages') {
+                                            const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+                                            const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+
+                                            // Show if not married, OR if married and preparing while divorcing
+                                            if (beneficiaryMaritalStatus !== 'Married' ||
+                                              (beneficiaryMaritalStatus === 'Married' && beneficiaryPreparingWhileDivorcing)) {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle marriage history
+                                          if (field.id === 'beneficiaryMarriageHistory') {
+                                            const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+                                            const beneficiaryPreparingWhileDivorcing = currentData['beneficiaryPreparingWhileDivorcing'] || false;
+                                            const beneficiaryPreviousMarriages = parseInt(currentData['beneficiaryPreviousMarriages']) || 0;
+
+                                            // Show if count > 0 AND (not married OR preparing while divorcing)
+                                            if ((beneficiaryMaritalStatus !== 'Married' && beneficiaryPreviousMarriages > 0) ||
+                                              (beneficiaryMaritalStatus === 'Married' && beneficiaryPreparingWhileDivorcing && beneficiaryPreviousMarriages > 0)) {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle parent field visibility
+                                          if (field.id.includes('beneficiaryParent1') || field.id.includes('beneficiaryParent2')) {
+                                            const parentCountValue = currentData['beneficiaryParentCount'];
+
+                                            if (field.id.includes('beneficiaryParent1')) {
+                                              // Show Parent 1 fields when beneficiary has 1 or 2 parents
+                                              if (parentCountValue === '1' || parentCountValue === '2') {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {field.helpText && field.type !== 'info-panel' && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+
+                                            if (field.id.includes('beneficiaryParent2')) {
+                                              // Show Parent 2 fields only when beneficiary has 2 parents
+                                              if (parentCountValue === '2') {
+                                                return (
+                                                  <div>
+                                                    {renderField(field)}
+                                                    {field.helpText && field.type !== 'info-panel' && (
+                                                      <div className="mt-2 text-sm text-gray-600 bg-blue-50 border-l-4 border-blue-300 pl-3 py-2 rounded">
+                                                        <span>💡 </span>
+                                                        {field.helpText.split('\n').map((line, index) => (
+                                                          <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                                                            {line}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }
+                                          }
+
+                                          // BENEFICIARY: Handle children details visibility
+                                          if (field.id === 'beneficiaryChildrenDetails') {
+                                            const hasChildren = currentData['beneficiaryHasChildren'] || '';
+                                            if (hasChildren === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle currently in US warning
+                                          if (field.id === 'beneficiaryCurrentlyInUSWarning') {
+                                            const currentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+                                            if (currentlyInUS === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle "currently in US" question - only show if they answered "Yes" to ever in US
+                                          if (field.id === 'beneficiaryCurrentlyInUS') {
+                                            const everInUS = currentData['beneficiaryEverInUS'] || '';
+
+                                            // Only show this question if they've ever been in US
+                                            if (everInUS === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle "Other" visa classification text field
+                                          if (field.id === 'beneficiaryLastEntryClassOther') {
+                                            const entryClass = currentData['beneficiaryLastEntryClass'] || '';
+                                            if (entryClass === 'Other (please specify below)') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle entry document type selector and basic entry fields
+                                          // These fields ONLY show if beneficiary is CURRENTLY in the US
+                                          if (field.id === 'beneficiaryEntryDocumentType' ||
+                                            field.id === 'beneficiaryLastEntryClass' ||
+                                            field.id === 'beneficiaryI94Number' ||
+                                            field.id === 'beneficiaryArrivalDate' ||
+                                            field.id === 'beneficiaryAuthorizedStayExpiration') {
+
+                                            const currentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+
+                                            // Show these fields ONLY if currently in US (not just "ever in US")
+                                            if (currentlyInUS === 'Yes') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle passport fields (only if "Passport" selected)
+                                          if (field.id === 'beneficiaryPassportNumber' ||
+                                            field.id === 'beneficiaryPassportCountryOfIssuance' ||
+                                            field.id === 'beneficiaryPassportExpiration') {
+
+                                            const currentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+                                            const entryDocType = currentData['beneficiaryEntryDocumentType'] || '';
+
+                                            // Show passport fields only if currently in US AND selected "Passport"
+                                            if (currentlyInUS === 'Yes' && entryDocType === 'Passport') {
+                                              return renderField(field);
+                                            }
+                                            return null;
+                                          }
+
+                                          // BENEFICIARY: Handle travel document fields (only if "Travel Document" selected)
+                                          if (field.id === 'beneficiaryTravelDocumentNumber' ||
+                                            field.id === 'beneficiaryTravelDocumentCountryOfIssuance' ||
+                                            field.id === 'beneficiaryTravelDocumentExpiration') {
+
+                                            const currentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+                                            const entryDocType = currentData['beneficiaryEntryDocumentType'] || '';
+
+                                            // Show travel document fields only if currently in US AND selected "Travel Document"
+                                            if (currentlyInUS === 'Yes' && entryDocType === 'Travel Document (in lieu of passport)') {
+                                              return renderField(field);
+                                            }
+                                            return null;
                                           }
 
                                           // Handle employment field visibility
@@ -6028,6 +7758,15 @@ const K1VisaQuestionnaire = () => {
                         </div>
                       );
                     })}
+                  </div>
+                ) : section.hasCustomComponent ? (
+                  <div className="px-6 pb-6">
+                    {section.component === 'section1' && (
+                      <Section1
+                        currentData={currentData}
+                        updateField={updateField}
+                      />
+                    )}
                   </div>
                 ) : (
                   <div className="px-6 pb-6">
