@@ -666,6 +666,31 @@ const FieldRenderer = ({
         </div>
       );
 
+    case 'multi-select':
+      const multiSelectValue = currentData[field.id] || [];
+
+      return (
+        <div className="space-y-2">
+          {field.options.map(option => (
+            <label key={option} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                checked={multiSelectValue.includes(option)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateField(field.id, [...multiSelectValue, option]);
+                  } else {
+                    updateField(field.id, multiSelectValue.filter(v => v !== option));
+                  }
+                }}
+              />
+              <span className="text-sm text-gray-700">{option}</span>
+            </label>
+          ))}
+        </div>
+      );
+
     case 'other-names':
       const otherNamesValue = currentData[field.id] || [];
 

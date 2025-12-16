@@ -17,18 +17,24 @@ export const getAllScreens = (userRole) => {
   const screens = [];
 
   questionnaireStructure.sections.forEach(section => {
-    // Skip sections that don't apply
-    if (section.appliesToBoth || section.isSponsor === (userRole === 'SPONSOR') || section.isSponsor === undefined) {
-      section.subsections.forEach(subsection => {
-        screens.push({
-          sectionId: section.id,
-          subsectionId: subsection.id,
-          sectionTitle: section.title,
-          subsectionTitle: subsection.title,
-          path: `/${section.id}/${subsection.id}`
-        });
-      });
+    // Include all sections:
+    // - appliesToBoth (like Your Relationship)
+    // - sponsor sections (isSponsor === true)
+    // - beneficiary sections (isSponsor === false)
+    // Skip only sponsor-only sections when they don't apply
+    if (section.sponsorOnly && userRole !== 'SPONSOR') {
+      return; // Skip sponsor-only sections for non-sponsors
     }
+
+    section.subsections.forEach(subsection => {
+      screens.push({
+        sectionId: section.id,
+        subsectionId: subsection.id,
+        sectionTitle: section.title,
+        subsectionTitle: subsection.title,
+        path: `/${section.id}/${subsection.id}`
+      });
+    });
   });
 
   return screens;
