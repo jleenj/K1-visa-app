@@ -15,6 +15,9 @@
 
 import React from 'react';
 import { ChevronDown, Info } from 'lucide-react';
+import Section1_7 from '../components/sections/Section1_7';
+import Section1_8 from '../components/sections/Section1_8';
+import Section1_9 from '../components/sections/Section1_9';
 
 // ========================================
 // DATA STRUCTURES (from App.tsx lines 78-469)
@@ -483,6 +486,99 @@ const validateEmail = (emailObj) => {
   }
 
   return { isValid: true, message: '' };
+};
+
+// ========================================
+// HELPER FUNCTION FOR TIMELINE COVERAGE
+// ========================================
+
+// Calculate timeline coverage with support for overlapping periods
+const calculateTimelineCoverage = (entries) => {
+  if (entries.length === 0) return { covered: 0, total: 5 * 365, gaps: [] };
+
+  // Normalize dates to midnight to avoid timezone/time issues in day calculations
+  const fiveYearsAgo = new Date();
+  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+  fiveYearsAgo.setHours(0, 0, 0, 0); // Set to midnight
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to midnight
+
+  // Create a day-by-day coverage map
+  const totalDays = Math.ceil((today.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
+  const coverage = new Array(totalDays).fill(false);
+
+  // Mark covered days for each entry
+  entries.forEach((entry) => {
+    if (!entry.startDate) return;
+
+    // Create dates in local timezone to avoid UTC/timezone shift issues
+    const startParts = entry.startDate.split('-');
+    const entryStartDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+
+    let entryEndDate;
+    if (entry.isCurrent || !entry.endDate) {
+      entryEndDate = today;
+    } else {
+      const endParts = entry.endDate.split('-');
+      entryEndDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+    }
+
+    // Skip if dates are invalid
+    if (isNaN(entryStartDate.getTime()) || isNaN(entryEndDate.getTime())) {
+      return;
+    }
+
+    // Mark each day covered by this entry
+    const startDayIndex = Math.floor((entryStartDate.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
+    const endDayIndex = Math.floor((entryEndDate.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
+
+    for (let dayIndex = Math.max(0, startDayIndex); dayIndex <= Math.min(totalDays - 1, endDayIndex); dayIndex++) {
+      coverage[dayIndex] = true;
+    }
+  });
+
+  // Find gaps (consecutive uncovered days)
+  const gaps = [];
+  let gapStart = null;
+
+  for (let dayIndex = 0; dayIndex < totalDays; dayIndex++) {
+    if (!coverage[dayIndex]) {
+      if (gapStart === null) {
+        gapStart = dayIndex;
+      }
+    } else {
+      if (gapStart !== null) {
+        // End of a gap
+        const gapDays = dayIndex - gapStart;
+        // Only include gaps that are actually meaningful
+        if (gapDays > 0) {
+          const gapStartDate = new Date(fiveYearsAgo.getTime() + gapStart * 24 * 60 * 60 * 1000);
+          const gapEndDate = new Date(fiveYearsAgo.getTime() + (dayIndex - 1) * 24 * 60 * 60 * 1000);
+          gaps.push({
+            startDate: gapStartDate.toISOString().split('T')[0],
+            endDate: gapEndDate.toISOString().split('T')[0],
+            days: gapDays
+          });
+        }
+        gapStart = null;
+      }
+    }
+  }
+
+  // Handle gap extending to the end
+  if (gapStart !== null) {
+    const gapDays = totalDays - gapStart;
+    const gapStartDate = new Date(fiveYearsAgo.getTime() + gapStart * 24 * 60 * 60 * 1000);
+    gaps.push({
+      startDate: gapStartDate.toISOString().split('T')[0],
+      endDate: today.toISOString().split('T')[0],
+      days: gapDays
+    });
+  }
+
+  const coveredDays = coverage.filter(day => day).length;
+  return { covered: coveredDays, total: totalDays, gaps };
 };
 
 // ========================================
@@ -1760,6 +1856,581 @@ const FieldRenderer = ({
               USCIS Online Account Number should be exactly 12 digits
             </div>
           )}
+        </div>
+      );
+    }
+
+    case 'info-panel':
+      return (
+        <div className="bg-blue-50 border-l-4 border-blue-300 pl-4 py-3 rounded mb-4">
+          <div className="flex items-start">
+            <div className="mr-3 mt-0.5">
+              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+            </div>
+            <div>
+              {field.label.split('\n').map((line, index) => (
+                <p key={index} className={`text-blue-800 text-sm ${index === 0 ? 'font-medium' : ''} ${index > 0 ? 'mt-2' : ''}`}>
+                  {line}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'section-header':
+      return (
+        <div className="border-t-2 border-blue-200 pt-6 mt-8 mb-4 first:border-t-0 first:pt-0 first:mt-0">
+          <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+            {field.label}
+          </h4>
+        </div>
+      );
+
+    case 'section1_7_component':
+      return (
+        <Section1_7
+          currentData={currentData}
+          updateField={updateField}
+        />
+      );
+
+    case 'section1_8_component':
+      return (
+        <Section1_8
+          currentData={currentData}
+          updateField={updateField}
+        />
+      );
+
+    case 'section1_9_component':
+      return (
+        <Section1_9
+          currentData={currentData}
+          updateField={updateField}
+        />
+      );
+
+    case 'country': {
+      // Filter out United States for beneficiary birth country and citizenship (K-1 beneficiary must be foreign national)
+      const filteredCountries = (field.id === 'beneficiaryBirthCountry' || field.id === 'beneficiaryCitizenship')
+        ? phoneCountries.filter(c => c.name !== 'United States')
+        : phoneCountries;
+
+      const countryUnknownFieldId = `${field.id}Unknown`;
+      const isCountryUnknown = currentData[countryUnknownFieldId] || false;
+
+      return (
+        <div className="flex items-center gap-3">
+          <select
+            className={`flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 ${isCountryUnknown ? 'opacity-50 pointer-events-none bg-gray-100' : ''}`}
+            value={isCountryUnknown ? '' : value}
+            disabled={isCountryUnknown}
+            onChange={(e) => updateField(field.id, e.target.value)}
+          >
+            <option value="">Select country...</option>
+            {filteredCountries.map(country => (
+              <option key={country.code} value={country.name}>
+                {country.flag} {country.name}
+              </option>
+            ))}
+          </select>
+          {field.allowUnknown && (
+            <label className="flex items-center gap-2 text-sm text-gray-700 whitespace-nowrap cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isCountryUnknown}
+                onChange={(e) => {
+                  updateField(countryUnknownFieldId, e.target.checked);
+                  if (e.target.checked) {
+                    updateField(field.id, '');
+                  }
+                }}
+                className="w-4 h-4"
+              />
+              Unknown
+            </label>
+          )}
+        </div>
+      );
+    }
+
+    case 'native-alphabet-name':
+      const nativeNameValue = currentData[field.id] || {};
+
+      return (
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+            <p className="text-blue-800">
+              <strong>ℹ️ When to use this field:</strong> Only if [BeneficiaryFirstName]'s name uses a non-Latin alphabet
+              (Arabic, Chinese, Cyrillic, Hebrew, Japanese, Korean, Thai, etc.). If the name uses Latin letters (A-Z), leave this blank.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Family Name (Last Name) in Native Alphabet</label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={nativeNameValue.lastName || ''}
+                onChange={(e) => updateField(field.id, { ...nativeNameValue, lastName: e.target.value })}
+                placeholder="Enter in native script"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Given Name (First Name) in Native Alphabet</label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={nativeNameValue.firstName || ''}
+                onChange={(e) => updateField(field.id, { ...nativeNameValue, firstName: e.target.value })}
+                placeholder="Enter in native script"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name in Native Alphabet (if applicable)</label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={nativeNameValue.middleName || ''}
+                onChange={(e) => updateField(field.id, { ...nativeNameValue, middleName: e.target.value })}
+                placeholder="Enter in native script (optional)"
+              />
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'native-alphabet-address': {
+      const nativeAddressValue = currentData[field.id] || {};
+      const { street: nativeStreet = '', unitType: nativeUnitType = '', unitNumber: nativeUnitNumber = '', city: nativeCity = '', state: nativeState = '', zipCode: nativeZipCode = '', country: nativeCountry = '' } = nativeAddressValue;
+      const nativeCountryFormat = addressFormats[nativeCountry] || addressFormats['United States'];
+
+      return (
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+            <p className="text-blue-800">
+              <strong>ℹ️ When to use this field:</strong> Only if [BeneficiaryFirstName]'s address uses a non-Latin alphabet
+              (Arabic, Chinese, Cyrillic, Hebrew, Japanese, Korean, Thai, etc.). Provide the complete address in native script.
+            </p>
+          </div>
+          <div className="space-y-3">
+            {/* Country Selection - Only non-Latin alphabet countries */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
+              <select
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={nativeCountry}
+                onChange={(e) => {
+                  updateField(field.id, { ...nativeAddressValue, country: e.target.value, state: '', zipCode: '' });
+                }}
+              >
+                <option value="">Select country...</option>
+                <option value="China">🇨🇳 China</option>
+                <option value="Russia">🇷🇺 Russia</option>
+                <option value="Thailand">🇹🇭 Thailand</option>
+                <option value="Ukraine">🇺🇦 Ukraine</option>
+                <option value="Vietnam">🇻🇳 Vietnam</option>
+              </select>
+            </div>
+
+            {nativeCountry && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Street Address (in Native Alphabet)
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={nativeStreet}
+                    onChange={(e) => updateField(field.id, { ...nativeAddressValue, street: e.target.value })}
+                    placeholder="Enter street address in native script"
+                  />
+                </div>
+
+                {/* Unit Details */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Unit Details (Optional)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                      value={nativeUnitType}
+                      onChange={(e) => updateField(field.id, { ...nativeAddressValue, unitType: e.target.value, unitNumber: e.target.value ? nativeUnitNumber : '' })}
+                    >
+                      <option value="">Select type...</option>
+                      <option value="Apt">Apt</option>
+                      <option value="Ste">Ste</option>
+                      <option value="Flr">Flr</option>
+                    </select>
+                    <input
+                      type="text"
+                      className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!nativeUnitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                      value={nativeUnitNumber}
+                      onChange={(e) => updateField(field.id, { ...nativeAddressValue, unitNumber: e.target.value })}
+                      placeholder="Number/ID"
+                      disabled={!nativeUnitType}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      City (in Native Alphabet)
+                    </label>
+                    <input
+                      type="text"
+                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500 w-full"
+                      value={nativeCity}
+                      onChange={(e) => updateField(field.id, { ...nativeAddressValue, city: e.target.value })}
+                      placeholder="Enter in native script"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      {nativeCountryFormat.stateLabel || 'State'} (in Native Alphabet)
+                      {nativeCountryFormat.stateRequired && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {nativeCountryFormat.states ? (
+                      <select
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={nativeState}
+                        onChange={(e) => updateField(field.id, { ...nativeAddressValue, state: e.target.value })}
+                      >
+                        <option value="">Select {nativeCountryFormat.stateLabel.toLowerCase()}...</option>
+                        {nativeCountryFormat.states.map(stateOption => (
+                          <option key={stateOption} value={stateOption}>{stateOption}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${!nativeCountryFormat.stateRequired && nativeCountry !== 'United States' && nativeCountry !== 'Canada' ? 'bg-gray-50' : ''}`}
+                        value={nativeState}
+                        onChange={(e) => updateField(field.id, { ...nativeAddressValue, state: e.target.value })}
+                        placeholder={`Enter in native script`}
+                        disabled={!nativeCountryFormat.stateRequired && nativeCountry !== 'United States' && nativeCountry !== 'Canada'}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    {nativeCountryFormat.postalLabel || 'Postal Code'} (in Native Alphabet)
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={nativeZipCode}
+                    onChange={(e) => {
+                      const formatted = formatPostalCode(e.target.value, nativeCountry);
+                      updateField(field.id, { ...nativeAddressValue, zipCode: formatted });
+                    }}
+                    placeholder={nativeCountryFormat.postalPlaceholder || 'Enter postal code'}
+                  />
+                  {nativeZipCode && !nativeCountryFormat.postalFormat.test(nativeZipCode) && (
+                    <div className="text-sm text-orange-600 flex items-center mt-1">
+                      <span>Please enter a valid {nativeCountryFormat.postalLabel.toLowerCase()} for {nativeCountry}</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    case 'address-with-careof': {
+      const addressWithCareOfValue = currentData[field.id] || {};
+      const { street: addressWithCareOfStreet = '', unitType: addressWithCareOfUnitType = '', unitNumber: addressWithCareOfUnitNumber = '', city: addressWithCareOfCity = '', state: addressWithCareOfState = '', zipCode: addressWithCareOfZipCode = '', country: addressWithCareOfCountry = '', careOf: addressWithCareOfCareOf = '' } = addressWithCareOfValue;
+      const addressWithCareOfCountryFormat = addressFormats[addressWithCareOfCountry] || addressFormats['United States'];
+
+      return (
+        <div className="space-y-3">
+          {/* C/O Field */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Care Of (c/o) - Optional
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              value={addressWithCareOfCareOf}
+              onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, careOf: e.target.value })}
+              placeholder="Name of person or organization (if applicable)"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Only use this if mail is being sent to an address in care of someone else (e.g., "c/o John Smith" or "c/o ABC Company")
+            </p>
+          </div>
+
+          {/* Country Selection */}
+          <select
+            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            value={addressWithCareOfCountry}
+            onChange={(e) => {
+              updateField(field.id, { ...addressWithCareOfValue, country: e.target.value, state: '', zipCode: '' });
+            }}
+          >
+            <option value="">Select country...</option>
+            {phoneCountries.map(c => (
+              <option key={c.code} value={c.name}>
+                {c.flag} {c.name}
+              </option>
+            ))}
+          </select>
+
+          {addressWithCareOfCountry && (
+            <>
+              {/* Street Address */}
+              <input
+                type="text"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={addressWithCareOfStreet}
+                onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, street: e.target.value })}
+                placeholder="Street Number and Name"
+              />
+
+              {/* Unit Details */}
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+                  value={addressWithCareOfUnitType}
+                  onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, unitType: e.target.value, unitNumber: e.target.value ? addressWithCareOfUnitNumber : '' })}
+                >
+                  <option value="">Unit type (optional)</option>
+                  <option value="Apt">Apt</option>
+                  <option value="Ste">Ste</option>
+                  <option value="Flr">Flr</option>
+                </select>
+                <input
+                  type="text"
+                  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm ${!addressWithCareOfUnitType ? 'bg-gray-100 text-gray-400' : ''}`}
+                  value={addressWithCareOfUnitNumber}
+                  onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, unitNumber: e.target.value })}
+                  placeholder="Number/ID"
+                  disabled={!addressWithCareOfUnitType}
+                />
+              </div>
+
+              {/* City and State */}
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  value={addressWithCareOfCity}
+                  onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, city: e.target.value })}
+                  placeholder="City"
+                />
+                {addressWithCareOfCountryFormat.states ? (
+                  <select
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={addressWithCareOfState}
+                    onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, state: e.target.value })}
+                  >
+                    <option value="">Select {addressWithCareOfCountryFormat.stateLabel.toLowerCase()}...</option>
+                    {addressWithCareOfCountryFormat.states.map(stateOption => (
+                      <option key={stateOption} value={stateOption}>{stateOption}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    value={addressWithCareOfState}
+                    onChange={(e) => updateField(field.id, { ...addressWithCareOfValue, state: e.target.value })}
+                    placeholder={addressWithCareOfCountryFormat.stateLabel || 'State/Province'}
+                  />
+                )}
+              </div>
+
+              {/* Postal Code */}
+              <input
+                type="text"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                value={addressWithCareOfZipCode}
+                onChange={(e) => {
+                  const formatted = formatPostalCode(e.target.value, addressWithCareOfCountry);
+                  updateField(field.id, { ...addressWithCareOfValue, zipCode: formatted });
+                }}
+                placeholder={addressWithCareOfCountryFormat.postalPlaceholder}
+              />
+              {addressWithCareOfZipCode && !addressWithCareOfCountryFormat.postalFormat.test(addressWithCareOfZipCode) && (
+                <div className="text-sm text-orange-600 flex items-center mt-1">
+                  <span>Please enter a valid {addressWithCareOfCountryFormat.postalLabel.toLowerCase()} for {addressWithCareOfCountry}</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    case 'beneficiary-currently-in-us-warning': {
+      const beneficiaryCurrentlyInUS = currentData['beneficiaryCurrentlyInUS'] || '';
+
+      if (beneficiaryCurrentlyInUS !== 'Yes') {
+        return null;
+      }
+
+      return (
+        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="flex items-start space-x-2">
+            <span className="text-amber-600 text-lg">⚠️</span>
+            <div>
+              <h4 className="font-medium text-amber-800 mb-2">Important: Beneficiary Currently in the U.S.</h4>
+              <p className="text-sm text-amber-700 mb-3">
+                Since [BeneficiaryFirstName] is currently in the United States, there are some important considerations:
+              </p>
+              <ul className="list-disc ml-5 text-sm text-amber-700 space-y-1">
+                <li><strong>Maintain legal status:</strong> [BeneficiaryFirstName] must maintain legal immigration status throughout the K-1 process</li>
+                <li><strong>Consular processing:</strong> [BeneficiaryFirstName] will need to return to their home country for the visa interview</li>
+                <li><strong>Travel considerations:</strong> Leaving the U.S. before the interview may affect pending applications</li>
+              </ul>
+              <p className="text-sm text-amber-700 mt-3">
+                <strong>We recommend consulting with an immigration attorney</strong> to ensure [BeneficiaryFirstName]'s situation is handled correctly.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    case 'beneficiary-married-eligibility-check': {
+      const beneficiaryMaritalStatus = currentData['beneficiaryMaritalStatus'] || '';
+      const beneficiaryFirstName = currentData['beneficiaryFirstName'] || '[BeneficiaryFirstName]';
+      const sponsorFirstName = currentData['sponsorFirstName'] || '[SponsorFirstName]';
+
+      if (beneficiaryMaritalStatus !== 'Married') {
+        return null;
+      }
+
+      return (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-start space-x-2">
+            <span className="text-red-600 text-xl">🚫</span>
+            <div>
+              <h4 className="font-medium text-red-800 mb-2">K-1 Visa Not Available</h4>
+              <p className="text-sm text-red-700 mb-3">
+                K-1 visas are only available for engaged couples who are both legally free to marry. Since {beneficiaryFirstName} is currently married, they cannot apply for a K-1 visa.
+              </p>
+              <p className="text-sm text-red-700 mb-3">
+                <strong>What to do:</strong>
+              </p>
+              <ul className="list-disc ml-5 text-sm text-red-700 space-y-1 mb-3">
+                <li>If {beneficiaryFirstName} is in the process of getting divorced, wait until the divorce is finalized before applying</li>
+                <li>If {beneficiaryFirstName} and {sponsorFirstName} are already married, you may qualify for a spousal visa instead</li>
+              </ul>
+              <button
+                className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                onClick={() => {
+                  console.log('TODO: Route to support for married beneficiary scenario');
+                }}
+              >
+                Contact Support for Guidance
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    case 'children-list': {
+      const childrenCount = parseInt(currentData['beneficiaryChildren'] || '0');
+
+      if (childrenCount === 0) return null;
+
+      const childrenValue = currentData[field.id] || [];
+
+      return (
+        <div className="space-y-4">
+          {[...Array(childrenCount)].map((_, index) => {
+            const child = childrenValue[index] || {};
+            return (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <h4 className="font-medium text-gray-800 mb-3">Child #{index + 1}</h4>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={child.lastName || ''}
+                      onChange={(e) => {
+                        const newChildren = [...childrenValue];
+                        newChildren[index] = { ...child, lastName: e.target.value };
+                        updateField(field.id, newChildren);
+                      }}
+                      placeholder="Last Name"
+                    />
+                    <input
+                      type="text"
+                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={child.firstName || ''}
+                      onChange={(e) => {
+                        const newChildren = [...childrenValue];
+                        newChildren[index] = { ...child, firstName: e.target.value };
+                        updateField(field.id, newChildren);
+                      }}
+                      placeholder="First Name"
+                    />
+                    <input
+                      type="text"
+                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      value={child.middleName || ''}
+                      onChange={(e) => {
+                        const newChildren = [...childrenValue];
+                        newChildren[index] = { ...child, middleName: e.target.value };
+                        updateField(field.id, newChildren);
+                      }}
+                      placeholder="Middle Name"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
+                      <input
+                        type="date"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={child.dob || ''}
+                        onChange={(e) => {
+                          const newChildren = [...childrenValue];
+                          newChildren[index] = { ...child, dob: e.target.value };
+                          updateField(field.id, newChildren);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Country of Birth</label>
+                      <select
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                        value={child.birthCountry || ''}
+                        onChange={(e) => {
+                          const newChildren = [...childrenValue];
+                          newChildren[index] = { ...child, birthCountry: e.target.value };
+                          updateField(field.id, newChildren);
+                        }}
+                      >
+                        <option value="">Select country...</option>
+                        {phoneCountries.map(c => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       );
     }
