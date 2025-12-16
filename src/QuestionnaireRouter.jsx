@@ -1,39 +1,35 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import NavigationPanel from './components/NavigationPanel';
+import SectionTimeline from './components/SectionTimeline';
 import NameScreen from './components/screens/NameScreen';
 import questionnaireStructure from './data/sectionStructure';
 
 /**
- * QuestionnaireRouter Component
- *
- * Main router for the multi-screen questionnaire experience
- * Manages:
- * - URL-based navigation
- * - Global state (currentData)
- * - Navigation panel integration
- * - Screen routing
+ * QuestionnaireContent Component
+ * Inner component that has access to useLocation
  */
-const QuestionnaireRouter = () => {
-  // Global questionnaire state
-  const [currentData, setCurrentData] = useState({
-    // TODO: Pre-fill from qualification test when connected
-    USER_FIRST_NAME: 'Your',
-    PARTNER_FIRST_NAME: "Partner's",
-    // For now, assume user is sponsor (will come from qualification test)
-    userRole: 'SPONSOR'
-  });
+const QuestionnaireContent = ({ currentData, updateField }) => {
+  const location = useLocation();
 
-  const updateField = (field, value) => {
-    setCurrentData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // Get current section ID from URL
+  const getCurrentSectionId = () => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    return pathParts.length > 0 ? pathParts[0] : null;
   };
 
+  const currentSectionId = getCurrentSectionId();
+
   return (
-    <BrowserRouter>
-      <div className="flex h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* Section Timeline at Top */}
+      <SectionTimeline
+        sections={questionnaireStructure.sections}
+        currentSectionId={currentSectionId}
+      />
+
+      {/* Main Content: Navigation Panel + Screens */}
+      <div className="flex flex-1 overflow-hidden">
         {/* Navigation Panel */}
         <NavigationPanel
           sections={questionnaireStructure.sections}
@@ -41,7 +37,7 @@ const QuestionnaireRouter = () => {
           userRole={currentData.userRole}
         />
 
-        {/* Main Content Area with Routes */}
+        {/* Screen Routes */}
         <Routes>
           {/* Default route - redirect to first screen */}
           <Route
@@ -97,6 +93,44 @@ const QuestionnaireRouter = () => {
           />
         </Routes>
       </div>
+    </div>
+  );
+};
+
+/**
+ * QuestionnaireRouter Component
+ *
+ * Main router for the multi-screen questionnaire experience
+ * Manages:
+ * - URL-based navigation
+ * - Global state (currentData)
+ * - Section timeline
+ * - Navigation panel integration
+ * - Screen routing
+ */
+const QuestionnaireRouter = () => {
+  // Global questionnaire state
+  const [currentData, setCurrentData] = useState({
+    // TODO: Pre-fill from qualification test when connected
+    USER_FIRST_NAME: 'Your',
+    PARTNER_FIRST_NAME: "Partner's",
+    // For now, assume user is sponsor (will come from qualification test)
+    userRole: 'SPONSOR'
+  });
+
+  const updateField = (field, value) => {
+    setCurrentData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <BrowserRouter>
+      <QuestionnaireContent
+        currentData={currentData}
+        updateField={updateField}
+      />
     </BrowserRouter>
   );
 };
