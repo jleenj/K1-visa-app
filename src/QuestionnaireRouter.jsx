@@ -3,6 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import NavigationPanel from './components/NavigationPanel';
 import SectionTimeline from './components/SectionTimeline';
 import NameScreen from './components/screens/NameScreen';
+import ContactInfoScreen from './components/screens/ContactInfoScreen';
+import BirthdateScreen from './components/screens/BirthdateScreen';
+import CitizenshipScreen from './components/screens/CitizenshipScreen';
+import PhysicalDescriptionScreen from './components/screens/PhysicalDescriptionScreen';
+import AddressHistoryScreen from './components/screens/AddressHistoryScreen';
 import questionnaireStructure from './data/sectionStructure';
 
 /**
@@ -45,33 +50,21 @@ const QuestionnaireContent = ({ currentData, updateField }) => {
             element={<Navigate to="/section-1-personal-info/name" replace />}
           />
 
-          {/* Sample screen route - NAME subsection for sponsor */}
-          <Route
-            path="/section-1-personal-info/name"
-            element={
-              <NameScreen
-                currentData={currentData}
-                updateField={updateField}
-                userRole={currentData.userRole}
-                isSponsor={true}
-              />
-            }
-          />
+          {/* SECTION 1: PERSONAL INFORMATION - SPONSOR */}
+          <Route path="/section-1-personal-info/name" element={<NameScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={true} />} />
+          <Route path="/section-1-personal-info/contact-info" element={<ContactInfoScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={true} />} />
+          <Route path="/section-1-personal-info/birthdate" element={<BirthdateScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={true} />} />
+          <Route path="/section-1-personal-info/citizenship-id" element={<CitizenshipScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={true} />} />
+          <Route path="/section-1-personal-info/biographic-physical" element={<PhysicalDescriptionScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={true} />} />
 
-          {/* Sample screen route - NAME subsection for beneficiary */}
-          <Route
-            path="/section-1-personal-info-beneficiary/name"
-            element={
-              <NameScreen
-                currentData={currentData}
-                updateField={updateField}
-                userRole={currentData.userRole}
-                isSponsor={false}
-              />
-            }
-          />
+          {/* SECTION 1: PERSONAL INFORMATION - BENEFICIARY */}
+          <Route path="/section-1-personal-info-beneficiary/name" element={<NameScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={false} />} />
+          <Route path="/section-1-personal-info-beneficiary/contact-info" element={<ContactInfoScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={false} />} />
+          <Route path="/section-1-personal-info-beneficiary/birthdate" element={<BirthdateScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={false} />} />
+          <Route path="/section-1-personal-info-beneficiary/citizenship-id" element={<CitizenshipScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={false} />} />
+          <Route path="/section-1-personal-info-beneficiary/biographic-physical" element={<PhysicalDescriptionScreen currentData={currentData} updateField={updateField} userRole={currentData.userRole} isSponsor={false} />} />
 
-          {/* TODO: Add routes for all other subsections */}
+          {/* TODO: Add routes for remaining sections (2-8) */}
           {/* For now, we'll show a placeholder for undefined routes */}
           <Route
             path="/:sectionId/:subsectionId"

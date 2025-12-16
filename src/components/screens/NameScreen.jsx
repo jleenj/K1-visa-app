@@ -37,15 +37,10 @@ const NameScreen = ({
     >
       {/* Screen Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-blue-600 text-sm font-medium">1</span>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            What is {isSponsor ? 'your' : 'your partner\'s'} full legal name?
-          </h2>
-        </div>
-        <p className="text-gray-600 ml-10">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          What is {isSponsor ? 'your' : 'your partner\'s'} full legal name?
+        </h2>
+        <p className="text-gray-600">
           Enter the name exactly as it appears on {isSponsor ? 'your' : 'their'} passport or birth certificate.
         </p>
       </div>

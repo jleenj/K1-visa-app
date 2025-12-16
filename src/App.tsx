@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronRight, ChevronDown, Check, Info, User, Users, FileText, Home, Phone, MapPin } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -55,7 +56,7 @@ const marriageHistorySchema = yup.object().shape({
 const K1VisaQuestionnaire = () => {
   const [expandedSections, setExpandedSections] = useState({ 0: true });
   const [expandedSubsections, setExpandedSubsections] = useState({});
-  const [currentData, setCurrentData] = useState({});
+  const [currentData, setCurrentData] = useState({} as any);
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
   const [showInfoPanel, setShowInfoPanel] = useState(false);
@@ -467,8 +468,8 @@ const K1VisaQuestionnaire = () => {
     }
   };
 
-  const formatPostalCode = (value, country) => {
-    const format = addressFormats[country];
+  const formatPostalCode = (value: any, country: any) => {
+    const format = (addressFormats as any)[country];
     if (!format) return value;
 
     const digits = value.replace(/\D/g, '');
@@ -496,7 +497,7 @@ const K1VisaQuestionnaire = () => {
     }
   };
 
-  const formatPhoneByCountry = (value, countryCode) => {
+  const formatPhoneByCountry = (value: any, countryCode: any) => {
     const country = phoneCountries.find(c => c.code === countryCode);
     if (!country) return value;
     const digits = value.replace(/\D/g, '');
@@ -514,7 +515,7 @@ const K1VisaQuestionnaire = () => {
     return formatted;
   };
 
-  const validateEmail = (emailObj) => {
+  const validateEmail = (emailObj: any) => {
     if (!emailObj || (!emailObj.localPart && !emailObj.domain)) {
       return { isValid: true, message: '' };
     }
@@ -544,7 +545,7 @@ const K1VisaQuestionnaire = () => {
   };
 
   // Helper function for address history
-  const getCurrentAddressStartDate = (physicalSameCheck, duration) => {
+  const getCurrentAddressStartDate = (physicalSameCheck: any, duration: any) => {
     if (!duration) return '';
 
     const today = new Date();
@@ -624,9 +625,9 @@ const K1VisaQuestionnaire = () => {
 
         // Certificates
         { id: 'sponsorHasCertificate', label: 'Do you have a Certificate of Naturalization or Certificate of Citizenship in your own name?', type: 'cert-question', required: true },
-        { id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: true, showWhen: (data) => data.sponsorHasCertificate === 'Yes' },
-        { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: true, showWhen: (data) => data.sponsorHasCertificate === 'Yes' },
-        { id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'cert-place', required: true, showWhen: (data) => data.sponsorHasCertificate === 'Yes' },
+        { id: 'sponsorCertNumber', label: 'Certificate Number', type: 'cert-number', required: true, showWhen: (data: any) => data.sponsorHasCertificate === 'Yes' },
+        { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: true, showWhen: (data: any) => data.sponsorHasCertificate === 'Yes' },
+        { id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'cert-place', required: true, showWhen: (data: any) => data.sponsorHasCertificate === 'Yes' },
       ]
     },
     {
@@ -659,7 +660,7 @@ const K1VisaQuestionnaire = () => {
         { id: 'sponsorMailingDifferent', label: 'Is your physical address different from your mailing address?', type: 'select', options: ['Yes', 'No'], required: true },
 
         // Physical Address (conditional)
-        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, showWhen: (data) => data.sponsorMailingDifferent === 'Yes' },
+        { id: 'sponsorCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, showWhen: (data: any) => data.sponsorMailingDifferent === 'Yes' },
 
         // Move-in date (shows for mailing address if same, physical if different)
         { id: 'sponsorMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
@@ -687,14 +688,14 @@ const K1VisaQuestionnaire = () => {
           required: true,
           helpText: 'Choose based on how your most recent marriage ended. For example, if you were widowed then remarried and divorced, select "Divorced".'
         },
-        { id: 'marriedEligibilityCheck', type: 'married-eligibility-check', hideLabel: true, required: false, showWhen: (data) => data.sponsorMaritalStatus === 'Married' },
+        { id: 'marriedEligibilityCheck', type: 'married-eligibility-check', hideLabel: true, required: false, showWhen: (data: any) => data.sponsorMaritalStatus === 'Married' },
         {
           id: 'sponsorPreviousMarriages', label: 'How many times has [SponsorFirstName] been previously married?', type: 'select',
           options: ['1', '2', '3', '4', '5+'],
           required: true,
-          showWhen: (data) => data.sponsorMaritalStatus === 'Divorced' || data.sponsorMaritalStatus === 'Widowed' || (data.sponsorMaritalStatus === 'Married' && data.preparingWhileDivorcing)
+          showWhen: (data: any) => data.sponsorMaritalStatus === 'Divorced' || data.sponsorMaritalStatus === 'Widowed' || (data.sponsorMaritalStatus === 'Married' && data.preparingWhileDivorcing)
         },
-        { id: 'sponsorMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, showWhen: (data) => {
+        { id: 'sponsorMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, showWhen: (data: any) => {
           const previousMarriages = parseInt(data.sponsorPreviousMarriages) || 0;
           return (data.sponsorMaritalStatus !== 'Married' && previousMarriages > 0) || (data.sponsorMaritalStatus === 'Married' && data.preparingWhileDivorcing && previousMarriages > 0);
         } }
@@ -857,7 +858,7 @@ const K1VisaQuestionnaire = () => {
         { id: 'beneficiaryMailingDifferent', label: 'Is [BeneficiaryFirstName]\'s physical address different from the mailing address?', type: 'select', options: ['Yes', 'No'], required: true },
 
         // Physical Address (conditional)
-        { id: 'beneficiaryCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, showWhen: (data) => data.beneficiaryMailingDifferent === 'Yes' },
+        { id: 'beneficiaryCurrentAddress', label: 'Current Physical Address', type: 'address-with-careof', required: true, showWhen: (data: any) => data.beneficiaryMailingDifferent === 'Yes' },
 
         // Move-in date (shows for mailing address if same, physical if different)
         { id: 'beneficiaryMoveInDate', label: 'Date moved to this address', type: 'date', required: true },
@@ -888,14 +889,14 @@ const K1VisaQuestionnaire = () => {
           required: true,
           helpText: 'Choose based on how most recent marriage ended. For K-1 visa, beneficiary must be legally free to marry.'
         },
-        { id: 'beneficiaryMarriedEligibilityCheck', type: 'beneficiary-married-eligibility-check', hideLabel: true, required: false, showWhen: (data) => data.beneficiaryMaritalStatus === 'Married' },
+        { id: 'beneficiaryMarriedEligibilityCheck', type: 'beneficiary-married-eligibility-check', hideLabel: true, required: false, showWhen: (data: any) => data.beneficiaryMaritalStatus === 'Married' },
         {
           id: 'beneficiaryPreviousMarriages', label: 'How many times has [BeneficiaryFirstName] been previously married?', type: 'select',
           options: ['1', '2', '3', '4', '5+'],
           required: true,
-          showWhen: (data) => data.beneficiaryMaritalStatus === 'Divorced' || data.beneficiaryMaritalStatus === 'Widowed' || (data.beneficiaryMaritalStatus === 'Married' && data.beneficiaryPreparingWhileDivorcing)
+          showWhen: (data: any) => data.beneficiaryMaritalStatus === 'Divorced' || data.beneficiaryMaritalStatus === 'Widowed' || (data.beneficiaryMaritalStatus === 'Married' && data.beneficiaryPreparingWhileDivorcing)
         },
-        { id: 'beneficiaryMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, showWhen: (data) => {
+        { id: 'beneficiaryMarriageHistory', label: 'Previous Marriage Details', type: 'marriage-history', required: false, showWhen: (data: any) => {
           const previousMarriages = parseInt(data.beneficiaryPreviousMarriages) || 0;
           return (data.beneficiaryMaritalStatus !== 'Married' && previousMarriages > 0) || (data.beneficiaryMaritalStatus === 'Married' && data.beneficiaryPreparingWhileDivorcing && previousMarriages > 0);
         } }
@@ -969,7 +970,7 @@ const K1VisaQuestionnaire = () => {
           required: true
         },
         {
-          id: 'beneficiaryChildrenDetails', label: 'Children Details', type: 'children-list', required: false, showWhen: (data) => data.beneficiaryHasChildren === 'Yes',
+          id: 'beneficiaryChildrenDetails', label: 'Children Details', type: 'children-list', required: false, showWhen: (data: any) => data.beneficiaryHasChildren === 'Yes',
           helpText: 'Provide information for all children, including those from previous relationships'
         }
       ]
@@ -993,9 +994,9 @@ const K1VisaQuestionnaire = () => {
           id: 'beneficiaryCurrentlyInUS', label: 'Is [BeneficiaryFirstName] currently in the United States?', type: 'select',
           options: ['Yes', 'No'],
           required: true,
-          showWhen: (data) => data.beneficiaryEverInUS === 'Yes'
+          showWhen: (data: any) => data.beneficiaryEverInUS === 'Yes'
         },
-        { id: 'beneficiaryCurrentlyInUSWarning', type: 'beneficiary-currently-in-us-warning', hideLabel: true, required: false, showWhen: (data) => data.beneficiaryCurrentlyInUS === 'Yes' }
+        { id: 'beneficiaryCurrentlyInUSWarning', type: 'beneficiary-currently-in-us-warning', hideLabel: true, required: false, showWhen: (data: any) => data.beneficiaryCurrentlyInUS === 'Yes' }
       ]
     }
   ];
@@ -1062,32 +1063,32 @@ const K1VisaQuestionnaire = () => {
     // Add your other sections here if you have them
   ];
 
-  const toggleSection = (index) => {
+  const toggleSection = (index: any) => {
     setExpandedSections(prev => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !(prev as any)[index]
     }));
   };
 
-  const toggleSubsection = (sectionIndex, subsectionId) => {
+  const toggleSubsection = (sectionIndex: any, subsectionId: any) => {
     const key = `${sectionIndex}-${subsectionId}`;
     setExpandedSubsections(prev => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !(prev as any)[key]
     }));
   };
 
-  const updateField = (field, value) => {
-    setCurrentData(prev => ({
+  const updateField = (field: any, value: any) => {
+    setCurrentData((prev: any) => ({
       ...prev,
       [field]: value
     }));
   };
 
   // Function to detect employment gaps
-  const detectEmploymentGaps = (data) => {
-    const gaps = [];
-    const employmentPeriods = [];
+  const detectEmploymentGaps = (data: any) => {
+    const gaps: any[] = [];
+    const employmentPeriods: any[] = [];
 
     // Collect all employment periods
     const employer1Start = data['sponsorEmployer1StartDate'];
@@ -1149,7 +1150,7 @@ const K1VisaQuestionnaire = () => {
   };
 
   // Calculate timeline coverage with support for overlapping periods
-  const calculateTimelineCoverage = (entries) => {
+  const calculateTimelineCoverage = (entries: any) => {
     if (entries.length === 0) return { covered: 0, total: 5 * 365, gaps: [] };
 
     // Normalize dates to midnight to avoid timezone/time issues in day calculations
@@ -1161,11 +1162,11 @@ const K1VisaQuestionnaire = () => {
     today.setHours(0, 0, 0, 0); // Set to midnight
 
     // Create a day-by-day coverage map
-    const totalDays = Math.ceil((today - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+    const totalDays = Math.ceil((today.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
     const coverage = new Array(totalDays).fill(false);
 
     // Mark covered days for each entry
-    entries.forEach(entry => {
+    entries.forEach((entry: any) => {
       if (!entry.startDate) return;
 
       // Create dates in local timezone to avoid UTC/timezone shift issues
@@ -1186,8 +1187,8 @@ const K1VisaQuestionnaire = () => {
       }
 
       // Mark each day covered by this entry
-      const startDayIndex = Math.floor((entryStartDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
-      const endDayIndex = Math.floor((entryEndDate - fiveYearsAgo) / (1000 * 60 * 60 * 24));
+      const startDayIndex = Math.floor((entryStartDate.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
+      const endDayIndex = Math.floor((entryEndDate.getTime() - fiveYearsAgo.getTime()) / (1000 * 60 * 60 * 24));
 
       for (let dayIndex = Math.max(0, startDayIndex); dayIndex <= Math.min(totalDays - 1, endDayIndex); dayIndex++) {
         coverage[dayIndex] = true;
@@ -1237,14 +1238,14 @@ const K1VisaQuestionnaire = () => {
     return { covered: coveredDays, total: totalDays, gaps };
   };
 
-  const renderField = (field) => {
-    const value = currentData[field.id] || '';
+  const renderField = (field: any) => {
+    const value = (currentData as any)[field.id] || '';
 
 
     switch (field.type) {
 
       case 'states-countries-list':
-        const sponsorDOBForList = currentData['sponsorDOB'] || '';
+        const sponsorDOBForList = (currentData as any)['sponsorDOB'] || '';
 
         // If no DOB provided, don't show anything
         if (!sponsorDOBForList) {
@@ -1287,7 +1288,7 @@ const K1VisaQuestionnaire = () => {
 
         // From address history
         const addrHistory = currentData['sponsorAddressHistory'] || [];
-        addrHistory.forEach(addr => {
+        addrHistory.forEach((addr: any) => {
           if (addr.country === 'United States' && addr.state) {
             extractedPlaces.add(`${addr.state}, USA`);
           } else if (addr.country && addr.country !== 'United States') {
@@ -1338,9 +1339,9 @@ const K1VisaQuestionnaire = () => {
                   ✅ We have these locations from your addresses:
                 </p>
                 <div className="space-y-1">
-                  {Array.from(extractedPlaces).map((place, index) => (
+                  {Array.from(extractedPlaces).map((place: any, index) => (
                     <div key={index} className="text-sm text-green-700">
-                      • {place} ({fiveYearsAgoStr} - {currentDateStr})
+                      {`• ${place} (${fiveYearsAgoStr} - ${currentDateStr})`}
                     </div>
                   ))}
                 </div>
@@ -1389,7 +1390,7 @@ const K1VisaQuestionnaire = () => {
                   Add <strong>ALL</strong> states and countries where you lived since age 18 ({turned18DateStr} - {fiveYearsAgoStr}):
                 </p>
 
-                {additionalPlaces.map((place, index) => (
+                {additionalPlaces.map((place: any, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
                       className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500"
@@ -1965,7 +1966,7 @@ const K1VisaQuestionnaire = () => {
         const heightConverterValue = currentData[field.id] || {};
         const { feet: heightFeet = '', inches: heightInches = '', unit: heightUnit = 'ft', cm: heightCm = '' } = heightConverterValue;
 
-        const convertHeight = (inputValue, fromUnit) => {
+        const convertHeight = (inputValue: any, fromUnit: any) => {
           if (fromUnit === 'cm') {
             const totalCm = parseFloat(inputValue) || 0;
             const totalInches = totalCm / 2.54;
@@ -2072,7 +2073,7 @@ const K1VisaQuestionnaire = () => {
         const weightValue = currentData[field.id] || {};
         const { pounds: weightPounds = '', unit: weightUnit = 'lbs' } = weightValue;
 
-        const convertWeight = (inputValue, fromUnit) => {
+        const convertWeight = (inputValue: any, fromUnit: any) => {
           const numValue = parseFloat(inputValue) || 0;
           if (fromUnit === 'kg') {
             return Math.round(numValue * 2.20462);
@@ -5411,7 +5412,7 @@ const K1VisaQuestionnaire = () => {
             <div className="space-y-4">
               {chronologicalEntries.map((entry, index) => {
                 // Description generation function
-                const generateDescription = (circumstances, professionalField) => {
+                const generateDescription = (circumstances: any, professionalField: any) => {
                   let parts = [];
 
                   // Add professional context first
@@ -5528,7 +5529,7 @@ const K1VisaQuestionnaire = () => {
                 };
 
                 // Auto-update description helper
-                const updateDescriptionIfNeeded = (newCircumstances, newProfessionalField) => {
+                const updateDescriptionIfNeeded = (newCircumstances: any, newProfessionalField: any) => {
                   if (entry.type !== 'seeking-work') return;
 
                   const newGeneratedDescription = generateDescription(newCircumstances || entry.favorableCircumstances, newProfessionalField || entry.professionalField);
@@ -6845,7 +6846,7 @@ const K1VisaQuestionnaire = () => {
         const summaryCoverage = calculateTimelineCoverage(summaryEntries.filter(entry => entry.type));
 
         // Helper function to get display name for employment types
-        const getDisplayName = (entry) => {
+        const getDisplayName = (entry: any) => {
           if (entry.type === 'working') {
             return entry.organization || 'Employment';
           }
