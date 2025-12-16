@@ -429,6 +429,94 @@ App.tsx contains MONTHS of user-tested work including:
 - Export a FieldRenderer component that takes: field definition, currentData, updateField, touchedFields, setTouchedFields
 - Include ALL dependencies (addressFormats, phoneCountries, etc.)
 
+---
+
+### Rule #2: ALWAYS VERIFY SPONSOR VS BENEFICIARY FIELD MAPPINGS
+
+**⚠️ CRITICAL: Before implementing ANY section, verify which fields apply to whom ⚠️**
+
+When building screens for sections that have both sponsor and beneficiary profiles, you MUST check the authoritative field mapping document.
+
+**AUTHORITATIVE SOURCE:**
+`documentation/QUESTIONNAIRE_SECTION_STRUCTURE.md`
+
+This document specifies for EVERY field whether it applies to:
+- **BOTH** - Show for sponsor AND beneficiary
+- **SPONSOR ONLY** - Show ONLY for sponsor
+- **BENEFICIARY ONLY** - Show ONLY for beneficiary
+
+**WRONG APPROACH ❌:**
+- Assuming all fields apply to both people
+- Copying sponsor fields to beneficiary without checking
+- Guessing based on what "seems reasonable"
+- Using App.tsx as the source (it may have errors)
+
+**CORRECT APPROACH ✅:**
+1. **ALWAYS read QUESTIONNAIRE_SECTION_STRUCTURE.md first**
+2. **Check the field mapping for the section you're implementing**
+3. **Note which fields are marked SPONSOR ONLY, BENEFICIARY ONLY, or BOTH**
+4. **Implement conditional logic in screen components:**
+   ```javascript
+   const fields = isSponsor ? [
+     // All sponsor fields including sponsor-only ones
+   ] : [
+     // Only beneficiary fields (exclude sponsor-only)
+   ];
+   ```
+
+**Real Example - BIOGRAPHIC & PHYSICAL INFORMATION:**
+
+Per QUESTIONNAIRE_SECTION_STRUCTURE.md lines 64-71:
+```
+- Sex - **BOTH**
+- Ethnicity - **SPONSOR ONLY**
+- Race - **SPONSOR ONLY**
+- Height - **SPONSOR ONLY**
+- Weight - **SPONSOR ONLY**
+- Eye Color - **SPONSOR ONLY**
+- Hair Color - **SPONSOR ONLY**
+```
+
+**Implementation:**
+```javascript
+// PhysicalDescriptionScreen.jsx
+const physicalFields = isSponsor ? [
+  { id: `${prefix}Sex`, label: 'Sex', type: 'select', ... },
+  { id: `${prefix}Ethnicity`, label: 'Ethnicity', type: 'select', ... },
+  { id: `${prefix}Race`, label: 'Race', type: 'multi-select', ... },
+  { id: `${prefix}Height`, label: 'Height', type: 'height-converter', ... },
+  { id: `${prefix}Weight`, label: 'Weight', type: 'weight', ... },
+  { id: `${prefix}EyeColor`, label: 'Eye Color', type: 'select', ... },
+  { id: `${prefix}HairColor`, label: 'Hair Color', type: 'select', ... }
+] : [
+  // ONLY Sex for beneficiary
+  { id: `${prefix}Sex`, label: 'Sex', type: 'select', ... }
+];
+```
+
+**Why This Matters:**
+- **USCIS forms differ**: I-129F (sponsor) vs DS-160 (beneficiary) require different information
+- **Collecting wrong data**: Showing sponsor-only fields to beneficiary collects useless data
+- **Form submission errors**: USCIS will reject forms with incorrect field mappings
+- **User confusion**: Users will be confused why they're asked for data that doesn't apply to them
+
+**Rationale for Common Sponsor-Only Fields:**
+- **Physical description (ethnicity, race, height, weight, eye/hair color)**: Required on I-129F but NOT on DS-160
+- **Financial information**: Only sponsor needs to prove financial capability
+- **Previous petitions**: Only sponsor can have filed previous K-1 petitions
+- **U.S. citizenship details**: Only applies to sponsor (beneficiary is foreign national)
+
+**Field Mapping Audit Process:**
+Before implementing ANY section:
+1. ✅ Read QUESTIONNAIRE_SECTION_STRUCTURE.md for that section
+2. ✅ Create a field list with sponsor/beneficiary/both markers
+3. ✅ Implement conditional logic in screen components
+4. ✅ Test both sponsor and beneficiary views
+5. ✅ Verify no sponsor-only fields show to beneficiary
+6. ✅ Verify no beneficiary-only fields show to sponsor
+
+**This rule is equally important as Rule #1. Violating it means collecting wrong data and causing USCIS submission failures.**
+
 **Step 3: Update Each Screen**
 - Import FieldRenderer
 - Import the field definitions from App.tsx subsections (lines 576-646 for Section 1)
