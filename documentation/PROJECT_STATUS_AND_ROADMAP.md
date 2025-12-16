@@ -1,8 +1,8 @@
 # K-1 Visa Questionnaire - Complete Project Status & Roadmap
 
-**Last Updated:** December 16, 2025 - 7:00 PM
-**Current Phase:** Screen Component Development - IN PROGRESS
-**Active Task:** NameScreen rebuilt with real fields - Remaining screens need migration from App.tsx
+**Last Updated:** December 16, 2025 - 7:30 PM
+**Current Phase:** Screen Component Development - CRITICAL EXTRACTION NEEDED
+**Active Task:** Extract renderField() from App.tsx - DO NOT RECREATE CONTENT
 
 ---
 
@@ -407,6 +407,39 @@ App.tsx contains MONTHS of user-tested work including:
 3. Pass the field definitions from App.tsx
 4. Get the EXACT same UI and behavior
 
+**DETAILED EXTRACTION PLAN:**
+
+**Step 1: Identify What to Extract from App.tsx**
+- Lines 1240-7000+: The massive renderField() switch statement with ALL field types
+- Lines 470-547: Helper functions (formatPostalCode, formatPhoneByCountry, validateEmail, getCurrentAddressStartDate)
+- Lines 77-468: Data structures (phoneCountries, addressFormats)
+- Lines 1088-1238: Gap detection and timeline coverage functions
+- Lines 56-63: State management hooks (fieldErrors, touchedFields)
+
+**Step 2: Create src/utils/fieldRenderer.jsx**
+- Copy ALL the above code into a reusable module
+- Export a FieldRenderer component that takes: field definition, currentData, updateField, touchedFields, setTouchedFields
+- Include ALL dependencies (addressFormats, phoneCountries, etc.)
+
+**Step 3: Update Each Screen**
+- Import FieldRenderer
+- Import the field definitions from App.tsx subsections (lines 576-646 for Section 1)
+- Map over fields and render each with: `<FieldRenderer field={field} currentData={currentData} updateField={updateField} />`
+- Remove ALL manually created field UI
+
+**Step 4: Test Each Screen**
+- Verify dropdowns show exact same options
+- Verify tooltips appear exactly as before
+- Verify validation works identically
+- Verify tools (converters, formatters) work
+- Verify conditional fields show/hide correctly
+
+**CRITICAL: Current screen components (NameScreen, ContactInfoScreen, etc.) are INCOMPLETE**
+- They manually recreate fields instead of using renderField()
+- They are missing tooltips, validation, dropdown options
+- They MUST be rebuilt using the FieldRenderer approach
+- User has confirmed content is NOT matching the original
+
 ---
 
 ## 📚 KEY REFERENCE DOCUMENTS
@@ -438,11 +471,19 @@ App.tsx contains MONTHS of user-tested work including:
 - ✅ URL routing: Yes, enable browser back/forward
 - ✅ Progress tracking: Percentage in navigation area (distinct from question-specific progress bars)
 
-**Next Action:**
-Continue building screen components. Options:
-1. Complete Address History timeline widget for Section 1
-2. Start Section 2 (Your Relationship) screens with one-question-per-screen format
-3. Build Section 3-8 basic screens following established pattern
+**CRITICAL ISSUE DISCOVERED (Dec 16, 7:00-7:30 PM):**
+- User discovered screen components were RECREATED instead of COPIED from App.tsx
+- Missing tooltips, different dropdown options, wrong help text, missing tools
+- User stressed: "I need you to focus on the root of the problem... just need everything copy pasted"
+- Added Rule #1 to roadmap: NEVER RECREATE CONTENT - ALWAYS COPY/REUSE
+- Navigation labels were also wrong multiple times (fixed after 2 attempts)
+
+**Next Action (URGENT):**
+1. Extract renderField() function from App.tsx (lines 1240-7000+) into src/utils/fieldRenderer.jsx
+2. Extract ALL helper functions and data structures it depends on
+3. Create FieldRenderer component that screens can import
+4. Rebuild ALL Section 1 screens to use FieldRenderer instead of manual field creation
+5. Verify with user that content now EXACTLY matches original App.tsx
 
 ---
 
