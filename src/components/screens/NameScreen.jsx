@@ -1,5 +1,7 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ScreenLayout from '../ScreenLayout';
+import { getNextScreen, isFirstScreen } from '../../utils/navigationUtils';
 
 /**
  * NameScreen Component
@@ -10,20 +12,26 @@ import ScreenLayout from '../ScreenLayout';
 const NameScreen = ({
   currentData,
   updateField,
-  onNext,
+  userRole,
   isSponsor = true
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const prefix = isSponsor ? 'sponsor' : 'beneficiary';
 
   const handleNext = () => {
     // TODO: Add validation before proceeding
-    if (onNext) {
-      onNext();
+    const nextPath = getNextScreen(location.pathname, userRole);
+    if (nextPath) {
+      navigate(nextPath);
     }
   };
 
+  const isFirst = isFirstScreen(location.pathname, userRole);
+
   return (
     <ScreenLayout
+      showBackButton={!isFirst}
       onNext={handleNext}
       nextButtonDisabled={!currentData[`${prefix}FirstName`] || !currentData[`${prefix}LastName`]}
     >

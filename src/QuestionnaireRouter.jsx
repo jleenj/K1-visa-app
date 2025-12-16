@@ -56,11 +56,8 @@ const QuestionnaireRouter = () => {
               <NameScreen
                 currentData={currentData}
                 updateField={updateField}
+                userRole={currentData.userRole}
                 isSponsor={true}
-                onNext={() => {
-                  // TODO: Navigate to next screen
-                  console.log('Navigate to next screen');
-                }}
               />
             }
           />
@@ -72,11 +69,8 @@ const QuestionnaireRouter = () => {
               <NameScreen
                 currentData={currentData}
                 updateField={updateField}
+                userRole={currentData.userRole}
                 isSponsor={false}
-                onNext={() => {
-                  // TODO: Navigate to next screen
-                  console.log('Navigate to next screen');
-                }}
               />
             }
           />
