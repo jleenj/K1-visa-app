@@ -4,15 +4,10 @@ import ScreenLayout from '../ScreenLayout';
 import { getNextScreen, isFirstScreen } from '../../utils/navigationUtils';
 
 /**
- * NameScreen Component - REBUILT WITH ACTUAL FIELD DEFINITIONS
+ * NameScreen Component
  *
- * Screen for collecting name information using real field types from App.tsx
- *
- * Fields from App.tsx (lines 578-584):
- * - sponsorLastName: type 'text', required
- * - sponsorFirstName: type 'text', required
- * - sponsorMiddleName: type 'text', optional
- * - sponsorOtherNames: type 'other-names' (array of {lastName, firstName, middleName} with Add/Remove)
+ * Screen for collecting name information (pilot/sample implementation)
+ * This demonstrates the pattern for subsection screens
  */
 const NameScreen = ({
   currentData,
@@ -25,6 +20,7 @@ const NameScreen = ({
   const prefix = isSponsor ? 'sponsor' : 'beneficiary';
 
   const handleNext = () => {
+    // TODO: Add validation before proceeding
     const nextPath = getNextScreen(location.pathname, userRole);
     if (nextPath) {
       navigate(nextPath);
@@ -32,24 +28,6 @@ const NameScreen = ({
   };
 
   const isFirst = isFirstScreen(location.pathname, userRole);
-
-  // Other Names field - array management (from App.tsx 'other-names' type)
-  const otherNamesValue = currentData[`${prefix}OtherNames`] || [];
-
-  const addOtherName = () => {
-    updateField(`${prefix}OtherNames`, [...otherNamesValue, { lastName: '', firstName: '', middleName: '' }]);
-  };
-
-  const removeOtherName = (index) => {
-    const newNames = otherNamesValue.filter((_, i) => i !== index);
-    updateField(`${prefix}OtherNames`, newNames);
-  };
-
-  const updateOtherName = (index, field, value) => {
-    const newNames = [...otherNamesValue];
-    newNames[index] = { ...newNames[index], [field]: value };
-    updateField(`${prefix}OtherNames`, newNames);
-  };
 
   return (
     <ScreenLayout
@@ -69,7 +47,7 @@ const NameScreen = ({
 
       {/* Form Fields */}
       <div className="space-y-6">
-        {/* Last Name - REQUIRED */}
+        {/* Last Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Legal Last Name (Family Name) <span className="text-red-500">*</span>
@@ -83,7 +61,7 @@ const NameScreen = ({
           />
         </div>
 
-        {/* First Name - REQUIRED */}
+        {/* First Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Legal First Name (Given Name) <span className="text-red-500">*</span>
@@ -97,7 +75,7 @@ const NameScreen = ({
           />
         </div>
 
-        {/* Middle Name - OPTIONAL */}
+        {/* Middle Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Middle Name
@@ -114,67 +92,24 @@ const NameScreen = ({
           </p>
         </div>
 
-        {/* Other Names - ARRAY FIELD (from App.tsx 'other-names' type) */}
+        {/* Other Names */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Other Names Used (aliases, maiden name, nicknames)
+            Other Names Used
           </label>
-
-          {/* Existing Other Names */}
-          {otherNamesValue.length > 0 && (
-            <div className="space-y-3 mb-3">
-              {otherNamesValue.map((nameEntry, index) => (
-                <div key={index} className="border border-gray-200 rounded p-3 bg-gray-50">
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.lastName || ''}
-                      onChange={(e) => updateOtherName(index, 'lastName', e.target.value)}
-                      placeholder="Last Name"
-                    />
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.firstName || ''}
-                      onChange={(e) => updateOtherName(index, 'firstName', e.target.value)}
-                      placeholder="First Name"
-                    />
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.middleName || ''}
-                      onChange={(e) => updateOtherName(index, 'middleName', e.target.value)}
-                      placeholder="Middle Name"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeOtherName(index)}
-                    className="text-sm text-red-600 hover:text-red-800"
-                  >
-                    Remove this name
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add Button */}
-          <button
-            type="button"
-            onClick={addOtherName}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add another name
-          </button>
-
-          <p className="text-sm text-gray-500 mt-2">
+          <input
+            type="text"
+            value={currentData[`${prefix}OtherNames`] || ''}
+            onChange={(e) => updateField(`${prefix}OtherNames`, e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Maiden name, aliases, nicknames"
+          />
+          <p className="text-sm text-gray-500 mt-1">
             Include any other names you've used (maiden name, previous married names, aliases)
           </p>
         </div>
 
-        {/* Native Alphabet (Beneficiary only) - This would need to be added based on field definitions */}
+        {/* Native Alphabet (Beneficiary only) */}
         {!isSponsor && (
           <>
             <div className="border-t border-gray-200 pt-6 mt-6">
