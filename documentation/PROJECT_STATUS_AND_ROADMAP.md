@@ -297,6 +297,43 @@ Begin building infrastructure - Start with navigation panel component.
 
 ## 📝 NOTES FOR FUTURE CONTEXT
 
+### ⚠️ CRITICAL: Git & Documentation Protocol
+
+**YOU MUST follow these practices when working on this project:**
+
+1. **Commit Regularly (Every 30-60 Minutes of Work)**
+   - Don't wait until end of session
+   - Commit after completing each discrete task
+   - Use descriptive commit messages with context
+   - Always include Co-Authored-By: Claude footer
+
+2. **Update PROJECT_STATUS_AND_ROADMAP.md As You Work**
+   - Update "Last Updated" timestamp
+   - Update "Active Task" when switching tasks
+   - Mark decisions as made when user confirms
+   - Add new challenges/patterns as discovered
+   - Update "Next Action" before ending session
+
+3. **Create Session Summary at End of Work**
+   - Create `SESSION_SUMMARY_[DATE].md` when user says they're done
+   - Include: What was built, files created, bugs fixed, decisions made, next steps
+   - Commit the summary before ending
+
+4. **Use TodoWrite Tool Throughout Session**
+   - Create todos at start of work
+   - Update status as you progress (pending → in_progress → completed)
+   - Don't let todo list become stale
+   - Clean up completed todos periodically
+
+5. **Before You Run Out of Context**
+   - Commit all current work
+   - Update roadmap with current status
+   - Create session summary if ending
+   - Push all commits
+
+**Why This Matters:**
+The next Claude instance needs clear context. Without regular commits and documentation updates, progress gets lost and you'll have to re-discover what was already done.
+
 ### Important Patterns in This Codebase:
 - **Never reuse generic variable names** - Always use prefixes (e.g., `isSSNTouched`, not `isFieldTouched`)
 - **Smart fields already exist** - Check renderField() switch statement before creating new field types
