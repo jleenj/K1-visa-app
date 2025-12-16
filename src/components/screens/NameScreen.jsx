@@ -1,18 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ScreenLayout from '../ScreenLayout';
+import FieldRenderer from '../../utils/FieldRenderer';
 import { getNextScreen, isFirstScreen } from '../../utils/navigationUtils';
 
 /**
- * NameScreen Component - REBUILT WITH ACTUAL FIELD DEFINITIONS
+ * NameScreen Component - USING ACTUAL FIELD DEFINITIONS FROM APP.TSX
  *
- * Screen for collecting name information using real field types from App.tsx
- *
- * Fields from App.tsx (lines 578-584):
- * - sponsorLastName: type 'text', required
- * - sponsorFirstName: type 'text', required
- * - sponsorMiddleName: type 'text', optional
- * - sponsorOtherNames: type 'other-names' (array of {lastName, firstName, middleName} with Add/Remove)
+ * Screen for collecting name information using FieldRenderer component
+ * Fields copied from App.tsx lines 578-584
  */
 const NameScreen = ({
   currentData,
@@ -24,6 +20,10 @@ const NameScreen = ({
   const location = useLocation();
   const prefix = isSponsor ? 'sponsor' : 'beneficiary';
 
+  // State for field validation tracking
+  const [touchedFields, setTouchedFields] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
+
   const handleNext = () => {
     const nextPath = getNextScreen(location.pathname, userRole);
     if (nextPath) {
@@ -33,23 +33,22 @@ const NameScreen = ({
 
   const isFirst = isFirstScreen(location.pathname, userRole);
 
-  // Other Names field - array management (from App.tsx 'other-names' type)
-  const otherNamesValue = currentData[`${prefix}OtherNames`] || [];
+  // Field definitions from App.tsx lines 578-584
+  const nameFields = [
+    { id: `${prefix}LastName`, label: 'Legal Last Name (Family Name)', type: 'text', required: true },
+    { id: `${prefix}FirstName`, label: 'Legal First Name (Given Name)', type: 'text', required: true },
+    { id: `${prefix}MiddleName`, label: 'Middle Name', type: 'text', required: false },
+    { id: `${prefix}OtherNames`, label: 'Other Names Used (aliases, maiden name, nicknames)', type: 'other-names', required: false }
+  ];
 
-  const addOtherName = () => {
-    updateField(`${prefix}OtherNames`, [...otherNamesValue, { lastName: '', firstName: '', middleName: '' }]);
-  };
-
-  const removeOtherName = (index) => {
-    const newNames = otherNamesValue.filter((_, i) => i !== index);
-    updateField(`${prefix}OtherNames`, newNames);
-  };
-
-  const updateOtherName = (index, field, value) => {
-    const newNames = [...otherNamesValue];
-    newNames[index] = { ...newNames[index], [field]: value };
-    updateField(`${prefix}OtherNames`, newNames);
-  };
+  // Add native alphabet fields for beneficiary
+  if (!isSponsor) {
+    nameFields.push(
+      { id: 'beneficiaryNativeLastName', label: 'Last Name in Native Alphabet', type: 'text', required: false },
+      { id: 'beneficiaryNativeFirstName', label: 'First Name in Native Alphabet', type: 'text', required: false },
+      { id: 'beneficiaryNativeMiddleName', label: 'Middle Name in Native Alphabet', type: 'text', required: false }
+    );
+  }
 
   return (
     <ScreenLayout
@@ -67,162 +66,32 @@ const NameScreen = ({
         </p>
       </div>
 
-      {/* Form Fields */}
+      {/* Form Fields using FieldRenderer */}
       <div className="space-y-6">
-        {/* Last Name - REQUIRED */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Legal Last Name (Family Name) <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={currentData[`${prefix}LastName`] || ''}
-            onChange={(e) => updateField(`${prefix}LastName`, e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Smith"
+        {nameFields.map(field => (
+          <FieldRenderer
+            key={field.id}
+            field={field}
+            currentData={currentData}
+            updateField={updateField}
+            touchedFields={touchedFields}
+            setTouchedFields={setTouchedFields}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
           />
-        </div>
+        ))}
 
-        {/* First Name - REQUIRED */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Legal First Name (Given Name) <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={currentData[`${prefix}FirstName`] || ''}
-            onChange={(e) => updateField(`${prefix}FirstName`, e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="John"
-          />
-        </div>
-
-        {/* Middle Name - OPTIONAL */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Middle Name
-          </label>
-          <input
-            type="text"
-            value={currentData[`${prefix}MiddleName`] || ''}
-            onChange={(e) => updateField(`${prefix}MiddleName`, e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Optional"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Leave blank if you don't have a middle name
-          </p>
-        </div>
-
-        {/* Other Names - ARRAY FIELD (from App.tsx 'other-names' type) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Other Names Used (aliases, maiden name, nicknames)
-          </label>
-
-          {/* Existing Other Names */}
-          {otherNamesValue.length > 0 && (
-            <div className="space-y-3 mb-3">
-              {otherNamesValue.map((nameEntry, index) => (
-                <div key={index} className="border border-gray-200 rounded p-3 bg-gray-50">
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.lastName || ''}
-                      onChange={(e) => updateOtherName(index, 'lastName', e.target.value)}
-                      placeholder="Last Name"
-                    />
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.firstName || ''}
-                      onChange={(e) => updateOtherName(index, 'firstName', e.target.value)}
-                      placeholder="First Name"
-                    />
-                    <input
-                      type="text"
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500"
-                      value={nameEntry.middleName || ''}
-                      onChange={(e) => updateOtherName(index, 'middleName', e.target.value)}
-                      placeholder="Middle Name"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeOtherName(index)}
-                    className="text-sm text-red-600 hover:text-red-800"
-                  >
-                    Remove this name
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add Button */}
-          <button
-            type="button"
-            onClick={addOtherName}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-          >
-            + Add another name
-          </button>
-
-          <p className="text-sm text-gray-500 mt-2">
-            Include any other names you've used (maiden name, previous married names, aliases)
-          </p>
-        </div>
-
-        {/* Native Alphabet (Beneficiary only) - This would need to be added based on field definitions */}
-        {!isSponsor && (
-          <>
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Name in Native Alphabet (if applicable)
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                If your name is written in a non-Latin alphabet (Arabic, Chinese, Cyrillic, etc.),
-                please provide it here.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Name in Native Alphabet
-              </label>
-              <input
-                type="text"
-                value={currentData.beneficiaryNativeLastName || ''}
-                onChange={(e) => updateField('beneficiaryNativeLastName', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                First Name in Native Alphabet
-              </label>
-              <input
-                type="text"
-                value={currentData.beneficiaryNativeFirstName || ''}
-                onChange={(e) => updateField('beneficiaryNativeFirstName', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Middle Name in Native Alphabet
-              </label>
-              <input
-                type="text"
-                value={currentData.beneficiaryNativeMiddleName || ''}
-                onChange={(e) => updateField('beneficiaryNativeMiddleName', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </>
+        {/* Native Alphabet Section Header for Beneficiary */}
+        {!isSponsor && nameFields.length > 4 && (
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Name in Native Alphabet (if applicable)
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              If your name is written in a non-Latin alphabet (Arabic, Chinese, Cyrillic, etc.),
+              please provide it here.
+            </p>
+          </div>
         )}
       </div>
     </ScreenLayout>
