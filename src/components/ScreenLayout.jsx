@@ -36,7 +36,7 @@ const ScreenLayout = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto bg-white">
         <div className="max-w-3xl mx-auto px-8 py-12">
@@ -45,7 +45,7 @@ const ScreenLayout = ({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="border-t border-gray-200 bg-white px-8 py-4">
+      <div className="border-t border-gray-200 bg-white px-8 py-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto flex justify-between items-center">
           {/* Back Button */}
           {showBackButton ? (
