@@ -69,16 +69,23 @@ const NameScreen = ({
       {/* Form Fields using FieldRenderer */}
       <div className="space-y-6">
         {nameFields.map(field => (
-          <FieldRenderer
-            key={field.id}
-            field={field}
-            currentData={currentData}
-            updateField={updateField}
-            touchedFields={touchedFields}
-            setTouchedFields={setTouchedFields}
-            fieldErrors={fieldErrors}
-            setFieldErrors={setFieldErrors}
-          />
+          <div key={field.id}>
+            {!field.hideLabel && (
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {field.label}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
+              </label>
+            )}
+            <FieldRenderer
+              field={field}
+              currentData={currentData}
+              updateField={updateField}
+              touchedFields={touchedFields}
+              setTouchedFields={setTouchedFields}
+              fieldErrors={fieldErrors}
+              setFieldErrors={setFieldErrors}
+            />
+          </div>
         ))}
 
         {/* Native Alphabet Section Header for Beneficiary */}
