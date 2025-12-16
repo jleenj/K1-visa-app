@@ -139,7 +139,7 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-gray-500" />
               <span className="uppercase tracking-wide text-xs text-gray-500">
-                {profileName} Profile
+                {profileName}
               </span>
             </div>
             {isExpanded ? (
