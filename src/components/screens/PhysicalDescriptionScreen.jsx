@@ -75,11 +75,22 @@ const PhysicalDescriptionScreen = ({
     }
   ];
 
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return currentData[`${prefix}Sex`] &&
+           currentData[`${prefix}Ethnicity`] &&
+           currentData[`${prefix}Race`] &&
+           currentData[`${prefix}Height`] &&
+           currentData[`${prefix}Weight`] &&
+           currentData[`${prefix}EyeColor`] &&
+           currentData[`${prefix}HairColor`];
+  };
+
   return (
     <ScreenLayout
       showBackButton={!isFirst}
       onNext={handleNext}
-      nextButtonDisabled={false}
+      nextButtonDisabled={!isFormValid()}
     >
       {/* Screen Header */}
       <div className="mb-8">

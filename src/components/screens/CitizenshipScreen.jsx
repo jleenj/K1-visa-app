@@ -48,11 +48,34 @@ const CitizenshipScreen = ({
     { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'select', options: ['Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Australia', 'Austria', 'Bangladesh', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China', 'Colombia', 'Denmark', 'Egypt', 'France', 'Germany', 'Greece', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Japan', 'Kenya', 'Mexico', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Russia', 'Saudi Arabia', 'South Africa', 'South Korea', 'Spain', 'Sweden', 'Switzerland', 'Thailand', 'Turkey', 'Ukraine', 'United Kingdom', 'Venezuela', 'Vietnam'], required: true }
   ];
 
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    if (isSponsor) {
+      // Sponsor must have SSN, citizenship method, and certificate question answered
+      const hasBasicFields = currentData.sponsorSSN &&
+                             currentData.sponsorCitizenshipThrough &&
+                             currentData.sponsorHasCertificate;
+
+      // If they have a certificate, also require certificate details
+      if (currentData.sponsorHasCertificate === 'Yes') {
+        return hasBasicFields &&
+               currentData.sponsorCertNumber &&
+               currentData.sponsorCertIssueDate &&
+               currentData.sponsorCertIssuePlace;
+      }
+
+      return hasBasicFields;
+    } else {
+      // Beneficiary just needs citizenship
+      return currentData.beneficiaryCitizenship;
+    }
+  };
+
   return (
     <ScreenLayout
       showBackButton={!isFirst}
       onNext={handleNext}
-      nextButtonDisabled={false}
+      nextButtonDisabled={!isFormValid()}
     >
       {/* Screen Header */}
       <div className="mb-8">
