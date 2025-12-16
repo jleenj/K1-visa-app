@@ -20,8 +20,13 @@ const SectionTimeline = ({ sections, currentSectionId }) => {
     const unique = [];
 
     sections.forEach(section => {
-      if (section.appliesToBoth) return; // Skip relationship for now
+      // Include sections that apply to both (like Your Relationship)
+      if (section.appliesToBoth) {
+        unique.push(section);
+        return;
+      }
 
+      // For sponsor/beneficiary duplicate sections, only show once
       const key = section.title;
       if (!seen.has(key)) {
         seen.add(key);
