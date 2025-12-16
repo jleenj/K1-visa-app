@@ -118,8 +118,8 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
   const renderProfile = (profileType) => {
     const isExpanded = expandedProfile === profileType;
     const profileName = profileType === 'user'
-      ? `${userName} (SPONSOR)`
-      : `${partnerName} (BENEFICIARY)`;
+      ? `YOUR PROFILE (SPONSOR)`
+      : `PARTNER'S PROFILE (BENEFICIARY)`;
 
     // Only show profile toggle if current section has both sponsor and beneficiary
     const hasBothProfiles = currentSection && !currentSection.appliesToBoth && !currentSection.sponsorOnly;

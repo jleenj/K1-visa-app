@@ -371,13 +371,52 @@ Section 3 (Address History) and Section 5 (Employment History) require visual ti
 
 ---
 
+## 🚨 CRITICAL RULES - NEVER VIOLATE
+
+### Rule #1: NEVER RECREATE CONTENT - ALWAYS COPY/REUSE
+
+**⚠️ THIS IS THE MOST IMPORTANT RULE IN THE ENTIRE PROJECT ⚠️**
+
+When building new screen components, you must **NEVER** recreate fields, tooltips, validation logic, or UI interactions from scratch.
+
+**WRONG APPROACH ❌:**
+- Reading field definitions and manually creating new input fields
+- Writing new validation logic
+- Creating new tooltips or help text
+- Rebuilding dropdown options from memory
+
+**CORRECT APPROACH ✅:**
+- **Copy the existing renderField() code** from App.tsx (lines 1240-7000+)
+- **Reuse the exact same switch cases** for each field type
+- **Extract and import** validation functions, formatters, and helpers
+- **Preserve every tooltip, help text, dropdown option, and interaction** exactly as it exists
+
+**Why This Matters:**
+App.tsx contains MONTHS of user-tested work including:
+- Custom field types with complex interactions
+- Carefully worded tooltips and help text
+- Specific dropdown options and validation rules
+- Tools like unit converters, formatters, etc.
+- Conditional logic with `showWhen` functions
+
+**If you recreate instead of reuse:** You WILL lose functionality, change wording, miss dropdown options, break tools, and create a nightmare for the user who has to explain what's missing.
+
+**Implementation Strategy:**
+1. Extract renderField() and all helper functions into a shared component
+2. Import that component in each screen
+3. Pass the field definitions from App.tsx
+4. Get the EXACT same UI and behavior
+
+---
+
 ## 📚 KEY REFERENCE DOCUMENTS
 
-1. **QUESTIONNAIRE_SECTION_STRUCTURE.md** - Source of truth for section order, field names, groupings
-2. **marriage_fiance_visa_qualifying_test (12).md** - Qualification test design (not yet implemented)
-3. **QUESTIONNAIRE_REDESIGN_PROJECT_PLAN.md** - Original 7-8 week plan (now modified to infrastructure-first approach)
-4. **TASK_0_QUALIFICATION_TEST_ANALYSIS.md** - Analysis of what qualification test covers
-5. **CLAUDE.md** - Technical rules and patterns for this codebase
+1. **App.tsx (lines 1240-7000+)** - SOURCE OF TRUTH for ALL field rendering logic, validation, tooltips, interactions
+2. **QUESTIONNAIRE_SECTION_STRUCTURE.md** - Source of truth for section order, field names, groupings
+3. **marriage_fiance_visa_qualifying_test (12).md** - Qualification test design (not yet implemented)
+4. **QUESTIONNAIRE_REDESIGN_PROJECT_PLAN.md** - Original 7-8 week plan (now modified to infrastructure-first approach)
+5. **TASK_0_QUALIFICATION_TEST_ANALYSIS.md** - Analysis of what qualification test covers
+6. **CLAUDE.md** - Technical rules and patterns for this codebase
 
 ---
 
