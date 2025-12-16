@@ -83,26 +83,36 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
     return currentSection && currentSection.title === sectionTitle;
   };
 
-  const renderSubsections = (section, profileType) => {
-    if (!section || !section.subsections) return null;
+  const renderSubsections = (profileType) => {
+    if (!currentSection) return null;
 
-    // Determine if this section belongs to the current profile
-    const belongsToThisProfile =
-      (profileType === 'user' && section.isSponsor === (userRole === 'SPONSOR')) ||
-      (profileType === 'partner' && section.isSponsor !== (userRole === 'SPONSOR'));
+    // Find the correct section for this profile type
+    let targetSection = null;
 
-    if (!belongsToThisProfile) return null;
+    if (profileType === 'user') {
+      // For user profile, use the sponsor version of the section
+      targetSection = sections.find(s =>
+        s.title === currentSection.title && s.isSponsor === true
+      );
+    } else {
+      // For partner profile, use the beneficiary version of the section
+      targetSection = sections.find(s =>
+        s.title === currentSection.title && s.isSponsor === false
+      );
+    }
+
+    if (!targetSection || !targetSection.subsections) return null;
 
     return (
       <div className="space-y-1">
-        {section.subsections.map(subsection => (
+        {targetSection.subsections.map(subsection => (
           <button
             key={subsection.id}
-            onClick={() => navigateToScreen(section.id, subsection.id)}
+            onClick={() => navigateToScreen(targetSection.id, subsection.id)}
             className={`
               w-full text-left px-4 py-2 text-sm rounded
               transition-colors duration-150
-              ${isActive(section.id, subsection.id)
+              ${isActive(targetSection.id, subsection.id)
                 ? 'bg-blue-100 text-blue-700 font-medium'
                 : 'text-gray-600 hover:bg-gray-100'
               }
@@ -153,7 +163,7 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
         {/* Profile Subsections (when expanded OR when it's the only profile) */}
         {(isExpanded || !hasBothProfiles) && (
           <div className="mt-1">
-            {renderSubsections(currentSection, profileType)}
+            {renderSubsections(profileType)}
           </div>
         )}
       </div>
