@@ -134,11 +134,11 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
         {hasBothProfiles && (
           <button
             onClick={() => toggleProfile(profileType)}
-            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
           >
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-500" />
-              <span className="uppercase tracking-wide text-xs text-gray-500">
+            <div className="flex items-center gap-2 flex-1">
+              <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+              <span className="uppercase tracking-wide text-xs text-gray-500 text-left">
                 {profileName}
               </span>
             </div>
