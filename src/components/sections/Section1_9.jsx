@@ -283,7 +283,7 @@ const Section1_9 = ({ currentData = {}, updateField, onBlock }) => {
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-900 mb-2">Other Serious Crimes:</p>
+            <p className="text-sm font-medium text-gray-900 mb-2">Other Crimes:</p>
             <ul className="text-sm text-gray-700 space-y-1 ml-4 list-disc">
               <li>Torture</li>
             </ul>

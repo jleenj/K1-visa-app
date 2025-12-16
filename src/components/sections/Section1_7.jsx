@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Info, Plus, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 
 const Section1_7 = ({ currentData = {}, updateField }) => {
-  // PART A: Previous I-129F Petitions
+  // PREVIOUS SPONSORSHIPS
   const [hasPreviousPetitions, setHasPreviousPetitions] = useState(
     currentData.hasPreviousPetitions || null
   );
@@ -13,7 +13,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     currentData.previousPetitions || []
   );
 
-  // PART B: Other Ongoing Financial Obligations
+  // OTHER OBLIGATIONS
   const [hasOtherObligations, setHasOtherObligations] = useState(
     currentData.hasOtherObligations || null
   );
@@ -24,18 +24,20 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     currentData.otherObligations || []
   );
 
-  // PART C: Children Under 18
+  // HOUSEHOLD MEMBERS
   const [hasChildrenUnder18, setHasChildrenUnder18] = useState(
     currentData.hasChildrenUnder18 || null
   );
+
+  // Help section state
+  const [showChildANumberHelp, setShowChildANumberHelp] = useState({});
+  const [showDependentANumberHelp, setShowDependentANumberHelp] = useState({});
+  const [showPetitionANumberHelp, setShowPetitionANumberHelp] = useState({});
+  const [showPetitionReceiptHelp, setShowPetitionReceiptHelp] = useState({});
+  const [showObligationReceiptHelp, setShowObligationReceiptHelp] = useState({});
+  const [showDependentReceiptHelp, setShowDependentReceiptHelp] = useState({});
   const [childrenCount, setChildrenCount] = useState(
     currentData.childrenCount || 0
-  );
-  const [childrenLivingStatus, setChildrenLivingStatus] = useState(
-    currentData.childrenLivingStatus || null
-  );
-  const [childrenLivingWithSponsor, setChildrenLivingWithSponsor] = useState(
-    currentData.childrenLivingWithSponsor || 0
   );
   const [childrenDetails, setChildrenDetails] = useState(
     currentData.childrenDetails || []
@@ -70,18 +72,18 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     const sponsorCount = 1;
     const fianeeCount = 1;
 
-    // Count active I-134 obligations from Part A
+    // Count active I-134 obligations from Previous Sponsorships
     const activeI134Count = previousPetitions.filter(p =>
       p.uscisAction === 'Approved' && p.filedI134 === 'yes'
     ).length;
 
-    // Count other obligations from Part B
+    // Count other obligations from Other Obligations
     const otherObligCount = otherObligations.length;
 
-    // Count children living with sponsor from Part C
-    const childrenLivingCount = childrenLivingWithSponsor || 0;
+    // Count children meeting I-134 criteria from Household Members (checked boxes)
+    const childrenLivingCount = childrenDetails.filter(child => child.meetsCriteria === true).length;
 
-    // Count other dependents from Part C
+    // Count other dependents from Household Members
     const otherDepsCount = otherDependents.length;
 
     const totalHouseholdSize = sponsorCount + fianeeCount + activeI134Count +
@@ -115,8 +117,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
       otherObligations,
       hasChildrenUnder18,
       childrenCount,
-      childrenLivingStatus,
-      childrenLivingWithSponsor,
       childrenDetails,
       otherDependentsCount,
       otherDependents,
@@ -130,8 +130,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
   }, [
     hasPreviousPetitions, petitionsCount, previousPetitions,
     hasOtherObligations, otherObligationsCount, otherObligations,
-    hasChildrenUnder18, childrenCount, childrenLivingStatus,
-    childrenLivingWithSponsor, childrenDetails,
+    hasChildrenUnder18, childrenCount, childrenDetails,
     otherDependentsCount, otherDependents
   ]);
 
@@ -204,20 +203,22 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     }
   }, [otherObligationsCount]);
 
+  // Always collect details for ALL children (for I-129F), regardless of criteria
   useEffect(() => {
-    if (childrenLivingWithSponsor > childrenDetails.length) {
-      const newChildren = Array(childrenLivingWithSponsor - childrenDetails.length).fill(null).map(() => ({
+    if (childrenCount > childrenDetails.length) {
+      const newChildren = Array(childrenCount - childrenDetails.length).fill(null).map(() => ({
         firstName: '',
         middleName: '',
         lastName: '',
         dateOfBirth: '',
-        aNumber: ''
+        aNumber: '',
+        meetsCriteria: false
       }));
       setChildrenDetails([...childrenDetails, ...newChildren]);
-    } else if (childrenLivingWithSponsor < childrenDetails.length) {
-      setChildrenDetails(childrenDetails.slice(0, childrenLivingWithSponsor));
+    } else if (childrenCount < childrenDetails.length) {
+      setChildrenDetails(childrenDetails.slice(0, childrenCount));
     }
-  }, [childrenLivingWithSponsor]);
+  }, [childrenCount]);
 
   useEffect(() => {
     if (otherDependentsCount > otherDependents.length) {
@@ -265,6 +266,16 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     setPreviousPetitions(previousPetitions.filter((_, i) => i !== index));
   };
 
+  const removeOtherObligation = (index) => {
+    setOtherObligations(otherObligations.filter((_, i) => i !== index));
+    setOtherObligationsCount(otherObligations.length - 1);
+  };
+
+  const removeChild = (index) => {
+    setChildrenDetails(childrenDetails.filter((_, i) => i !== index));
+    setChildrenCount(childrenDetails.length - 1);
+  };
+
   const updateOtherObligation = (index, field, value) => {
     const updated = [...otherObligations];
     updated[index][field] = value;
@@ -291,10 +302,27 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     setChildrenDetails(updated);
   };
 
+  const addChild = () => {
+    setChildrenDetails([...childrenDetails, {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      dateOfBirth: '',
+      aNumber: '',
+      meetsCriteria: false
+    }]);
+    setChildrenCount(childrenDetails.length + 1);
+  };
+
   const updateOtherDependent = (index, field, value) => {
     const updated = [...otherDependents];
     updated[index][field] = value;
     setOtherDependents(updated);
+  };
+
+  const removeOtherDependent = (index) => {
+    setOtherDependents(otherDependents.filter((_, i) => i !== index));
+    setOtherDependentsCount(otherDependents.length - 1);
   };
 
   const addOtherDependent = () => {
@@ -311,7 +339,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
     setOtherDependentsCount(otherDependents.length + 1);
   };
 
-  // Get excluded names for Part B
+  // Get excluded names for Other Obligations
   const getExcludedNames = () => {
     return previousPetitions
       .filter(p => p.beneficiaryFirstName && p.beneficiaryLastName)
@@ -357,10 +385,10 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         </p>
       </div>
 
-      {/* PART A: Previous I-129F Petitions */}
+      {/* PREVIOUS SPONSORSHIPS */}
       <div className="space-y-4">
         <h4 className="text-base font-semibold text-gray-900">
-          Part A: Previous I-129F Petitions
+          Previous Sponsorships
         </h4>
 
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -439,18 +467,7 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
           <div className="ml-6 space-y-6 mt-6">
             {previousPetitions.map((petition, index) => (
               <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h5 className="text-base font-semibold text-gray-900">Previous Petition #{index + 1}</h5>
-                  {petitionsCount === '3+' && previousPetitions.length > 3 && (
-                    <button
-                      onClick={() => removePetition(index)}
-                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Remove
-                    </button>
-                  )}
-                </div>
+                <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Previous Petition #{index + 1}</h5>
 
                 {/* Beneficiary Name */}
                 <div>
@@ -495,9 +512,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Beneficiary's A-Number (Alien Registration Number)
                   </label>
-                  <p className="text-xs text-gray-600 mb-2">
-                    Format: 7, 8, or 9 digits. May be written with an "A" prefix (A12345678) or with dashes (123-456-789). Leave blank if they were never assigned one.
-                  </p>
                   <div className="flex">
                     <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
                       A
@@ -520,6 +534,50 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
+                  {/* Expandable help section */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPetitionANumberHelp({...showPetitionANumberHelp, [index]: !showPetitionANumberHelp[index]})}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                  >
+                    {showPetitionANumberHelp[index] ? '▼' : '▶'} Where to find this number
+                  </button>
+
+                  {showPetitionANumberHelp[index] && (
+                    <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                      <p className="font-semibold">Where to find the beneficiary's A-Number (if they have one):</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li><strong>Green Card:</strong> Front of card under "USCIS#"</li>
+                        <li><strong>Work Permit (EAD):</strong> Front of card under "USCIS#"</li>
+                        <li><strong>Visa stamp in passport:</strong> Listed as "Registration Number"</li>
+                        <li><strong>USCIS notices/letters:</strong> Near top, labeled "A#" or "USCIS A#"</li>
+                      </ul>
+                      <p className="font-semibold mt-3">Format:</p>
+                      <p>A followed by 7-9 digits (e.g., A12345678)</p>
+                      <p className="font-semibold mt-3">Don't confuse with:</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>Receipt numbers (3 letters + 10 digits like MSC1234567890)</li>
+                        <li>Green card number (13 characters on back of card)</li>
+                        <li>USCIS online account number (12 digits, no "A")</li>
+                      </ul>
+                      <p className="mt-3 italic text-gray-700">
+                        <strong>Note:</strong> Most people won't have an A-Number unless they previously had a green card, work permit, or filed for permanent residence. If they've never had U.S. immigration status, leave this blank.
+                      </p>
+                    </div>
+                  )}
+
+                  {petition.beneficiaryANumber && petition.beneficiaryANumber.replace(/^A0*/, '').length >= 7 && petition.beneficiaryANumber.replace(/^A0*/, '').length <= 9 && (
+                    <div className="text-sm text-green-600 mt-1">
+                      ✅ Valid A-Number format
+                    </div>
+                  )}
+
+                  {petition.beneficiaryANumber && petition.beneficiaryANumber.replace(/^A0*/, '').length > 0 && (petition.beneficiaryANumber.replace(/^A0*/, '').length < 7 || petition.beneficiaryANumber.replace(/^A0*/, '').length > 9) && (
+                    <div className="text-sm text-orange-600 mt-1">
+                      A-Number should be 7-9 digits (e.g., A12345678)
+                    </div>
+                  )}
                 </div>
 
                 {/* Date of Filing */}
@@ -708,35 +766,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             USCIS Receipt Number for {petition.beneficiaryFirstName ? `${petition.beneficiaryFirstName}'s` : "this"} I-134
                           </label>
-                          <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-2 space-y-2">
-                            <p className="text-xs text-gray-700">
-                              <strong>What is this?</strong>
-                            </p>
-                            <p className="text-xs text-gray-700">
-                              A unique 13-character identifier assigned when USCIS receives your form.
-                            </p>
-                            <p className="text-xs text-gray-700">
-                              <strong>Format:</strong>
-                            </p>
-                            <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
-                              <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
-                            </ul>
-                            <p className="text-xs text-gray-700 ml-4 font-medium my-1">OR</p>
-                            <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
-                              <li>IOE + 13 digits<br/><span className="italic">Example: IOE1234567890123</span></li>
-                            </ul>
-                            <p className="text-xs text-gray-700">
-                              <strong>Where to find it:</strong>
-                            </p>
-                            <ul className="text-xs text-gray-700 ml-4 list-disc">
-                              <li>I-797 Notice of Action</li>
-                              <li>Your USCIS online account</li>
-                              <li>Email or text notifications from USCIS</li>
-                            </ul>
-                            <p className="text-xs text-gray-600 italic">
-                              Leave blank if you don't have it available.
-                            </p>
-                          </div>
                           <input
                             type="text"
                             value={petition.i134ReceiptNumber}
@@ -749,6 +778,40 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                             maxLength="13"
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
                           />
+
+                          {/* Expandable help section */}
+                          <button
+                            type="button"
+                            onClick={() => setShowPetitionReceiptHelp({...showPetitionReceiptHelp, [index]: !showPetitionReceiptHelp[index]})}
+                            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                          >
+                            {showPetitionReceiptHelp[index] ? '▼' : '▶'} What is a receipt number?
+                          </button>
+
+                          {showPetitionReceiptHelp[index] && (
+                            <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                              <p className="font-semibold">What is this?</p>
+                              <p>A unique 13-character identifier assigned when USCIS receives your form.</p>
+
+                              <p className="font-semibold mt-3">Format:</p>
+                              <ul className="list-disc ml-4 space-y-1">
+                                <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
+                              </ul>
+                              <p className="ml-4 font-medium my-1">OR</p>
+                              <ul className="list-disc ml-4 space-y-1">
+                                <li>IOE + 10 numbers<br/><span className="italic">Example: IOE1234567890</span></li>
+                              </ul>
+
+                              <p className="font-semibold mt-3">Where to find it:</p>
+                              <ul className="list-disc ml-4">
+                                <li>I-797 Notice of Action</li>
+                                <li>Your USCIS online account</li>
+                                <li>Email or text notifications from USCIS</li>
+                              </ul>
+
+                              <p className="italic text-gray-700 mt-3">Leave blank if you don't have it available.</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -767,10 +830,10 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         )}
       </div>
 
-      {/* PART B: Other Ongoing Financial Obligations */}
+      {/* OTHER OBLIGATIONS */}
       <div className={`space-y-4 border-t pt-8 ${needsIMBRAWaiver ? 'opacity-50 pointer-events-none' : ''}`}>
         <h4 className="text-base font-semibold text-gray-900">
-          Part B: Other Ongoing Financial Obligations
+          Other Obligations
         </h4>
 
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
@@ -847,18 +910,30 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
         </div>
 
         {hasOtherObligations === 'yes' && (
-          <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <label className="block text-sm font-medium text-gray-900">
-              How many people are you still financially obligated to support (not including anyone listed above)?
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={otherObligationsCount}
-              onChange={(e) => setOtherObligationsCount(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter number..."
-            />
+          <div className="mt-8 space-y-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm font-semibold text-gray-900 mb-2">
+                How many people are you still financially obligated to support (not including anyone listed above)?
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {[1, 2, 3, 4, 5].map(num => (
+                <label key={num} className="flex items-center justify-center p-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="otherObligationsCount"
+                    value={num}
+                    checked={otherObligationsCount === num}
+                    onChange={() => setOtherObligationsCount(num)}
+                    className="sr-only"
+                  />
+                  <span className={`text-sm font-medium ${otherObligationsCount === num ? 'text-blue-600' : 'text-gray-900'}`}>
+                    {num === 5 ? '5+' : num}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         )}
 
@@ -866,7 +941,18 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
           <div className="ml-6 space-y-6 mt-6">
             {otherObligations.map((obligation, index) => (
               <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
-                <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Individual #{index + 1}</h5>
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h5 className="text-base font-semibold text-gray-900">Individual #{index + 1}</h5>
+                  {otherObligationsCount >= 5 && otherObligations.length > 5 && (
+                    <button
+                      onClick={() => removeOtherObligation(index)}
+                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
 
                 {/* Form Type */}
                 <div>
@@ -975,35 +1061,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     USCIS Receipt Number
                   </label>
-                  <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-2 space-y-2">
-                    <p className="text-xs text-gray-700">
-                      <strong>What is this?</strong>
-                    </p>
-                    <p className="text-xs text-gray-700">
-                      A unique 13-character identifier assigned when USCIS receives your form.
-                    </p>
-                    <p className="text-xs text-gray-700">
-                      <strong>Format:</strong>
-                    </p>
-                    <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
-                      <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
-                    </ul>
-                    <p className="text-xs text-gray-700 ml-4 font-medium my-1">OR</p>
-                    <ul className="text-xs text-gray-700 ml-4 list-disc space-y-1">
-                      <li>IOE + 13 digits<br/><span className="italic">Example: IOE1234567890123</span></li>
-                    </ul>
-                    <p className="text-xs text-gray-700">
-                      <strong>Where to find it:</strong>
-                    </p>
-                    <ul className="text-xs text-gray-700 ml-4 list-disc">
-                      <li>I-797 Notice of Action</li>
-                      <li>Your USCIS online account</li>
-                      <li>Email or text notifications from USCIS</li>
-                    </ul>
-                    <p className="text-xs text-gray-600 italic">
-                      Leave blank if you don't have it available.
-                    </p>
-                  </div>
                   <input
                     type="text"
                     value={obligation.receiptNumber}
@@ -1016,25 +1073,61 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                     maxLength="13"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
                   />
+
+                  {/* Expandable help section */}
+                  <button
+                    type="button"
+                    onClick={() => setShowObligationReceiptHelp({...showObligationReceiptHelp, [index]: !showObligationReceiptHelp[index]})}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                  >
+                    {showObligationReceiptHelp[index] ? '▼' : '▶'} What is a receipt number?
+                  </button>
+
+                  {showObligationReceiptHelp[index] && (
+                    <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                      <p className="font-semibold">What is this?</p>
+                      <p>A unique 13-character identifier assigned when USCIS receives your form.</p>
+
+                      <p className="font-semibold mt-3">Format:</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
+                      </ul>
+                      <p className="ml-4 font-medium my-1">OR</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>IOE + 10 numbers<br/><span className="italic">Example: IOE1234567890</span></li>
+                      </ul>
+
+                      <p className="font-semibold mt-3">Where to find it:</p>
+                      <ul className="list-disc ml-4">
+                        <li>I-797 Notice of Action</li>
+                        <li>Your USCIS online account</li>
+                        <li>Email or text notifications from USCIS</li>
+                      </ul>
+
+                      <p className="italic text-gray-700 mt-3">Leave blank if you don't have it available.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
 
-            <button
-              onClick={addOtherObligation}
-              className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
-            >
-              <Plus className="h-5 w-5" />
-              Add Another Individual
-            </button>
+            {otherObligationsCount === 5 && (
+              <button
+                onClick={addOtherObligation}
+                className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Another Individual
+              </button>
+            )}
           </div>
         )}
       </div>
 
-      {/* PART C: Children Under 18 & Other Household Members */}
+      {/* HOUSEHOLD MEMBERS */}
       <div className={`space-y-4 border-t pt-8 ${needsIMBRAWaiver ? 'opacity-50 pointer-events-none' : ''}`}>
         <h4 className="text-base font-semibold text-gray-900">
-          Part C: Children Under 18 & Other Household Members
+          Household Members
         </h4>
 
         {/* Children Question */}
@@ -1059,8 +1152,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                   setHasChildrenUnder18(e.target.value);
                   if (e.target.value === 'no') {
                     setChildrenCount(0);
-                    setChildrenLivingStatus(null);
-                    setChildrenLivingWithSponsor(0);
                     setChildrenDetails([]);
                   }
                 }}
@@ -1103,75 +1194,29 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
 
             {childrenCount > 0 && (
               <>
-                <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                {/* First, collect details for ALL children (for I-129F Items 49.a & 49.b) */}
+                <div className="ml-6 space-y-4 mt-6">
                   <p className="text-sm font-medium text-gray-900">
-                    Do any of the children under 18 meet the criteria below?
+                    Please provide details for each child under 18:
                   </p>
-                  <ul className="text-sm text-gray-700 ml-6 list-disc space-y-2 mt-3 mb-3">
-                    <li>You claimed them as a dependent on your most recent Federal income tax return, OR</li>
-                    <li>They have lived with you for at least the past 6 months</li>
-                  </ul>
-                  <p className="text-xs text-gray-600 mb-3 italic">
-                    💡 Note: If you did not file a Federal income tax return, select "No, none of them."
+                  <p className="text-xs text-gray-700">
+                    This information is required for Form I-129F (Items 48, 49.a, 49.b).
                   </p>
-                  <div className="space-y-2 mt-4">
-                    {['all', 'some', 'none'].map(option => (
-                      <label key={option} className="flex items-center space-x-3 p-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="childrenLivingStatus"
-                          value={option}
-                          checked={childrenLivingStatus === option}
-                          onChange={(e) => {
-                            setChildrenLivingStatus(e.target.value);
-                            if (e.target.value === 'all') {
-                              setChildrenLivingWithSponsor(childrenCount);
-                            } else if (e.target.value === 'none') {
-                              setChildrenLivingWithSponsor(0);
-                              setChildrenDetails([]);
-                            }
-                          }}
-                          className="h-4 w-4 text-blue-600"
-                        />
-                        <span className="text-sm text-gray-900">
-                          {option === 'all' ? 'Yes, all of them' :
-                           option === 'some' ? 'Yes, some of them' :
-                           'No, none of them'}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
 
-                {childrenLivingStatus === 'some' && (
-                  <div className="ml-6 space-y-4 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <label className="block text-sm font-medium text-gray-900">
-                      How many of your children under 18 did you claim as dependents?
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max={childrenCount}
-                      value={childrenLivingWithSponsor}
-                      onChange={(e) => setChildrenLivingWithSponsor(Math.min(parseInt(e.target.value) || 0, childrenCount))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter number..."
-                    />
-                  </div>
-                )}
-
-                {childrenLivingWithSponsor > 0 && (
-                  <div className="ml-6 space-y-4 mt-6">
-                    <p className="text-sm font-medium text-gray-900">
-                      Please provide details for each child you claimed as a dependent:
-                    </p>
-                    <p className="text-xs text-gray-700">
-                      We need complete information for household size calculation (required for Form I-134).
-                    </p>
-
-                    {childrenDetails.map((child, index) => (
+                  {childrenDetails.map((child, index) => (
                       <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
-                        <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Child #{index + 1}</h5>
+                        <div className="flex justify-between items-center border-b pb-3">
+                          <h5 className="text-base font-semibold text-gray-900">Child #{index + 1}</h5>
+                          {childrenCount >= 5 && childrenDetails.length > 5 && (
+                            <button
+                              onClick={() => removeChild(index)}
+                              className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove
+                            </button>
+                          )}
+                        </div>
 
                         {/* Name */}
                         <div>
@@ -1228,9 +1273,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             A-Number (if any)
                           </label>
-                          <p className="text-xs text-gray-600 mb-2">
-                            Leave blank if your child doesn't have one.
-                          </p>
                           <div className="flex">
                             <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l font-medium">
                               A
@@ -1253,11 +1295,82 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                               className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
+
+                          {/* Expandable help section */}
+                          <button
+                            type="button"
+                            onClick={() => setShowChildANumberHelp({...showChildANumberHelp, [index]: !showChildANumberHelp[index]})}
+                            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                          >
+                            {showChildANumberHelp[index] ? '▼' : '▶'} Where to find this number
+                          </button>
+
+                          {showChildANumberHelp[index] && (
+                            <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                              <p className="font-semibold">Where to find your child's A-Number (if they have one):</p>
+                              <ul className="list-disc ml-4 space-y-1">
+                                <li><strong>Green Card:</strong> Front of card under "USCIS#"</li>
+                                <li><strong>Work Permit (EAD):</strong> Front of card under "USCIS#"</li>
+                                <li><strong>Visa stamp in passport:</strong> Listed as "Registration Number"</li>
+                                <li><strong>USCIS notices/letters:</strong> Near top, labeled "A#" or "USCIS A#"</li>
+                              </ul>
+                              <p className="font-semibold mt-3">Format:</p>
+                              <p>A followed by 7-9 digits (e.g., A12345678)</p>
+                              <p className="font-semibold mt-3">Don't confuse with:</p>
+                              <ul className="list-disc ml-4 space-y-1">
+                                <li>Receipt numbers (3 letters + 10 digits like MSC1234567890)</li>
+                                <li>Green card number (13 characters on back of card)</li>
+                                <li>USCIS online account number (12 digits, no "A")</li>
+                              </ul>
+                              <p className="mt-3 italic text-gray-700">
+                                <strong>Note:</strong> Most children won't have an A-Number unless they previously had a green card, work permit, or filed for permanent residence. If they've never had U.S. immigration status, leave this blank.
+                              </p>
+                            </div>
+                          )}
+
+                          {child.aNumber && child.aNumber.replace(/^A0*/, '').length >= 7 && child.aNumber.replace(/^A0*/, '').length <= 9 && (
+                            <div className="text-sm text-green-600 mt-1">
+                              ✅ Valid A-Number format
+                            </div>
+                          )}
+
+                          {child.aNumber && child.aNumber.replace(/^A0*/, '').length > 0 && (child.aNumber.replace(/^A0*/, '').length < 7 || child.aNumber.replace(/^A0*/, '').length > 9) && (
+                            <div className="text-sm text-orange-600 mt-1">
+                              A-Number should be 7-9 digits (e.g., A12345678)
+                            </div>
+                          )}
+                        </div>
+                        {/* Checkbox for meeting I-134 criteria */}
+                        <div className="pt-3 border-t border-gray-200">
+                          <label className="flex items-start space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={child.meetsCriteria || false}
+                              onChange={(e) => updateChild(index, 'meetsCriteria', e.target.checked)}
+                              className="h-4 w-4 text-blue-600 mt-1"
+                            />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900">This child meets the criteria below:</span>
+                              <ul className="text-xs text-gray-600 ml-4 list-disc space-y-1 mt-1">
+                                <li>I claimed them as a dependent on my most recent Federal income tax return, OR</li>
+                                <li>They have lived with me for at least the past 6 months</li>
+                              </ul>
+                            </div>
+                          </label>
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
+
+                    {childrenCount === 5 && (
+                      <button
+                        onClick={addChild}
+                        className="w-full px-4 py-3 bg-blue-50 text-blue-700 border-2 border-blue-300 rounded-lg hover:bg-blue-100 font-medium flex items-center justify-center gap-2"
+                      >
+                        <Plus className="h-5 w-5" />
+                        Add Another Child
+                      </button>
+                    )}
+                </div>
               </>
             )}
           </>
@@ -1277,8 +1390,8 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
               <ul className="text-xs text-yellow-900 space-y-1 ml-4 list-disc">
                 <li>Yourself</li>
                 <li>{fianceName}</li>
-                <li>Anyone from "Previous Petitions" (Part A) above</li>
-                <li>Children you already listed in Part C above</li>
+                <li>Anyone from "Previous Sponsorships" above</li>
+                <li>Children you already listed in "Household Members" above</li>
               </ul>
             </div>
             <div className="bg-white border border-gray-200 rounded p-3 mb-3">
@@ -1321,7 +1434,18 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
           <div className="ml-6 space-y-6 mt-6">
             {otherDependents.map((dependent, index) => (
               <div key={index} className="border-2 border-gray-300 rounded-lg p-6 space-y-4 bg-white">
-                <h5 className="text-base font-semibold text-gray-900 border-b pb-3">Person #{index + 1}</h5>
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h5 className="text-base font-semibold text-gray-900">Person #{index + 1}</h5>
+                  {otherDependentsCount >= 5 && otherDependents.length > 5 && (
+                    <button
+                      onClick={() => removeOtherDependent(index)}
+                      className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
 
                 {/* Name */}
                 <div>
@@ -1426,6 +1550,50 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-r focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
+                  {/* Expandable help section */}
+                  <button
+                    type="button"
+                    onClick={() => setShowDependentANumberHelp({...showDependentANumberHelp, [index]: !showDependentANumberHelp[index]})}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                  >
+                    {showDependentANumberHelp[index] ? '▼' : '▶'} Where to find this number
+                  </button>
+
+                  {showDependentANumberHelp[index] && (
+                    <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                      <p className="font-semibold">Where to find the A-Number (if they have one):</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li><strong>Green Card:</strong> Front of card under "USCIS#"</li>
+                        <li><strong>Work Permit (EAD):</strong> Front of card under "USCIS#"</li>
+                        <li><strong>Visa stamp in passport:</strong> Listed as "Registration Number"</li>
+                        <li><strong>USCIS notices/letters:</strong> Near top, labeled "A#" or "USCIS A#"</li>
+                      </ul>
+                      <p className="font-semibold mt-3">Format:</p>
+                      <p>A followed by 7-9 digits (e.g., A12345678)</p>
+                      <p className="font-semibold mt-3">Don't confuse with:</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>Receipt numbers (3 letters + 10 digits like MSC1234567890)</li>
+                        <li>Green card number (13 characters on back of card)</li>
+                        <li>USCIS online account number (12 digits, no "A")</li>
+                      </ul>
+                      <p className="mt-3 italic text-gray-700">
+                        <strong>Note:</strong> Most people won't have an A-Number unless they previously had a green card, work permit, or filed for permanent residence. If they've never had U.S. immigration status, leave this blank.
+                      </p>
+                    </div>
+                  )}
+
+                  {dependent.aNumber && dependent.aNumber.replace(/^A0*/, '').length >= 7 && dependent.aNumber.replace(/^A0*/, '').length <= 9 && (
+                    <div className="text-sm text-green-600 mt-1">
+                      ✅ Valid A-Number format
+                    </div>
+                  )}
+
+                  {dependent.aNumber && dependent.aNumber.replace(/^A0*/, '').length > 0 && (dependent.aNumber.replace(/^A0*/, '').length < 7 || dependent.aNumber.replace(/^A0*/, '').length > 9) && (
+                    <div className="text-sm text-orange-600 mt-1">
+                      A-Number should be 7-9 digits (e.g., A12345678)
+                    </div>
+                  )}
                 </div>
 
                 {/* Receipt Number */}
@@ -1442,10 +1610,44 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
                       if (val.length > 13) val = val.slice(0, 13);
                       updateOtherDependent(index, 'receiptNumber', val);
                     }}
-                    placeholder="MSC2190123456"
+                    placeholder="MSC2190123456 or IOE1234567890123"
                     maxLength="13"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 uppercase"
                   />
+
+                  {/* Expandable help section */}
+                  <button
+                    type="button"
+                    onClick={() => setShowDependentReceiptHelp({...showDependentReceiptHelp, [index]: !showDependentReceiptHelp[index]})}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 mt-2"
+                  >
+                    {showDependentReceiptHelp[index] ? '▼' : '▶'} What is a receipt number?
+                  </button>
+
+                  {showDependentReceiptHelp[index] && (
+                    <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded p-3 space-y-2 mt-2">
+                      <p className="font-semibold">What is this?</p>
+                      <p>A unique 13-character identifier assigned when USCIS receives your form.</p>
+
+                      <p className="font-semibold mt-3">Format:</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>3 letters (MSC, EAC, WAC, LIN, SRC, NBC, TSC, VSC, or CSC) + 10 numbers<br/><span className="italic">Example: MSC2190123456</span></li>
+                      </ul>
+                      <p className="ml-4 font-medium my-1">OR</p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>IOE + 10 numbers<br/><span className="italic">Example: IOE1234567890</span></li>
+                      </ul>
+
+                      <p className="font-semibold mt-3">Where to find it:</p>
+                      <ul className="list-disc ml-4">
+                        <li>I-797 Notice of Action</li>
+                        <li>Your USCIS online account</li>
+                        <li>Email or text notifications from USCIS</li>
+                      </ul>
+
+                      <p className="italic text-gray-700 mt-3">Leave blank if you don't have it available.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1477,9 +1679,9 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
               <ul className="ml-4 space-y-1">
                 <li>• You: <strong>1 person</strong></li>
                 <li>• {fianceName}: <strong>1 person</strong></li>
-                <li>• Active I-134 obligations (from Part A): <strong>{householdData.breakdown.activeI134} {householdData.breakdown.activeI134 === 1 ? 'person' : 'people'}</strong></li>
-                <li>• Other financial obligations (from Part B): <strong>{householdData.breakdown.otherObligations} {householdData.breakdown.otherObligations === 1 ? 'person' : 'people'}</strong></li>
-                <li>• Children under 18 living with you: <strong>{householdData.breakdown.childrenLiving} {householdData.breakdown.childrenLiving === 1 ? 'child' : 'children'}</strong></li>
+                <li>• Active I-134 obligations (from Previous Sponsorships): <strong>{householdData.breakdown.activeI134} {householdData.breakdown.activeI134 === 1 ? 'person' : 'people'}</strong></li>
+                <li>• Other financial obligations (from Other Obligations): <strong>{householdData.breakdown.otherObligations} {householdData.breakdown.otherObligations === 1 ? 'person' : 'people'}</strong></li>
+                <li>• Children under 18 meeting criteria: <strong>{householdData.breakdown.childrenLiving} {householdData.breakdown.childrenLiving === 1 ? 'child' : 'children'}</strong></li>
                 <li>• Other dependents: <strong>{householdData.breakdown.otherDependents} {householdData.breakdown.otherDependents === 1 ? 'person' : 'people'}</strong></li>
               </ul>
             </div>

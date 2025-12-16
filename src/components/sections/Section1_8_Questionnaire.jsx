@@ -1239,7 +1239,7 @@ export const QuestionnaireSteps = ({
     );
   };
 
-  // Q4d: Is this from current employer from Section 1.6?
+  // Q4d: Is this from current employer from Section 2.6?
   const renderQ4d = () => {
     const mostRecentEmployer = mostRecentEmployment?.employer || 'your current employer';
 
@@ -1250,7 +1250,7 @@ export const QuestionnaireSteps = ({
             Is this W-2 income from {mostRecentEmployer}?
           </h3>
           <p className="text-sm text-gray-600">
-            We're checking if this is your current employment from Section 1.6
+            We're checking if this is your current employment from Section 2.6
           </p>
         </div>
 
@@ -2143,7 +2143,7 @@ export const QuestionnaireSteps = ({
     </div>
   );
 
-  // Q8: Employment check (routes based on Section 1.6 data)
+  // Q8: Employment check (routes based on Section 2.6 data)
   const renderQ8 = () => {
     const employmentType = mostRecentEmployment?.type || '';
 

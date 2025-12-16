@@ -29,7 +29,7 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
   const AOS_ASSET_MULTIPLIER = 3; // Form I-864 uses 3x multiplier
   const AOS_POVERTY_GUIDELINE_PERCENTAGE = 125; // Form I-864 requires 125%
 
-  // Get K-1 requirements from Section 1.7
+  // Get K-1 requirements from Section 2.7
   const k1MinimumIncomeRequired = currentData.minimumRequiredIncome || 30000;
   const k1HouseholdSize = currentData.householdSize || 2;
 
@@ -1019,7 +1019,7 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
             <h2 className="text-2xl font-bold text-gray-900">
-              Section 1.8: Financial Information - Income Proof
+              Section 2.8: Financial Information - Income Proof
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               We'll help you gather the right documents to prove your income meets USCIS requirements.
@@ -1034,7 +1034,7 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
             <h2 className="text-2xl font-bold text-gray-900">
-              Section 1.8: Financial Information - Income Proof
+              Section 2.8: Financial Information - Income Proof
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               We'll help you gather the right documents to prove your income meets USCIS requirements.
@@ -1088,7 +1088,7 @@ const Section1_8 = ({ currentData = {}, updateField, mostRecentEmployment = {} }
               ) : (
                 <div className="flex items-center space-x-3 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2">
                   <p className="text-xs text-yellow-900">
-                    Reset all answers in Section 1.8? (Other sections are safe)
+                    Reset all answers in Section 2.8? (Other sections are safe)
                   </p>
                   <button
                     onClick={resetQuestionnaireWithConfirm}
