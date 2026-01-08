@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, User } from 'lucide-react';
+import { ChevronDown, ChevronRight, User, AlertCircle } from 'lucide-react';
 
 /**
  * NavigationPanel Component - SECTION-AWARE VERSION
@@ -63,8 +63,19 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
   };
 
   const navigateToScreen = (sectionId, subsectionId) => {
-    const path = `/${sectionId}/${subsectionId}`;
-    navigate(path);
+    // Find the section and subsection
+    const section = sections.find(s => s.id === sectionId);
+    const subsection = section?.subsections.find(sub => sub.id === subsectionId);
+
+    // Check if subsection uses oneQuestionPerScreen format (like Section 2)
+    if (subsection?.oneQuestionPerScreen && subsection?.screens && subsection.screens.length > 0) {
+      const firstScreen = subsection.screens[0];
+      const path = `/${sectionId}/${firstScreen.id}`;
+      navigate(path);
+    } else {
+      const path = `/${sectionId}/${subsectionId}`;
+      navigate(path);
+    }
   };
 
   const navigateToSection = (section) => {
@@ -81,6 +92,19 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
 
   const isSectionActive = (sectionTitle) => {
     return currentSection && currentSection.title === sectionTitle;
+  };
+
+  // Check if a subsection should show a warning icon
+  const hasSubsectionWarning = (subsectionId, targetSection) => {
+    // Section 5: Employment History incomplete indicator
+    if (subsectionId === 'employment-timeline') {
+      if (targetSection.id === 'section-5-employment') {
+        return currentData.section5_sponsor_incomplete;
+      } else if (targetSection.id === 'section-5-employment-beneficiary') {
+        return currentData.section5_beneficiary_incomplete;
+      }
+    }
+    return false;
   };
 
   const renderSubsections = (profileType) => {
@@ -105,22 +129,29 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
 
     return (
       <div className="space-y-1">
-        {targetSection.subsections.map(subsection => (
-          <button
-            key={subsection.id}
-            onClick={() => navigateToScreen(targetSection.id, subsection.id)}
-            className={`
-              w-full text-left px-4 py-2 text-sm rounded
-              transition-colors duration-150
-              ${isActive(targetSection.id, subsection.id)
-                ? 'bg-blue-100 text-blue-700 font-medium'
-                : 'text-gray-600 hover:bg-gray-100'
-              }
-            `}
-          >
-            {subsection.title}
-          </button>
-        ))}
+        {targetSection.subsections.map(subsection => {
+          const showWarning = hasSubsectionWarning(subsection.id, targetSection);
+
+          return (
+            <button
+              key={subsection.id}
+              onClick={() => navigateToScreen(targetSection.id, subsection.id)}
+              className={`
+                w-full text-left px-4 py-2 text-sm rounded
+                transition-colors duration-150 flex items-center justify-between
+                ${isActive(targetSection.id, subsection.id)
+                  ? 'bg-blue-100 text-blue-700 font-medium'
+                  : 'text-gray-600 hover:bg-gray-100'
+                }
+              `}
+            >
+              <span>{subsection.title}</span>
+              {showWarning && (
+                <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+              )}
+            </button>
+          );
+        })}
       </div>
     );
   };
