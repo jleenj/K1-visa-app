@@ -58,6 +58,9 @@ export const stateMarriageLaws = {
 // States that allow adopted sibling marriage
 export const adoptedSiblingsAllowedStates = ['CO', 'HI', 'KS', 'MA', 'RI', 'VA'];
 
+// State that prohibits step-sibling marriage (all others allow it)
+export const stepSiblingsProhibitedStates = ['VA'];
+
 // Helper function to check if first cousins can marry in a state
 export const canFirstCousinsMarry = (stateCode) => {
   return stateMarriageLaws[stateCode]?.firstCousinsAllowed || false;
@@ -71,4 +74,9 @@ export const getMinimumMarriageAge = (stateCode) => {
 // Helper function to check if adopted siblings can marry in a state
 export const canAdoptedSiblingsMarry = (stateCode) => {
   return adoptedSiblingsAllowedStates.includes(stateCode);
+};
+
+// Helper function to check if step-siblings can marry in a state
+export const canStepSiblingsMarry = (stateCode) => {
+  return !stepSiblingsProhibitedStates.includes(stateCode);
 };

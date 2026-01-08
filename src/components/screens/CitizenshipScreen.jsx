@@ -33,8 +33,15 @@ const CitizenshipScreen = ({
 
   const isFirst = isFirstScreen(location.pathname, userRole);
 
-  // Field definitions from App.tsx lines 590, 619-630 (sponsor only)
+  // Field definitions from App.tsx lines 590, 619-630
+  // Per QUESTIONNAIRE_SECTION_STRUCTURE.md lines 52, 60-62:
+  // - Country of Citizenship: BENEFICIARY ONLY
+  // - U.S. Citizenship method & Certificates: SPONSOR ONLY
+  // - SSN: Required for SPONSOR, Optional for BENEFICIARY
+  // - A-Number: BOTH
+  // - USCIS Online Account: SPONSOR ONLY
   const citizenshipFields = isSponsor ? [
+    // SPONSOR fields
     { id: 'sponsorSSN', label: 'Social Security Number', type: 'ssn', required: true },
     { id: 'sponsorANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false },
     { id: 'sponsorUSCISAccount', label: 'USCIS Online Account Number (if any)', type: 'uscis-account', required: false },
@@ -44,8 +51,10 @@ const CitizenshipScreen = ({
     { id: 'sponsorCertIssueDate', label: 'Date of Issuance', type: 'date', required: true, showWhen: (data) => data.sponsorHasCertificate === 'Yes' },
     { id: 'sponsorCertIssuePlace', label: 'Place of Issuance', type: 'cert-place', required: true, showWhen: (data) => data.sponsorHasCertificate === 'Yes' }
   ] : [
-    // Beneficiary citizenship fields would go here
-    { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'select', options: ['Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Australia', 'Austria', 'Bangladesh', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China', 'Colombia', 'Denmark', 'Egypt', 'France', 'Germany', 'Greece', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Japan', 'Kenya', 'Mexico', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Russia', 'Saudi Arabia', 'South Africa', 'South Korea', 'Spain', 'Sweden', 'Switzerland', 'Thailand', 'Turkey', 'Ukraine', 'United Kingdom', 'Venezuela', 'Vietnam'], required: true }
+    // BENEFICIARY fields
+    { id: 'beneficiaryCitizenship', label: 'Country of Citizenship or Nationality', type: 'country', required: true },
+    { id: 'beneficiarySSN', label: 'Social Security Number (if any)', type: 'ssn', required: false },
+    { id: 'beneficiaryANumber', label: 'USCIS File Number (A-Number) if any', type: 'a-number', required: false }
   ];
 
   // Check if all required fields are filled
@@ -66,7 +75,7 @@ const CitizenshipScreen = ({
 
       return hasBasicFields;
     } else {
-      // Beneficiary just needs citizenship
+      // Beneficiary only needs Country of Citizenship (SSN and A-Number are optional)
       return currentData.beneficiaryCitizenship;
     }
   };

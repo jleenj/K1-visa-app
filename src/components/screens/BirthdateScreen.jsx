@@ -47,11 +47,31 @@ const BirthdateScreen = ({
     { id: `${prefix}BirthLocation`, label: 'Place of Birth', type: 'birth-location', required: true }
   ];
 
+  // Helper to validate birth location is complete
+  const isBirthLocationComplete = (birthLocation) => {
+    if (!birthLocation) return false;
+    const { city, country } = birthLocation;
+
+    // Must have country and city
+    if (!country || country.trim() === '') return false;
+    if (!city || city.trim() === '') return false;
+
+    return true;
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    const dob = currentData[`${prefix}DOB`];
+    const birthLocation = currentData[`${prefix}BirthLocation`];
+
+    return dob && isBirthLocationComplete(birthLocation);
+  };
+
   return (
     <ScreenLayout
       showBackButton={!isFirst}
       onNext={handleNext}
-      nextButtonDisabled={!currentData[`${prefix}DOB`] || !currentData[`${prefix}BirthLocation`]}
+      nextButtonDisabled={!isFormValid()}
     >
       {/* Screen Header */}
       <div className="mb-8">

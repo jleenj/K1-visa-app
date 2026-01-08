@@ -50,11 +50,20 @@ const NameScreen = ({
     );
   }
 
+  // Check if all required fields are filled (and not just whitespace)
+  const isFormValid = () => {
+    const firstName = currentData[`${prefix}FirstName`];
+    const lastName = currentData[`${prefix}LastName`];
+
+    return firstName && firstName.trim() !== '' &&
+           lastName && lastName.trim() !== '';
+  };
+
   return (
     <ScreenLayout
       showBackButton={!isFirst}
       onNext={handleNext}
-      nextButtonDisabled={!currentData[`${prefix}FirstName`] || !currentData[`${prefix}LastName`]}
+      nextButtonDisabled={!isFormValid()}
     >
       {/* Screen Header */}
       <div className="mb-8">

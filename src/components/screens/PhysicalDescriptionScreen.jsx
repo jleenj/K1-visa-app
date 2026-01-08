@@ -34,7 +34,11 @@ const PhysicalDescriptionScreen = ({
   const isFirst = isFirstScreen(location.pathname, userRole);
 
   // Field definitions from App.tsx lines 589, 593-616
-  const physicalFields = [
+  // Per QUESTIONNAIRE_SECTION_STRUCTURE.md lines 64-71:
+  // - Sex: BOTH
+  // - Ethnicity, Race, Height, Weight, Eye Color, Hair Color: SPONSOR ONLY
+  const physicalFields = isSponsor ? [
+    // SPONSOR: All 7 fields
     {
       id: `${prefix}Sex`,
       label: 'Sex',
@@ -73,17 +77,35 @@ const PhysicalDescriptionScreen = ({
       options: ['Bald (No hair)', 'Black', 'Blonde', 'Brown', 'Gray', 'Red', 'Sandy', 'White', 'Unknown/Other'],
       required: true
     }
+  ] : [
+    // BENEFICIARY: ONLY Sex field
+    {
+      id: `${prefix}Sex`,
+      label: 'Sex',
+      type: 'select',
+      options: ['Male', 'Female'],
+      required: true,
+      helpText: 'Please note: Starting January 2025, USCIS made the decision to recognize only two biological sexes - male and female - on all immigration forms.'
+    }
   ];
 
   // Check if all required fields are filled
   const isFormValid = () => {
-    return currentData[`${prefix}Sex`] &&
-           currentData[`${prefix}Ethnicity`] &&
-           currentData[`${prefix}Race`] &&
-           currentData[`${prefix}Height`] &&
-           currentData[`${prefix}Weight`] &&
-           currentData[`${prefix}EyeColor`] &&
-           currentData[`${prefix}HairColor`];
+    if (isSponsor) {
+      // Sponsor needs all 7 fields
+      // Note: Race is a multi-select (array), so check length > 0
+      const raceArray = currentData[`${prefix}Race`] || [];
+      return currentData[`${prefix}Sex`] &&
+             currentData[`${prefix}Ethnicity`] &&
+             raceArray.length > 0 &&
+             currentData[`${prefix}Height`] &&
+             currentData[`${prefix}Weight`] &&
+             currentData[`${prefix}EyeColor`] &&
+             currentData[`${prefix}HairColor`];
+    } else {
+      // Beneficiary only needs Sex
+      return currentData[`${prefix}Sex`];
+    }
   };
 
   return (

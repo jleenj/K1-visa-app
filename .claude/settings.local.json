@@ -24,7 +24,15 @@
       "Bash(npm install:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(/bashes)"
+      "Bash(/bashes)",
+      "Bash(del:*)",
+      "Bash(find:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(git log:*)",
+      "Bash(python:*)",
+      "Bash(git stash push:*)"
     ],
     "deny": [],
     "ask": []

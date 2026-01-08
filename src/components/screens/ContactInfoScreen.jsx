@@ -33,19 +33,58 @@ const ContactInfoScreen = ({
 
   const isFirst = isFirstScreen(location.pathname, userRole);
 
-  // Field definitions from App.tsx lines 640-644
+  // Field definitions per QUESTIONNAIRE_SECTION_STRUCTURE.md lines 38-41
   const contactFields = [
     { id: `${prefix}Email`, label: 'Email Address', type: 'smart-email', required: true },
-    { id: `${prefix}Newsletter`, label: 'Keep me informed about immigration policy changes, news, and updates that may affect my case', type: 'checkbox', required: false, hideLabel: true },
     { id: `${prefix}DaytimePhone`, label: 'Daytime Phone Number', type: 'international-phone', required: true },
     { id: `${prefix}MobilePhone`, label: 'Mobile Phone Number', type: 'international-phone', required: false }
   ];
+
+  // Helper to validate email is complete
+  const isEmailComplete = (email) => {
+    if (!email) return false;
+    const { localPart, domain, customDomain } = email;
+
+    // Must have local part
+    if (!localPart || localPart.trim() === '') return false;
+
+    // Must have domain
+    if (!domain || domain.trim() === '') return false;
+
+    // If domain is 'other', must have customDomain
+    if (domain === 'other' && (!customDomain || customDomain.trim() === '')) return false;
+
+    return true;
+  };
+
+  // Helper to validate phone is complete
+  const isPhoneComplete = (phone) => {
+    if (!phone) return false;
+    const { country, number } = phone;
+
+    // Must have country (defaults to 'US', so check if number exists)
+    if (!number || number.trim() === '') return false;
+
+    // Check minimum digits based on country
+    const phoneDigits = number.replace(/\D/g, '').length;
+    const minDigits = (country === 'US' || country === 'CA') ? 10 : 7;
+
+    return phoneDigits >= minDigits;
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    const email = currentData[`${prefix}Email`];
+    const daytimePhone = currentData[`${prefix}DaytimePhone`];
+
+    return isEmailComplete(email) && isPhoneComplete(daytimePhone);
+  };
 
   return (
     <ScreenLayout
       showBackButton={!isFirst}
       onNext={handleNext}
-      nextButtonDisabled={!currentData[`${prefix}Email`] || !currentData[`${prefix}DaytimePhone`]}
+      nextButtonDisabled={!isFormValid()}
     >
       {/* Screen Header */}
       <div className="mb-8">

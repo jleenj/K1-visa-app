@@ -1,0 +1,214 @@
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import ScreenLayout from '../../ScreenLayout';
+import FieldRenderer from '../../../utils/FieldRenderer';
+import { getNextScreen, getPreviousScreen, isFirstScreen } from '../../../utils/navigationUtils';
+
+/**
+ * PlacesSince18Screen - Section 3, Places Lived Since Age 18
+ * (Sponsor only, shown only if age 23+)
+ *
+ * Shows states/countries where sponsor has lived since turning 18,
+ * auto-extracted from addresses with option to add additional places
+ * from before the 5-year period.
+ */
+const PlacesSince18Screen = ({
+  currentData,
+  updateField,
+  fieldErrors,
+  setFieldErrors,
+  touchedFields,
+  setTouchedFields,
+  userRole
+}) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Calculate age and date when turned 18
+  const userDOB = currentData.sponsorDOB;
+  const calculateAge = (dob) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const getAgeAt18Date = (dob) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const age18Date = new Date(birthDate);
+    age18Date.setFullYear(birthDate.getFullYear() + 18);
+    return age18Date;
+  };
+
+  const userAge = calculateAge(userDOB);
+  const age18Date = getAgeAt18Date(userDOB);
+
+  // Redirect if user shouldn't be on this screen (age < 23)
+  useEffect(() => {
+    if (userAge !== null && userAge < 23) {
+      // User is too young - skip to next screen
+      const nextPath = getNextScreen(location.pathname, userRole, currentData);
+      if (nextPath) {
+        navigate(nextPath, { replace: true });
+      }
+    }
+  }, [userAge, navigate, location.pathname, userRole, currentData]);
+
+  // If user is under 23, don't render - we're redirecting
+  if (userAge !== null && userAge < 23) {
+    return null;
+  }
+
+  const formatDateRange = () => {
+    if (!age18Date) return '';
+    const options = { year: 'numeric', month: 'long' };
+    return age18Date.toLocaleDateString('en-US', options);
+  };
+
+  // Get existing places from current and previous addresses
+  const getExistingPlaces = () => {
+    const places = new Set();
+
+    // Add current address location
+    const mailingDifferent = currentData.sponsorMailingDifferent;
+    const currentAddress = mailingDifferent === 'Yes'
+      ? currentData.sponsorCurrentAddress
+      : currentData.sponsorMailingAddress;
+
+    if (currentAddress?.country) {
+      if (currentAddress.country === 'United States' && currentAddress.state) {
+        places.add(`${currentAddress.state}, USA`);
+      } else {
+        places.add(currentAddress.country);
+      }
+    }
+
+    // Add previous addresses
+    const previousAddresses = currentData.sponsorAddressHistory || [];
+    previousAddresses.forEach(addr => {
+      if (addr?.country) {
+        if (addr.country === 'United States' && addr.state) {
+          places.add(`${addr.state}, USA`);
+        } else {
+          places.add(addr.country);
+        }
+      }
+    });
+
+    return Array.from(places);
+  };
+
+  const existingPlaces = getExistingPlaces();
+
+  const handleNext = () => {
+    const nextPath = getNextScreen(location.pathname, userRole, currentData);
+    if (nextPath) {
+      navigate(nextPath);
+    }
+  };
+
+  const handleBack = () => {
+    const prevPath = getPreviousScreen(location.pathname, userRole, currentData);
+    if (prevPath) {
+      navigate(prevPath);
+    }
+  };
+
+  const isFirst = isFirstScreen(location.pathname, userRole, currentData);
+
+  // Form validation
+  const isFormValid = () => {
+    // Check if the answer has been provided
+    const answer = currentData.sponsorPlacesResided_answer;
+
+    // Must have an answer
+    if (!answer) return false;
+
+    // If they answered "no", we're done
+    if (answer === 'no') return true;
+
+    // If they answered "yes", they must have added at least one place
+    if (answer === 'yes') {
+      const places = currentData.sponsorPlacesResided;
+      // Check if they've added at least one place with required fields
+      if (!places || places.length === 0) return false;
+
+      // Each place must have type and location filled
+      const allPlacesComplete = places.every(place => {
+        return place.type && place.location && place.location.trim() !== '';
+      });
+
+      return allPlacesComplete;
+    }
+
+    return false;
+  };
+
+  return (
+    <ScreenLayout
+      showBackButton={!isFirst}
+      onBack={handleBack}
+      onNext={handleNext}
+      nextButtonDisabled={!isFormValid()}
+    >
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Other Places You've Lived
+          </h2>
+          <p className="text-sm text-gray-600 mt-2">
+            We just need the states and countries—full addresses aren't required for this part.
+          </p>
+        </div>
+
+        {/* Show existing places from current/previous addresses */}
+        {existingPlaces.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-blue-900 mb-3">
+              Based on your address history, we know you've lived in:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {existingPlaces.map((place, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-300"
+                >
+                  {place}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <p className="text-lg font-semibold text-gray-900">
+            Have you lived in any other US states or foreign countries since you turned 18 ({formatDateRange()})?
+          </p>
+        </div>
+
+        <FieldRenderer
+          field={{
+            id: 'sponsorPlacesResided',
+            label: 'States and Countries Lived Since Age 18',
+            type: 'states-countries-list',
+            required: true
+          }}
+          currentData={currentData}
+          updateField={updateField}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
+          touchedFields={touchedFields}
+          setTouchedFields={setTouchedFields}
+        />
+      </div>
+    </ScreenLayout>
+  );
+};
+
+export default PlacesSince18Screen;

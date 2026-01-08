@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronRight, User, AlertCircle } from 'lucide-react';
+import SubsectionProgressBar from './SubsectionProgressBar';
 
 /**
  * NavigationPanel Component - SECTION-AWARE VERSION
@@ -104,6 +105,36 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
         return currentData.section5_beneficiary_incomplete;
       }
     }
+
+    // Section 6 Sponsor: Criminal History DQ - shows on criminal-history subsection only
+    if (targetSection.id === 'section-6-legal' && subsectionId === 'criminal-history') {
+      return !!(
+        currentData.section6_protectionOrder_DQ ||
+        currentData.section6_domesticViolence_DQ ||
+        currentData.section6_violentCrimes_DQ ||
+        currentData.section6_drugAlcohol_DQ ||
+        currentData.section6_otherCriminalHistory_DQ
+      );
+    }
+
+    // Section 6 Beneficiary: DQ indicators per subsection
+    if (targetSection.id === 'section-6-legal-beneficiary') {
+      if (subsectionId === 'us-travel') return !!currentData.section6_beneficiary_willBeInUS_DQ;
+      if (subsectionId === 'criminal-history') return !!currentData.section6_beneficiary_criminalHistory_DQ;
+      if (subsectionId === 'immigration-issues') return !!currentData.section6_beneficiary_immigrationIssues_DQ;
+      if (subsectionId === 'health-vaccinations') return !!currentData.section6_beneficiary_health_DQ;
+      if (subsectionId === 'security-human-rights') return !!currentData.section6_beneficiary_security_DQ;
+    }
+
+    // Section 7: All DQs are set in Previous Sponsorships screen, so only show icon there
+    if (targetSection.id === 'section-7-petitions' && subsectionId === 'previous-sponsorships') {
+      return !!(
+        currentData.section7_twoPlus_DQ ||
+        currentData.section7_withinTwoYears_DQ ||
+        currentData.section7_currentSpouse_DQ
+      );
+    }
+
     return false;
   };
 
@@ -113,12 +144,15 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
     // Find the correct section for this profile type
     let targetSection = null;
 
-    if (profileType === 'user') {
+    // Handle appliesToBoth sections (Section 2) - receives section object directly
+    if (typeof profileType === 'object' && profileType !== null) {
+      targetSection = profileType;
+    } else if (profileType === 'user') {
       // For user profile, use the sponsor version of the section
       targetSection = sections.find(s =>
         s.title === currentSection.title && s.isSponsor === true
       );
-    } else {
+    } else if (profileType === 'partner') {
       // For partner profile, use the beneficiary version of the section
       targetSection = sections.find(s =>
         s.title === currentSection.title && s.isSponsor === false
@@ -128,28 +162,60 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
     if (!targetSection || !targetSection.subsections) return null;
 
     return (
-      <div className="space-y-1">
+      <div className="space-y-3">
         {targetSection.subsections.map(subsection => {
           const showWarning = hasSubsectionWarning(subsection.id, targetSection);
 
+          // Check if this subsection uses oneQuestionPerScreen format (like Section 2, Section 6)
+          const hasQuestionDots = subsection.oneQuestionPerScreen && subsection.screens;
+
+          // Get current question index if we're in this subsection
+          let currentQuestionIndex = null;
+          if (hasQuestionDots) {
+            const currentPath = location.pathname;
+            const screenIndex = subsection.screens.findIndex(screen =>
+              currentPath.includes(`/${screen.id}`)
+            );
+            if (screenIndex !== -1) {
+              currentQuestionIndex = screenIndex;
+            }
+          }
+
           return (
-            <button
-              key={subsection.id}
-              onClick={() => navigateToScreen(targetSection.id, subsection.id)}
-              className={`
-                w-full text-left px-4 py-2 text-sm rounded
-                transition-colors duration-150 flex items-center justify-between
-                ${isActive(targetSection.id, subsection.id)
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-100'
-                }
-              `}
-            >
-              <span>{subsection.title}</span>
-              {showWarning && (
-                <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+            <div key={subsection.id}>
+              <button
+                onClick={() => navigateToScreen(targetSection.id, subsection.id)}
+                className={`
+                  w-full text-left px-4 py-2 text-sm rounded
+                  transition-colors duration-150 flex items-center justify-between
+                  ${isActive(targetSection.id, subsection.id)
+                    ? 'bg-blue-100 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:bg-gray-100'
+                  }
+                `}
+              >
+                <span>{subsection.title}</span>
+                {showWarning && (
+                  <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                )}
+              </button>
+
+              {/* Dot navigation for oneQuestionPerScreen subsections */}
+              {hasQuestionDots && (
+                <div className="px-4 mt-2">
+                  <SubsectionProgressBar
+                    completionStatus={[]}
+                    disqualificationStatus={[]}
+                    total={subsection.screens.length}
+                    currentQuestionIndex={currentQuestionIndex}
+                    onQuestionClick={(index) => {
+                      const screen = subsection.screens[index];
+                      navigate(`/${targetSection.id}/${screen.id}`);
+                    }}
+                  />
+                </div>
               )}
-            </button>
+            </div>
           );
         })}
       </div>

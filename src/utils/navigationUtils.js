@@ -13,7 +13,7 @@ import questionnaireStructure from '../data/sectionStructure';
  * Get all screens in order (flattened list)
  * This creates the master navigation sequence
  */
-export const getAllScreens = (userRole) => {
+export const getAllScreens = (userRole, currentData = {}) => {
   const screens = [];
 
   questionnaireStructure.sections.forEach(section => {
@@ -27,13 +27,36 @@ export const getAllScreens = (userRole) => {
     }
 
     section.subsections.forEach(subsection => {
-      screens.push({
-        sectionId: section.id,
-        subsectionId: subsection.id,
-        sectionTitle: section.title,
-        subsectionTitle: subsection.title,
-        path: `/${section.id}/${subsection.id}`
-      });
+      // Check if subsection has a showWhen condition
+      if (subsection.showWhen && typeof subsection.showWhen === 'function') {
+        // Evaluate the condition - skip if it returns false
+        if (!subsection.showWhen(currentData)) {
+          return; // Skip this subsection
+        }
+      }
+
+      // Check if this subsection uses one-question-per-screen format (Section 2)
+      if (subsection.oneQuestionPerScreen && subsection.screens) {
+        // Add each screen as a separate navigation item
+        subsection.screens.forEach(screen => {
+          screens.push({
+            sectionId: section.id,
+            subsectionId: screen.id, // Use screen ID instead of subsection ID
+            sectionTitle: section.title,
+            subsectionTitle: subsection.title,
+            path: `/${section.id}/${screen.id}`
+          });
+        });
+      } else {
+        // Regular subsection (one screen per subsection)
+        screens.push({
+          sectionId: section.id,
+          subsectionId: subsection.id,
+          sectionTitle: section.title,
+          subsectionTitle: subsection.title,
+          path: `/${section.id}/${subsection.id}`
+        });
+      }
     });
   });
 
@@ -43,8 +66,8 @@ export const getAllScreens = (userRole) => {
 /**
  * Get the next screen path
  */
-export const getNextScreen = (currentPath, userRole) => {
-  const screens = getAllScreens(userRole);
+export const getNextScreen = (currentPath, userRole, currentData = {}) => {
+  const screens = getAllScreens(userRole, currentData);
   const currentIndex = screens.findIndex(s => s.path === currentPath);
 
   if (currentIndex === -1 || currentIndex === screens.length - 1) {
@@ -57,8 +80,8 @@ export const getNextScreen = (currentPath, userRole) => {
 /**
  * Get the previous screen path
  */
-export const getPreviousScreen = (currentPath, userRole) => {
-  const screens = getAllScreens(userRole);
+export const getPreviousScreen = (currentPath, userRole, currentData = {}) => {
+  const screens = getAllScreens(userRole, currentData);
   const currentIndex = screens.findIndex(s => s.path === currentPath);
 
   if (currentIndex === -1 || currentIndex === 0) {
@@ -71,16 +94,16 @@ export const getPreviousScreen = (currentPath, userRole) => {
 /**
  * Check if this is the first screen
  */
-export const isFirstScreen = (currentPath, userRole) => {
-  const screens = getAllScreens(userRole);
+export const isFirstScreen = (currentPath, userRole, currentData = {}) => {
+  const screens = getAllScreens(userRole, currentData);
   return screens.length > 0 && screens[0].path === currentPath;
 };
 
 /**
  * Check if this is the last screen
  */
-export const isLastScreen = (currentPath, userRole) => {
-  const screens = getAllScreens(userRole);
+export const isLastScreen = (currentPath, userRole, currentData = {}) => {
+  const screens = getAllScreens(userRole, currentData);
   return screens.length > 0 && screens[screens.length - 1].path === currentPath;
 };
 

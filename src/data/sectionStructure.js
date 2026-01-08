@@ -150,54 +150,79 @@ export const questionnaireStructure = {
           id: 'marriage-plans',
           title: 'Marriage Plans',
           oneQuestionPerScreen: true, // Each question gets own screen
-          fields: [
-            'marriageState',
-            'intentToMarry'
+          totalQuestions: 2, // For progress bar
+          screens: [
+            { id: 'marriage-state', field: 'marriageState' },
+            { id: 'intent-to-marry', field: 'intendToMarry90Days' }
           ]
         },
         {
           id: 'visa-requirements',
           title: 'Visa Requirements',
           oneQuestionPerScreen: true, // Each question gets own screen
-          fields: [
-            'legallyFreeToMarry',
-            'metInPerson',
-            'planToMeet', // Conditional
-            'metThroughIMB',
-            'currentlyRelated',
-            'relationshipType', // Conditional
-            'bloodRelationship', // Conditional
-            'adoptionRelationship', // Conditional
-            'marriageRelationship', // Conditional
-            'meetingDescription'
+          totalQuestions: 5, // For progress bar (5 L0 questions: legally free, met in person, marriage broker, related, meeting description)
+          screens: [
+            { id: 'legally-free', field: 'legallyFreeToMarry' },
+            { id: 'met-in-person', fields: ['metInPerson', 'planToMeet'] }, // planToMeet is conditional
+            { id: 'marriage-broker', field: 'metThroughIMB' },
+            { id: 'relationship', field: 'areRelated' }, // Main field that determines completion
+            { id: 'meeting-description', field: 'meetingCircumstances' }
           ]
         }
       ]
     },
 
-    // SECTION 3: COMPLETE ADDRESS HISTORY (Sponsor)
+    // SECTION 3: ADDRESS HISTORY (Sponsor)
     {
       id: 'section-3-address-history',
-      title: 'Complete Address History',
+      title: 'Address History',
       isSponsor: true,
       subsections: [
         {
           id: 'current-addresses',
-          title: 'CURRENT ADDRESSES',
+          title: 'CURRENT ADDRESS',
           fields: [
             'sponsorMailingAddress',
             'sponsorMailingDifferent',
-            'sponsorCurrentAddress',
-            'sponsorAddressDuration'
+            'sponsorCurrentAddress'
           ]
         },
         {
           id: 'address-history',
-          title: 'ADDRESS HISTORY',
+          title: 'PREVIOUS ADDRESSES (5 YEARS)',
           fields: [
-            'sponsorPreviousAddresses', // Smart field - 5-year timeline
-            'sponsorPlacesLivedSince18' // Smart field - states/countries since 18
+            'sponsorAddressDuration', // Moved from current-addresses
+            'sponsorAddressHistory' // Smart field - 5-year timeline
           ]
+        },
+        {
+          id: 'places-since-18',
+          title: 'OTHER PLACES LIVED SINCE AGE 18',
+          fields: [
+            'sponsorPlacesResided' // Smart field - states/countries since 18
+          ],
+          showWhen: (data) => {
+            // Only show if sponsor is 23 or older
+            // Logic: If 22 or younger, past 5 years fully covers since age 18
+            // If 23+, there's a gap between turning 18 and the 5-year cutoff
+            const dob = data.sponsorDOB;
+            if (!dob) return false;
+
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+              age--;
+            }
+
+            return age >= 23;
+          }
+        },
+        {
+          id: 'review',
+          title: 'SUMMARY',
+          fields: [] // Timeline visualization component
         }
       ]
     },
@@ -205,25 +230,25 @@ export const questionnaireStructure = {
     // SECTION 3 (Beneficiary instance)
     {
       id: 'section-3-address-history-beneficiary',
-      title: 'Complete Address History',
+      title: 'Address History',
       isSponsor: false,
       subsections: [
         {
           id: 'current-addresses',
-          title: 'CURRENT ADDRESSES',
+          title: 'CURRENT ADDRESS',
           fields: [
             'beneficiaryMailingAddress',
             'beneficiaryMailingDifferent',
             'beneficiaryCurrentAddress',
-            'beneficiaryNativeAddress',
-            'beneficiaryAddressDuration'
+            'beneficiaryNativeAddress'
           ]
         },
         {
           id: 'address-history',
-          title: 'ADDRESS HISTORY',
+          title: 'PREVIOUS ADDRESSES (5 YEARS)',
           fields: [
-            'beneficiaryPreviousAddresses' // Smart field - 5-year timeline
+            'beneficiaryAddressDuration', // Moved from current-addresses
+            'beneficiaryAddressHistory' // Smart field - 5-year timeline
           ]
         },
         {
@@ -232,6 +257,11 @@ export const questionnaireStructure = {
           fields: [
             'beneficiaryIntendedUSAddress'
           ]
+        },
+        {
+          id: 'review',
+          title: 'SUMMARY',
+          fields: [] // Timeline visualization component
         }
       ]
     },
@@ -338,10 +368,16 @@ export const questionnaireStructure = {
       subsections: [
         {
           id: 'employment-timeline',
-          title: '5-YEAR EMPLOYMENT TIMELINE',
+          title: 'EMPLOYMENT HISTORY (5 YEARS)',
           fields: [
-            'sponsorEmploymentTimeline' // Smart field - 5-year timeline with gap detection
+            'sponsorTimeline', // Smart field - chronological-timeline
+            'sponsorTimelineSummary' // Smart field - timeline-summary
           ]
+        },
+        {
+          id: 'summary',
+          title: 'SUMMARY',
+          fields: [] // Review component
         }
       ]
     },
@@ -354,29 +390,38 @@ export const questionnaireStructure = {
       subsections: [
         {
           id: 'employment-timeline',
-          title: '5-YEAR EMPLOYMENT TIMELINE',
+          title: 'EMPLOYMENT HISTORY (5 YEARS)',
           fields: [
-            'beneficiaryEmploymentTimeline' // Smart field - 5-year timeline
+            'beneficiaryTimeline', // Smart field - chronological-timeline
+            'beneficiaryTimelineSummary' // Smart field - timeline-summary
           ]
+        },
+        {
+          id: 'summary',
+          title: 'SUMMARY',
+          fields: [] // Review component
         }
       ]
     },
 
-    // SECTION 6: LEGAL & SECURITY HISTORY (Sponsor)
+    // SECTION 6: LEGAL & SECURITY (Sponsor)
     {
       id: 'section-6-legal',
-      title: 'Legal & Security History',
+      title: 'Legal & Security',
       isSponsor: true,
       subsections: [
         {
           id: 'criminal-history',
-          title: 'CRIMINAL HISTORY',
-          fields: [
-            'sponsorProtectionOrders',
-            'sponsorDomesticViolence',
-            'sponsorViolentCrimes',
-            'sponsorMultipleDrugAlcohol',
-            'sponsorOtherCrimes'
+          title: 'Criminal History',
+          oneQuestionPerScreen: true, // Each question gets own screen (like Section 2)
+          totalQuestions: 6, // For progress bar (intro + 5 questions)
+          screens: [
+            { id: 'criminal-history-intro', field: 'sponsorCriminalHistoryIntroViewed' }, // Intro screen - tracked when user clicks Next
+            { id: 'criminal-history-protection-orders', field: 'sponsorProtectionOrder' },
+            { id: 'criminal-history-domestic-violence', field: 'sponsorDomesticViolence' },
+            { id: 'criminal-history-violent-crimes', field: 'sponsorViolentCrimes' },
+            { id: 'criminal-history-drug-alcohol', field: 'sponsorDrugAlcoholOffenses' },
+            { id: 'criminal-history-other', field: 'sponsorOtherCriminalHistory' }
           ]
         }
       ]
@@ -385,7 +430,7 @@ export const questionnaireStructure = {
     // SECTION 6 (Beneficiary instance)
     {
       id: 'section-6-legal-beneficiary',
-      title: 'Legal & Security History',
+      title: 'Legal & Security',
       isSponsor: false,
       subsections: [
         {
@@ -393,8 +438,7 @@ export const questionnaireStructure = {
           title: 'U.S. TRAVEL HISTORY',
           fields: [
             'beneficiaryEverInUS',
-            'beneficiaryCurrentlyInUS',
-            'beneficiaryCurrentlyInUSWarning'
+            'beneficiaryWillBeInUSWhenFiling'
           ]
         },
         {
@@ -408,32 +452,21 @@ export const questionnaireStructure = {
           id: 'immigration-issues',
           title: 'IMMIGRATION ISSUES',
           fields: [
-            'beneficiaryImmigrationViolations'
+            'beneficiaryImmigrationIssues'
           ]
         },
         {
           id: 'health-vaccinations',
           title: 'HEALTH & VACCINATIONS',
           fields: [
-            'beneficiaryCommunicableDiseases',
-            'beneficiaryMentalPhysicalDisorder',
-            'beneficiaryDrugAbuse',
-            'beneficiaryVaccinationDocumentation'
+            'beneficiaryHealthConcerns'
           ]
         },
         {
           id: 'security-human-rights',
           title: 'SECURITY & HUMAN RIGHTS',
           fields: [
-            'beneficiaryTerrorismEspionage',
-            'beneficiaryGenocideWarCrimes',
-            'beneficiaryHumanTrafficking',
-            'beneficiaryChildSoldiers',
-            'beneficiaryReligiousFreedomViolations',
-            'beneficiaryForcedAbortionSterilization',
-            'beneficiaryOrganTransplantation',
-            'beneficiaryCommunistParty',
-            'beneficiaryBenefitedFromFamilyTrafficking'
+            'beneficiarySecurityViolations'
           ]
         }
       ]
@@ -448,21 +481,18 @@ export const questionnaireStructure = {
       subsections: [
         {
           id: 'previous-sponsorships',
-          title: 'PREVIOUS SPONSORSHIPS',
-          customComponent: 'Section1_7', // Uses existing custom component
-          fields: [] // Handled by custom component
+          title: 'Previous Sponsorships',
+          fields: ['hasPreviousPetitions', 'previousPetitions']
         },
         {
           id: 'other-obligations',
-          title: 'OTHER OBLIGATIONS',
-          customComponent: 'Section1_7',
-          fields: []
+          title: 'Other Obligations',
+          fields: ['hasOtherObligations', 'otherObligations']
         },
         {
           id: 'household-members',
-          title: 'HOUSEHOLD MEMBERS',
-          customComponent: 'Section1_7',
-          fields: []
+          title: 'Household Members',
+          fields: ['hasChildrenUnder18', 'childrenDetails', 'otherDependents']
         }
       ]
     },

@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Info, Plus, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
-import DisqualificationStandaloneScreen from '../DisqualificationStandaloneScreen';
 
 const Section1_7 = ({ currentData = {}, updateField }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   // PREVIOUS SPONSORSHIPS
   const [hasPreviousPetitions, setHasPreviousPetitions] = useState(
     currentData.hasPreviousPetitions || null
@@ -17,10 +12,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
   const [previousPetitions, setPreviousPetitions] = useState(
     currentData.previousPetitions || []
   );
-
-  // DQ tracking state
-  const [showDisqualification, setShowDisqualification] = useState(false);
-  const [dqScenario, setDqScenario] = useState(null); // 'twoPlus', 'withinTwoYears', 'currentSpouse'
 
   // OTHER OBLIGATIONS
   const [hasOtherObligations, setHasOtherObligations] = useState(
@@ -168,77 +159,6 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
   };
 
   const needsIMBRAWaiver = requiresIMBRAWaiver();
-
-  // Track DQ scenarios with useEffect
-  useEffect(() => {
-    if (petitionsCount === '2+') {
-      setDqScenario('twoPlus');
-      updateField('section7_twoPlus_DQ', true);
-    } else {
-      if (dqScenario === 'twoPlus') {
-        setDqScenario(null);
-        setShowDisqualification(false);
-      }
-      updateField('section7_twoPlus_DQ', false);
-    }
-  }, [petitionsCount]);
-
-  useEffect(() => {
-    if (petitionsCount === '1' && previousPetitions.length > 0) {
-      const petition = previousPetitions[0];
-      if (petition.uscisAction === 'Approved' && petition.dateOfFiling) {
-        const filingDate = new Date(petition.dateOfFiling);
-        const twoYearsAgo = new Date();
-        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-
-        if (filingDate > twoYearsAgo) {
-          setDqScenario('withinTwoYears');
-          updateField('section7_withinTwoYears_DQ', true);
-        } else {
-          if (dqScenario === 'withinTwoYears') {
-            setDqScenario(null);
-            setShowDisqualification(false);
-          }
-          updateField('section7_withinTwoYears_DQ', false);
-        }
-      } else {
-        if (dqScenario === 'withinTwoYears') {
-          setDqScenario(null);
-          setShowDisqualification(false);
-        }
-        updateField('section7_withinTwoYears_DQ', false);
-      }
-    } else {
-      if (dqScenario === 'withinTwoYears') {
-        setDqScenario(null);
-        setShowDisqualification(false);
-      }
-      updateField('section7_withinTwoYears_DQ', false);
-    }
-  }, [petitionsCount, previousPetitions]);
-
-  // Track current spouse DQ
-  useEffect(() => {
-    const hasCurrentSpouse = previousPetitions.some(p => p.relationship === 'current-spouse');
-    if (hasCurrentSpouse) {
-      setDqScenario('currentSpouse');
-      updateField('section7_currentSpouse_DQ', true);
-    } else {
-      if (dqScenario === 'currentSpouse') {
-        setDqScenario(null);
-        setShowDisqualification(false);
-      }
-      updateField('section7_currentSpouse_DQ', false);
-    }
-  }, [previousPetitions]);
-
-  // Reset DQ screen when navigating away from this screen
-  useEffect(() => {
-    const isOnThisScreen = location.pathname.includes('previous-petitions');
-    if (!isOnThisScreen) {
-      setShowDisqualification(false);
-    }
-  }, [location.pathname]);
 
   // Initialize arrays when counts change
   useEffect(() => {
@@ -427,82 +347,27 @@ const Section1_7 = ({ currentData = {}, updateField }) => {
       .join(', ');
   };
 
-  // Handle "Go Back" button - don't clear user's answer, just hide DQ screen
-  const handleGoBack = () => {
-    setShowDisqualification(false);
-  };
-
-  // DQ messages based on scenario
-  const getDQMessage = () => {
-    if (dqScenario === 'twoPlus') {
-      return `Based on your answers, the K-1 visa may not be the best option for your situation.
-
-USCIS has a lifetime limit of two K-1 petitions per person. While limited exceptions exist, your case may require additional documentation and review beyond our standard process.
-
-Please contact our support team for further assistance.`;
-    } else if (dqScenario === 'withinTwoYears') {
-      return `Based on your answers, the K-1 visa may not be the best option for your situation.
-
-USCIS requires a 2-year waiting period between K-1 petition filings. While exceptions exist, your case may require additional documentation and review beyond our standard process.
-
-Please contact our support team for further assistance.`;
-    } else if (dqScenario === 'currentSpouse') {
-      return `Based on your answers, the K-1 visa may not be the best option for your situation.
-
-K-1 fiancé(e) visas are only available to unmarried U.S. citizens. If you are currently married, you would need to file a different type of petition for your spouse or explore other visa options.
-
-Please contact our support team for further assistance.`;
-    }
-    return '';
-  };
-
-  // Show standalone disqualification screen
-  const isOnThisScreen = location.pathname.includes('previous-petitions');
-  if (showDisqualification && isOnThisScreen && dqScenario) {
-    return (
-      <DisqualificationStandaloneScreen
-        reason={getDQMessage()}
-        onGoBack={handleGoBack}
-        supportEmail="support@evernestusa.com"
-        supportPhone="+1 (555) 123-4567"
-      />
-    );
-  }
-
-  // Inline warning components (soft warnings)
-  const TwoPlusWarning = () => (
-    <div className="mt-4 p-5 bg-red-50 border-l-4 border-red-500 rounded-lg">
-      <p className="text-sm font-semibold text-red-900 mb-3">
-        ⚠️ Important Information
-      </p>
-      <p className="text-sm text-red-800">
-        USCIS does not allow more than two K-1 petitions to be filed in a lifetime. There are limited exceptions, but these cases may involve a more complex process.
-      </p>
-    </div>
-  );
-
-  const WithinTwoYearsWarning = () => (
-    <div className="mt-4 p-5 bg-red-50 border-l-4 border-red-500 rounded-lg">
-      <p className="text-sm font-semibold text-red-900 mb-3">
-        ⚠️ Important Information
-      </p>
-      <p className="text-sm text-red-800">
-        USCIS does not allow filing another K-1 petition within 2 years of a previous filing. There are exceptions, but these cases may involve a more complex process.
-      </p>
-    </div>
-  );
-
-  const CurrentSpouseWarning = () => (
-    <div className="mt-4 p-5 bg-red-50 border-l-4 border-red-500 rounded-lg">
-      <p className="text-sm font-semibold text-red-900 mb-3">
-        ⚠️ Important Information
-      </p>
-      <p className="text-sm text-red-800 mb-3">
-        If you previously sponsored this person on a K-1 visa and are now married to them, you would typically file Form I-485 (Adjustment of Status), not another K-1 petition.
-      </p>
-      <p className="text-sm text-red-800">
-        If you're trying to sponsor a different person while currently married to someone else, K-1 visas are only available to unmarried U.S. citizens.
-      </p>
+  // Disqualification component for IMBRA waiver
+  const DisqualificationMessage = () => (
+    <div className="mt-4 p-6 bg-red-50 border-l-4 border-red-400 rounded">
+      <div className="flex items-start">
+        <AlertCircle className="w-6 h-6 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <p className="text-base font-semibold text-red-800 mb-2">
+            Your situation requires individual review
+          </p>
+          <p className="text-sm text-red-700 mb-4">
+            Based on your answer, you require an IMBRA multiple filer waiver. This is a complex situation that requires personalized guidance. Please contact our customer service team to discuss your options.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.href = 'mailto:support@example.com?subject=K-1 Visa Application - IMBRA Multiple Filer Waiver'}
+            className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+          >
+            Contact Customer Service
+          </button>
+        </div>
+      </div>
     </div>
   );
 
@@ -593,7 +458,7 @@ Please contact our support team for further assistance.`;
               ))}
             </div>
 
-            {petitionsCount === '2+' && <TwoPlusWarning />}
+            {petitionsCount === '2+' && <DisqualificationMessage />}
           </div>
         )}
 
@@ -857,7 +722,30 @@ Please contact our support team for further assistance.`;
                         </div>
 
                         {/* Current Spouse Warning */}
-                        {petition.relationship === 'current-spouse' && <CurrentSpouseWarning />}
+                        {petition.relationship === 'current-spouse' && (
+                          <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4">
+                            <div className="flex gap-3">
+                              <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-red-900 mb-2">⚠️ Your situation requires individual review</p>
+                                <p className="text-sm text-red-800 mb-3">
+                                  If you previously sponsored {petition.beneficiaryFirstName || 'someone'} on a K-1 visa and are now married to {petition.beneficiaryFirstName ? 'them' : 'that person'}, you would typically file
+                                  Form I-485 (Adjustment of Status) and Form I-864 (Affidavit of Support), not another K-1 petition.
+                                </p>
+                                <p className="text-sm text-red-800 mb-3">
+                                  If you're trying to sponsor a different person while currently married, K-1 visas are only for unmarried
+                                  U.S. citizens sponsoring their fiancé(e). You may need a different visa category.
+                                </p>
+                                <p className="text-sm font-medium text-red-900">
+                                  Please contact our support team for personalized guidance on your situation.
+                                </p>
+                                <p className="text-xs text-red-700 mt-2 italic">
+                                  Note: You can continue filling out this questionnaire, but we recommend getting professional review before submitting.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Date of Birth */}
                         <div>
@@ -935,9 +823,9 @@ Please contact our support team for further assistance.`;
         )}
 
         {/* Show disqualification if 2-year condition is met */}
-        {hasPreviousPetitions === 'yes' && petitionsCount === '1' && dqScenario === 'withinTwoYears' && (
+        {hasPreviousPetitions === 'yes' && petitionsCount === '1' && needsIMBRAWaiver && (
           <div className="ml-6 mt-4">
-            <WithinTwoYearsWarning />
+            <DisqualificationMessage />
           </div>
         )}
       </div>
