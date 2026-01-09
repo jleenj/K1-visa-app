@@ -3091,7 +3091,13 @@ const FieldRenderer = ({
                       >
                         <option value="">Select state...</option>
                         {addressFormats['United States'].states
-                          .filter(state => !statesFromAddressHistory.has(state))
+                          .filter(state => {
+                            if (statesFromAddressHistory.has(state)) return false;
+                            const alreadySelected = additionalPlaces.some((p, i) =>
+                              i !== index && p.type === 'united-states' && p.location === state
+                            );
+                            return !alreadySelected;
+                          })
                           .map(state => (
                             <option key={state} value={state}>{state}</option>
                           ))}
@@ -3110,7 +3116,13 @@ const FieldRenderer = ({
                       >
                         <option value="">Select country...</option>
                         {phoneCountries
-                          .filter(c => c.code !== 'US' && !countriesFromAddressHistory.has(c.name))
+                          .filter(c => {
+                            if (c.code === 'US' || countriesFromAddressHistory.has(c.name)) return false;
+                            const alreadySelected = additionalPlaces.some((p, i) =>
+                              i !== index && p.type === 'foreign-country' && p.location === c.name
+                            );
+                            return !alreadySelected;
+                          })
                           .map(c => (
                             <option key={c.code} value={c.name}>
                               {c.flag} {c.name}
