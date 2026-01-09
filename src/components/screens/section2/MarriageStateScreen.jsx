@@ -17,6 +17,7 @@ const MarriageStateScreen = ({
   const location = useLocation();
 
   const marriageState = currentData.marriageState || '';
+  const beneficiaryName = currentData.beneficiaryFirstName || 'your fiancé(e)';
 
   const handleStateChange = (value) => {
     updateField('marriageState', value);
@@ -109,6 +110,23 @@ const MarriageStateScreen = ({
           <div className="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
             <p className="text-sm text-yellow-800">
               In {stateMarriageLaws[marriageState]?.name}, the minimum age to marry is {ageCheck.age}. Based on the dates of birth provided, {ageCheck.person} do not meet this requirement. Please select a different state where you plan to marry, or contact customer support if you need assistance.
+            </p>
+          </div>
+        )}
+
+        {/* Relationship DQ warning */}
+        {marriageState && currentData.section2_relationship_DQ && (
+          <div className="mt-3 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+            <p className="text-sm font-semibold text-red-800 mb-2">
+              ⚠️ USCIS Requirement Conflict
+            </p>
+            <p className="text-sm text-red-800 mb-3">
+              Marriages between close blood relatives like siblings or aunt/uncle-niece/nephew
+              are prohibited in all 50 U.S. states and aren't recognized under federal immigration law.
+            </p>
+            <p className="text-sm text-red-800">
+              Because of your blood relationship with {beneficiaryName}, USCIS will deny
+              your K-1 petition and {beneficiaryName} cannot obtain a K-1 visa.
             </p>
           </div>
         )}

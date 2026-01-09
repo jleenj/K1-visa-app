@@ -138,6 +138,57 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
     return false;
   };
 
+  // Get completion status for oneQuestionPerScreen subsections
+  const getCompletionStatus = (subsection) => {
+    if (!subsection.screens) return [];
+
+    return subsection.screens.map(screen => {
+      const field = screen.field || (screen.fields && screen.fields[0]);
+      return !!(field && currentData[field]);
+    });
+  };
+
+  // Get disqualification status for oneQuestionPerScreen subsections
+  const getDisqualificationStatus = (subsection, targetSection) => {
+    if (!subsection.screens) return [];
+
+    // DQ field mapping for different sections
+    const dqFieldMaps = {
+      'section-2-relationship': {
+        'marriage-state': 'section2_relationship_DQ',
+        'intent-to-marry': 'section2_intentToMarry_DQ',
+        'legally-free': 'section2_legallyFree_DQ',
+        'met-in-person': 'section2_metInPerson_DQ',
+        'marriage-broker': 'section2_marriageBroker_DQ',
+        'relationship': 'section2_relationship_DQ',
+      },
+      'section-6-legal': {
+        'criminal-history-protection-orders': 'section6_protectionOrder_DQ',
+        'criminal-history-domestic-violence': 'section6_domesticViolence_DQ',
+        'criminal-history-violent-crimes': 'section6_violentCrimes_DQ',
+        'criminal-history-drug-alcohol': 'section6_drugAlcohol_DQ',
+        'criminal-history-other': 'section6_otherCriminalHistory_DQ',
+      }
+    };
+
+    const dqFieldMap = dqFieldMaps[targetSection.id] || {};
+
+    return subsection.screens.map((screen, index) => {
+      const dqField = dqFieldMap[screen.id];
+      const hasDQ = !!(dqField && currentData[dqField]);
+
+      const completionStatus = getCompletionStatus(subsection);
+      const isIncomplete = completionStatus[index] === false;
+
+      const field = screen.field || (screen.fields && screen.fields[0]);
+      const hasEngaged = !!(field && currentData[field]);
+
+      const isEngagedButIncomplete = hasEngaged && isIncomplete;
+
+      return hasDQ || isEngagedButIncomplete;
+    });
+  };
+
   const renderSubsections = (profileType) => {
     if (!currentSection) return null;
 
@@ -204,8 +255,8 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
               {hasQuestionDots && (
                 <div className="px-4 mt-2">
                   <SubsectionProgressBar
-                    completionStatus={[]}
-                    disqualificationStatus={[]}
+                    completionStatus={getCompletionStatus(subsection)}
+                    disqualificationStatus={getDisqualificationStatus(subsection, targetSection)}
                     total={subsection.screens.length}
                     currentQuestionIndex={currentQuestionIndex}
                     onQuestionClick={(index) => {

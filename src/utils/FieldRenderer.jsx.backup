@@ -2989,9 +2989,8 @@ const FieldRenderer = ({
 
       return (
         <div className="space-y-4">
-          {/* Simple Yes/No Question - hide if hideYesNo prop is true */}
-          {!field.hideYesNo && (
-            <div className="space-y-3">
+          {/* Simple Yes/No Question */}
+          <div className="space-y-3">
             <div className="flex gap-3">
               <button
                 type="button"
@@ -3020,7 +3019,6 @@ const FieldRenderer = ({
               </button>
             </div>
           </div>
-          )}
 
           {/* Only show fields if they answered Yes */}
           {showEarlierPlaces && (() => {

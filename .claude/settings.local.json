@@ -32,7 +32,9 @@
       "Bash(taskkill:*)",
       "Bash(git log:*)",
       "Bash(python:*)",
-      "Bash(git stash push:*)"
+      "Bash(git stash push:*)",
+      "Bash(sed:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []
