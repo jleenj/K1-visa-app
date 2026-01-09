@@ -159,11 +159,6 @@ const ReviewScreen = ({
       issues.push('current address is incomplete');
     }
 
-    // Check if move-in date is provided
-    if (!moveInDate) {
-      issues.push('current address move-in date');
-    }
-
     // For beneficiary, check if future US address is complete
     if (!isSponsor) {
       if (!isAddressComplete(futureUSAddress)) {
@@ -173,6 +168,11 @@ const ReviewScreen = ({
 
     // Check if 5-year address history requirement is met
     if (needsPreviousAddresses()) {
+      // Check if move-in date is provided (needed to determine 5-year coverage)
+      if (!moveInDate) {
+        issues.push('5-year address history (move-in date needed)');
+      }
+
       // Check if we have previous addresses to fill the gap
       if (previousAddresses.length === 0) {
         issues.push('5-year address history (previous addresses needed)');
@@ -259,22 +259,24 @@ const ReviewScreen = ({
             )}
 
             {/* Current Address */}
-            <div className={`relative pl-8 pb-6 border-l-2 ${(!isAddressComplete(currentAddress) || !moveInDate) ? 'border-amber-300 bg-amber-50/30' : 'border-green-300 bg-green-50/30'}`}>
-              <div className={`absolute -left-2.5 top-0 w-5 h-5 rounded-full border-4 border-white ${(!isAddressComplete(currentAddress) || !moveInDate) ? 'bg-amber-500' : 'bg-green-500'}`}></div>
+            <div className={`relative pl-8 pb-6 border-l-2 ${!isAddressComplete(currentAddress) ? 'border-amber-300 bg-amber-50/30' : 'border-green-300 bg-green-50/30'}`}>
+              <div className={`absolute -left-2.5 top-0 w-5 h-5 rounded-full border-4 border-white ${!isAddressComplete(currentAddress) ? 'bg-amber-500' : 'bg-green-500'}`}></div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-gray-900">Current Address</p>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(!isAddressComplete(currentAddress) || !moveInDate) ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
-                    {(!isAddressComplete(currentAddress) || !moveInDate) ? 'Incomplete' : 'Complete'}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${!isAddressComplete(currentAddress) ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                    {!isAddressComplete(currentAddress) ? 'Incomplete' : 'Complete'}
                   </span>
                 </div>
                 <p className="text-sm text-gray-700 mt-1">
                   {formatAddress(currentAddress)}
                 </p>
-                <div className="flex items-center mt-2 text-xs text-gray-500">
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  {!moveInDate ? 'Move-in date not provided' : `Since ${formatDate(moveInDate)}`}
-                </div>
+                {moveInDate && (
+                  <div className="flex items-center mt-2 text-xs text-gray-500">
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    Since {formatDate(moveInDate)}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -300,8 +302,8 @@ const ReviewScreen = ({
                 }
               }
 
-              // Overall status: incomplete if required but missing, or if any address is incomplete, or if coverage gap exists
-              const overallIncomplete = (isRequired && !hasAddresses) || hasIncompleteAddresses || hasCoverageGap;
+              // Overall status: incomplete if required but missing, or if any address is incomplete, or if coverage gap exists, or if move-in date missing
+              const overallIncomplete = (isRequired && !hasAddresses) || hasIncompleteAddresses || hasCoverageGap || !moveInDate;
 
               return (
                 <div className={`relative pl-8 pb-6 border-l-2 ${overallIncomplete ? 'border-amber-300 bg-amber-50/30' : hasAddresses ? 'border-green-300 bg-green-50/30' : 'border-gray-200'}`}>
