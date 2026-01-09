@@ -34,7 +34,9 @@
       "Bash(python:*)",
       "Bash(git stash push:*)",
       "Bash(sed:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git reset:*)",
+      "Bash(tasklist)"
     ],
     "deny": [],
     "ask": []
