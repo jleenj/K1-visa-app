@@ -332,7 +332,7 @@ const ReviewScreen = ({
                             <p className="text-sm text-gray-700 mt-1">{formatAddress(addr)}</p>
                             <div className="flex items-center mt-1 text-xs text-gray-500">
                               <Calendar className="h-3.5 w-3.5 mr-1" />
-                              {formatDate(addr.dateFrom)} - {formatDate(addr.dateTo)}
+                              {addr.dateFrom ? formatDate(addr.dateFrom) : 'Start date not provided'} - {addr.dateTo ? formatDate(addr.dateTo) : 'End date not provided'}
                             </div>
                           </div>
                         ))}
