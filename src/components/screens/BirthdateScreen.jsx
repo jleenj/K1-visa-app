@@ -34,13 +34,13 @@ const BirthdateScreen = ({
   const isFirst = isFirstScreen(location.pathname, userRole);
 
   // Get sponsor first name for dynamic label
-  const sponsorFirstName = currentData.sponsorFirstName || 'your';
+  const sponsorFirstName = currentData.sponsorFirstName;
 
   // Field definitions from App.tsx lines 587-588
   const birthdateFields = [
     {
       id: `${prefix}DOB`,
-      label: isSponsor ? `${sponsorFirstName}'s Date of Birth` : 'Date of Birth',
+      label: isSponsor ? (sponsorFirstName ? `${sponsorFirstName}'s Date of Birth` : 'Date of Birth') : 'Date of Birth',
       type: 'date',
       required: true
     },
