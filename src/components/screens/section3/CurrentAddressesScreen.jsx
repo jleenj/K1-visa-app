@@ -48,7 +48,11 @@ const CurrentAddressesScreen = ({
         : `Is ${personName}'s physical address different from the mailing address?`,
       type: 'select',
       options: ['Yes', 'No'],
-      required: true
+      required: true,
+      showWhen: (data) => {
+        const mailingAddress = data[`${prefix}MailingAddress`];
+        return mailingAddress && mailingAddress.country;
+      }
     },
 
     // Physical Address (conditional)
