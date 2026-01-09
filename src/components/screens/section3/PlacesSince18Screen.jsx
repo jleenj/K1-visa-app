@@ -186,58 +186,26 @@ const PlacesSince18Screen = ({
           </div>
         )}
 
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-2">
-            Have you lived in any other US states or foreign countries since you turned 18{age18Date ? ` (${formatDateRange()})` : ''}?
+        <div>
+          <p className="text-lg font-semibold text-gray-900">
+            Have you lived in any other US states or foreign countries since you turned 18 ({formatDateRange()})?
           </p>
         </div>
 
-        <div className="space-y-3">
-          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input
-              type="radio"
-              name="sponsorPlacesResided_answer"
-              value="yes"
-              checked={currentData.sponsorPlacesResided_answer === 'yes'}
-              onChange={(e) => updateField('sponsorPlacesResided_answer', e.target.value)}
-              className="h-4 w-4 text-blue-600"
-            />
-            <span className="text-sm font-medium text-gray-900">Yes</span>
-          </label>
-
-          <label className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input
-              type="radio"
-              name="sponsorPlacesResided_answer"
-              value="no"
-              checked={currentData.sponsorPlacesResided_answer === 'no'}
-              onChange={(e) => {
-                updateField('sponsorPlacesResided_answer', e.target.value);
-                updateField('sponsorPlacesResided', []); // Clear any added places
-              }}
-              className="h-4 w-4 text-blue-600"
-            />
-            <span className="text-sm font-medium text-gray-900">No</span>
-          </label>
-        </div>
-
-        {/* Show FieldRenderer inputs when Yes is selected */}
-        {currentData.sponsorPlacesResided_answer === 'yes' && (
-          <FieldRenderer
-            field={{
-              id: 'sponsorPlacesResided',
-              type: 'states-countries-list',
-              required: true,
-              hideYesNo: true
-            }}
-            currentData={currentData}
-            updateField={updateField}
-            fieldErrors={fieldErrors}
-            setFieldErrors={setFieldErrors}
-            touchedFields={touchedFields}
-            setTouchedFields={setTouchedFields}
-          />
-        )}
+        <FieldRenderer
+          field={{
+            id: 'sponsorPlacesResided',
+            label: 'States and Countries Lived Since Age 18',
+            type: 'states-countries-list',
+            required: true
+          }}
+          currentData={currentData}
+          updateField={updateField}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
+          touchedFields={touchedFields}
+          setTouchedFields={setTouchedFields}
+        />
       </div>
     </ScreenLayout>
   );
