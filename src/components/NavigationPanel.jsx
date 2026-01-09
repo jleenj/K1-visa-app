@@ -214,7 +214,15 @@ const NavigationPanel = ({ sections, currentData, userRole }) => {
 
     return (
       <div className="space-y-3">
-        {targetSection.subsections.map(subsection => {
+        {targetSection.subsections
+          .filter(subsection => {
+            // Check if subsection has a showWhen condition
+            if (subsection.showWhen && typeof subsection.showWhen === 'function') {
+              return subsection.showWhen(currentData);
+            }
+            return true; // Show by default if no showWhen
+          })
+          .map(subsection => {
           const showWarning = hasSubsectionWarning(subsection.id, targetSection);
 
           // Check if this subsection uses oneQuestionPerScreen format (like Section 2, Section 6)
